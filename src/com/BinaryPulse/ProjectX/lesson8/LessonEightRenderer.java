@@ -274,7 +274,8 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 
 		final int[] vbo = new int[1];
 		final int[] ibo = new int[1];
-
+        final float[] kzVertices = RawResourceReader.MeshDataReader(lessonEightActivity,
+				R.raw.blade);
 		int indexCount;
 
 		HeightMap() {
@@ -327,7 +328,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 
 						// Add some fancy colors.
 						heightMapVertexData[offset++] = xRatio;
-						heightMapVertexData[offset++] = yRatio;
+						heightMapVertexData[offset++] = kzVertices[0];//yRatio;
 						heightMapVertexData[offset++] = 0.5f;
 						heightMapVertexData[offset++] = 1f;
 					}

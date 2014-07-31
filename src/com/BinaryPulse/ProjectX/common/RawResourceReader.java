@@ -37,4 +37,53 @@ public class RawResourceReader
 
 		return body.toString();
 	}
+	
+	public static float[] MeshDataReader(final Context context,
+			final int resourceId)
+	{
+		final InputStream inputStream = context.getResources().openRawResource(
+				resourceId);
+		final InputStreamReader inputStreamReader = new InputStreamReader(
+				inputStream);
+		final BufferedReader bufferedReader = new BufferedReader(
+				inputStreamReader);
+
+		String nextLine,line;
+		final StringBuilder body = new StringBuilder();
+        float[] Vertices = new float[21];
+        
+		try
+		{   
+			int i;
+			while ((nextLine = bufferedReader.readLine()) != null)
+			{
+				body.append(nextLine);
+				//body.append('\n');
+			}
+			line = body.toString();
+			//if(line.startsWith("Vertices") )
+			{
+				String[] tokens =line.split(":");
+				String[] parts = tokens[1].split(",");
+				for(i=0;i<21;i++){
+					Vertices[i] = Float.parseFloat(parts[i]);					
+				}
+			     
+				return 	Vertices;	 
+				
+			}
+			//else
+			//	 return Vertices;	
+			
+		}
+		catch (IOException e)
+		{
+			return null;
+		}
+
+
+	}	
+	
+	
+	
 }
