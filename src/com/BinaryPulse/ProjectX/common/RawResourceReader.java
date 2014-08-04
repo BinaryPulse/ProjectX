@@ -37,9 +37,11 @@ public class RawResourceReader
 
 		return body.toString();
 	}
-	
-	public static float[] MeshDataReader(final Context context,
-			final int resourceId)
+}
+/*	
+	//public static float[] 
+	void MeshDataReader(final Context context,
+			final int resourceId, final float[] mVertices,final float[] mNormals,final short[] mIndexes)
 	{
 		final InputStream inputStream = context.getResources().openRawResource(
 				resourceId);
@@ -50,8 +52,9 @@ public class RawResourceReader
 
 		String nextLine,line;
 		final StringBuilder body = new StringBuilder();
-        float[] Vertices = new float[21];
-        
+		final float[] Vertices = new float[1307*3];
+		final float[] Normals = new float[1307*3];
+		final short[] Indexes = new short[2148*3];
 		try
 		{   
 			int i;
@@ -64,12 +67,18 @@ public class RawResourceReader
 			//if(line.startsWith("Vertices") )
 			{
 				String[] tokens =line.split(":");
-				String[] parts = tokens[1].split(",");
-				for(i=0;i<21;i++){
-					Vertices[i] = Float.parseFloat(parts[i]);					
+				String[] parts1 = tokens[1].split(",");
+				String[] parts2 = tokens[2].split(",");
+				String[] parts3 = tokens[3].split(",");
+				for(i=0;i<1037*3;i++){
+					Vertices[i] = Float.parseFloat(parts1[i]);	
+					Normals[i] = Float.parseFloat(parts1[i]);
 				}
-			     
-				return 	Vertices;	 
+				for(i=0;i<2148*3;i++){
+					Indexes[i] = Short.parseShort(parts3[i]);	
+				}			     
+				//return 	Vertices;	 
+				mIndexes = Indexes;
 				
 			}
 			//else
@@ -86,4 +95,4 @@ public class RawResourceReader
 	
 	
 	
-}
+}*/

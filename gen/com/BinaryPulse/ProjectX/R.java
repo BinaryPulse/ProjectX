@@ -66,19 +66,21 @@ public final class R {
     }
     public static final class raw {
         public static final int blade=0x7f050000;
-        public static final int color_fragment_shader=0x7f050001;
-        public static final int color_vertex_shader=0x7f050002;
-        public static final int examples=0x7f050003;
-        public static final int lesson_seven_fragment_shader=0x7f050004;
-        public static final int lesson_seven_vertex_shader=0x7f050005;
-        public static final int per_pixel_fragment_shader=0x7f050006;
-        public static final int per_pixel_fragment_shader_no_tex=0x7f050007;
-        public static final int per_pixel_fragment_shader_tex_and_light=0x7f050008;
-        public static final int per_pixel_vertex_shader=0x7f050009;
-        public static final int per_pixel_vertex_shader_no_tex=0x7f05000a;
-        public static final int per_pixel_vertex_shader_tex_and_light=0x7f05000b;
-        public static final int point_fragment_shader=0x7f05000c;
-        public static final int point_vertex_shader=0x7f05000d;
+        public static final int blade1=0x7f050001;
+        public static final int color_fragment_shader=0x7f050002;
+        public static final int color_vertex_shader=0x7f050003;
+        public static final int examples=0x7f050004;
+        public static final int lesson_seven_fragment_shader=0x7f050005;
+        public static final int lesson_seven_vertex_shader=0x7f050006;
+        public static final int per_pixel_fragment_shader=0x7f050007;
+        public static final int per_pixel_fragment_shader_no_tex=0x7f050008;
+        public static final int per_pixel_fragment_shader_tex_and_light=0x7f050009;
+        public static final int per_pixel_vertex_shader=0x7f05000a;
+        public static final int per_pixel_vertex_shader_no_tex=0x7f05000b;
+        public static final int per_pixel_vertex_shader_no_tex1=0x7f05000c;
+        public static final int per_pixel_vertex_shader_tex_and_light=0x7f05000d;
+        public static final int point_fragment_shader=0x7f05000e;
+        public static final int point_vertex_shader=0x7f05000f;
     }
     public static final class string {
         public static final int action_settings=0x7f070028;

@@ -5,6 +5,13 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import android.content.Context;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -168,16 +175,20 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		Matrix.setLookAtM(viewMatrix, 0, eyeX, eyeY, eyeZ, lookX, lookY, lookZ, upX, upY, upZ);
 
 		final String vertexShader = RawResourceReader.readTextFileFromRawResource(lessonEightActivity,
-				R.raw.per_pixel_vertex_shader_no_tex);
+				R.raw.per_pixel_vertex_shader_no_tex1);
 		final String fragmentShader = RawResourceReader.readTextFileFromRawResource(lessonEightActivity,
 				R.raw.per_pixel_fragment_shader_no_tex);
 
 		final int vertexShaderHandle = ShaderHelper.compileShader(GLES20.GL_VERTEX_SHADER, vertexShader);
 		final int fragmentShaderHandle = ShaderHelper.compileShader(GLES20.GL_FRAGMENT_SHADER, fragmentShader);
 
+		//program = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, new String[] {
+		//		POSITION_ATTRIBUTE, NORMAL_ATTRIBUTE, COLOR_ATTRIBUTE });
 		program = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, new String[] {
-				POSITION_ATTRIBUTE, NORMAL_ATTRIBUTE, COLOR_ATTRIBUTE });
-
+				POSITION_ATTRIBUTE, NORMAL_ATTRIBUTE});
+		heightMap.MeshDataReader(lessonEightActivity,
+				R.raw.blade);
+		
 		// Initialize the accumulated rotation matrix
 		Matrix.setIdentityM(accumulatedRotation, 0);
 	}
@@ -213,7 +224,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		lightPosUniform = GLES20.glGetUniformLocation(program, LIGHT_POSITION_UNIFORM);
 		positionAttribute = GLES20.glGetAttribLocation(program, POSITION_ATTRIBUTE);
 		normalAttribute = GLES20.glGetAttribLocation(program, NORMAL_ATTRIBUTE);
-		colorAttribute = GLES20.glGetAttribLocation(program, COLOR_ATTRIBUTE);
+		//colorAttribute = GLES20.glGetAttribLocation(program, COLOR_ATTRIBUTE);
 
 		// Calculate position of the light. Push into the distance.
 		Matrix.setIdentityM(lightModelMatrix, 0);
@@ -272,15 +283,15 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		static final float MIN_POSITION = -5f;
 		static final float POSITION_RANGE = 10f;
 
-		final int[] vbo = new int[1];
+		final int[] vbo = new int[2];
 		final int[] ibo = new int[1];
-        final float[] kzVertices = RawResourceReader.MeshDataReader(lessonEightActivity,
-				R.raw.blade);
+/*        final float[] kzVertices = RawResourceReader.MeshDataReader(lessonEightActivity,
+				R.raw.blade);*/
 		int indexCount;
 
 		HeightMap() {
 			try {
-				final int floatsPerVertex = POSITION_DATA_SIZE_IN_ELEMENTS + NORMAL_DATA_SIZE_IN_ELEMENTS
+				/*final int floatsPerVertex = POSITION_DATA_SIZE_IN_ELEMENTS + NORMAL_DATA_SIZE_IN_ELEMENTS
 						+ COLOR_DATA_SIZE_IN_ELEMENTS;
 				final int xLength = SIZE_PER_SIDE;
 				final int yLength = SIZE_PER_SIDE;
@@ -328,7 +339,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 
 						// Add some fancy colors.
 						heightMapVertexData[offset++] = xRatio;
-						heightMapVertexData[offset++] = kzVertices[0];//yRatio;
+						heightMapVertexData[offset++] = yRatio;
 						heightMapVertexData[offset++] = 0.5f;
 						heightMapVertexData[offset++] = 1f;
 					}
@@ -389,7 +400,11 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 					GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 				} else {
 					errorHandler.handleError(ErrorType.BUFFER_CREATION_ERROR, "glGenBuffers");
-				}
+				}*/
+				
+				
+				
+				
 			} catch (Throwable t) {
 				Log.w(TAG, t);
 				errorHandler.handleError(ErrorType.BUFFER_CREATION_ERROR, t.getLocalizedMessage());
@@ -397,7 +412,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		}
 
 		void render() {
-			if (vbo[0] > 0 && ibo[0] > 0) {				
+/*			if (vbo[0] > 0 && ibo[0] > 0) {				
 				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
 
 				// Bind Attributes
@@ -419,13 +434,147 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 
 				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-			}
+				
+			}*/
+			if (vbo[0] > 0 && ibo[0] > 0 && vbo[1] > 0) {				
+				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
+
+				// Bind Attributes
+				GLES20.glVertexAttribPointer(positionAttribute, POSITION_DATA_SIZE_IN_ELEMENTS, GLES20.GL_FLOAT, false,
+						0, 0);
+				GLES20.glEnableVertexAttribArray(positionAttribute);
+
+				GLES20.glVertexAttribPointer(normalAttribute, NORMAL_DATA_SIZE_IN_ELEMENTS, GLES20.GL_FLOAT, false,
+						0, 0);
+				GLES20.glEnableVertexAttribArray(normalAttribute);
+
+				//GLES20.glVertexAttribPointer(colorAttribute, COLOR_DATA_SIZE_IN_ELEMENTS, GLES20.GL_FLOAT, false,
+				//		STRIDE, (POSITION_DATA_SIZE_IN_ELEMENTS + NORMAL_DATA_SIZE_IN_ELEMENTS) * BYTES_PER_FLOAT);
+				//GLES20.glEnableVertexAttribArray(colorAttribute);
+
+				// Draw
+				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
+				GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, indexCount, GLES20.GL_UNSIGNED_SHORT, 0);
+
+				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+				
+			}			
+			
 		}
 
+		void MeshDataReader(final Context context,
+				final int resourceId)
+		{
+			final InputStream inputStream = context.getResources().openRawResource(
+					resourceId);
+			final InputStreamReader inputStreamReader = new InputStreamReader(
+					inputStream);
+			final BufferedReader bufferedReader = new BufferedReader(
+					inputStreamReader);
+
+			String nextLine,line;
+			final StringBuilder body = new StringBuilder();
+			final float[] Vertices = new float[1307*3];
+			final float[] Normals = new float[1307*3];
+			//final short[] Indexes = new short[2148*3];
+			final float[] Indexes = new float[2148*3];
+			final short[] Index = new short[2148*3];
+			/*
+			final float[] Vertices = new float[5*3];
+			final float[] Normals = new float[5*3];
+			final short[] Indexes = new short[2*3];	*/		
+			
+			try
+			{   
+				int i;
+				while ((nextLine = bufferedReader.readLine()) != null)
+				{
+					body.append(nextLine);
+					//body.append('\n');
+				}
+				line = body.toString();
+				//if(line.startsWith("Vertices") )
+				{
+					String[] tokens =line.split(":");
+					String[] parts1 = tokens[1].split(",");
+					String[] parts2 = tokens[2].split(",");
+					String[] parts3 = tokens[3].split(",");
+					for(i=0;i<1307*3;i++){
+						Vertices[i] = Float.parseFloat(parts1[i]);	
+						Normals[i] = Float.parseFloat(parts2[i]);
+					}
+					for(i=0;i<2148*3;i++){
+						//parts3[i].replaceAll(" +", ""); 
+						//parts3[i].replaceAll("\n", ""); 
+						//parts3[i].replaceAll("[^0-9.]","");
+
+						//Indexes[i] = Short.parseShort(parts3[i]);	
+						float tempIndexes = Float.parseFloat(parts3[i]);	
+						Index[i] = (short)tempIndexes;
+					}			     
+					//return 	Vertices;	 
+					final FloatBuffer BladeVertexDataBuffer = ByteBuffer
+							.allocateDirect(Vertices.length * BYTES_PER_FLOAT).order(ByteOrder.nativeOrder())
+							.asFloatBuffer();
+					BladeVertexDataBuffer.put(Vertices).position(0);
+					
+					final FloatBuffer BladeNormalDataBuffer = ByteBuffer
+							.allocateDirect(Normals.length * BYTES_PER_FLOAT).order(ByteOrder.nativeOrder())
+							.asFloatBuffer();
+					BladeNormalDataBuffer.put(Normals).position(0);
+					
+					final ShortBuffer BladeIndexDataBuffer = ByteBuffer
+							.allocateDirect(Indexes.length * BYTES_PER_SHORT).order(ByteOrder.nativeOrder())
+							.asShortBuffer();
+					BladeIndexDataBuffer.put(Index).position(0);
+					
+					indexCount = Index.length;
+					
+					GLES20.glGenBuffers(2, vbo, 0);
+					GLES20.glGenBuffers(1, ibo, 0);
+
+					if (vbo[0] > 0 && ibo[0] > 0 && vbo[1] > 0) {
+						GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
+						GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, BladeVertexDataBuffer.capacity() * BYTES_PER_FLOAT,
+								BladeVertexDataBuffer, GLES20.GL_STATIC_DRAW);
+						
+						GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[1]);
+						GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, BladeNormalDataBuffer.capacity() * BYTES_PER_FLOAT,
+								BladeNormalDataBuffer, GLES20.GL_STATIC_DRAW);
+						
+						GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
+						GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, BladeIndexDataBuffer.capacity()
+								* BYTES_PER_SHORT, BladeIndexDataBuffer, GLES20.GL_STATIC_DRAW);
+
+						GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+						GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+					} else {
+						errorHandler.handleError(ErrorType.BUFFER_CREATION_ERROR, "glGenBuffers");
+					}
+					
+					
+				}
+				//else
+				//	 return Vertices;	
+				
+			}
+			catch (IOException e)
+			{
+				//return null;
+			}
+
+
+		}	
+		
+
+		
+		
 		void release() {
 			if (vbo[0] > 0) {
 				GLES20.glDeleteBuffers(vbo.length, vbo, 0);
 				vbo[0] = 0;
+				vbo[1] = 0;
 			}
 
 			if (ibo[0] > 0) {
