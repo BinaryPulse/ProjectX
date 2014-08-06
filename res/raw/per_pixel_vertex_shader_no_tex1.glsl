@@ -16,10 +16,10 @@ void main()
 	v_Position = vec3(u_MVMatrix * a_Position);            
 		
 	// Pass through the color.
-	v_Color = vec4(0.5,0.5,0.5,0.5);//a_Color;
+	v_Color = vec4(0.0,(a_Position.y)/40.0,1.0,1.0);//a_Color;
 	
 	// Transform the normal's orientation into eye space.
-    v_Normal = vec3(u_MVMatrix * vec4(a_Normal, 0.0));
+    v_Normal = normalize(vec3(u_MVMatrix * vec4(a_Normal, 0.0)));
           
 	// gl_Position is a special variable used to store the final position.
 	// Multiply the vertex by the matrix to get the final point in normalized screen coordinates.

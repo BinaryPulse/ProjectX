@@ -4,6 +4,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.lang.Math;
+import java.util.ArrayList;
+import java.util.List;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -106,7 +109,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	 * coordinate so we can get translations to work when we multiply this by
 	 * our transformation matrices.
 	 */
-	private final float[] lightPosInModelSpace = new float[] { 0.0f, 0.0f, 0.0f, 1.0f };
+	private final float[] lightPosInModelSpace = new float[] { 0.0f, 10.0f, 0.0f, 1.0f };
 
 	/**
 	 * Used to hold the current position of the light in world space (after
@@ -128,9 +131,10 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	// happen.
 	public volatile float deltaX;
 	public volatile float deltaY;
-
+	public volatile float deltaZ;
+	public volatile float[] rotorSpeed;
 	/** The current heightmap object. */
-	private HeightMap heightMap;
+	private HeightMap heightMap,tower,nacelle,porche;
 
 	/**
 	 * Initialize the model data.
@@ -144,7 +148,9 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
 		heightMap = new HeightMap();
-
+		tower= new HeightMap();
+		nacelle = new HeightMap(); 
+		porche = new HeightMap(); 
 		// Set the background clear color to black.
 		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -166,7 +172,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		final float upX = 0.0f;
 		final float upY = 1.0f;
 		final float upZ = 0.0f;
-
+		rotorSpeed = new float[5];
 		// Set the view matrix. This matrix can be said to represent the camera
 		// position.
 		// NOTE: In OpenGL 1, a ModelView matrix is used, which is a combination
@@ -188,7 +194,12 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 				POSITION_ATTRIBUTE, NORMAL_ATTRIBUTE});
 		heightMap.MeshDataReader(lessonEightActivity,
 				R.raw.blade);
-		
+		tower.MeshDataReader(lessonEightActivity,
+				R.raw.tower);	
+		nacelle.MeshDataReader(lessonEightActivity,
+				R.raw.nacelle);	
+		//porche.PorcheDataReader(lessonEightActivity,
+		//		R.raw.porsche);	
 		// Initialize the accumulated rotation matrix
 		Matrix.setIdentityM(accumulatedRotation, 0);
 	}
@@ -201,14 +212,15 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		// Create a new perspective projection matrix. The height will stay the
 		// same while the width will vary as per aspect ratio.
 		final float ratio = (float) width / height;
-		final float left = -ratio;
-		final float right = ratio;
-		final float bottom = -1.0f;
-		final float top = 1.0f;
+		final float left = -ratio*1.0f;
+		final float right = ratio*1.0f;
+		final float bottom = -1.0f*1.0f;
+		final float top = 1.0f*1.0f;
 		final float near = 1.0f;
-		final float far = 1000.0f;
+		final float far = 200.0f;
 
 		Matrix.frustumM(projectionMatrix, 0, left, right, bottom, top, near, far);
+		//Matrix.perspectiveM(projectionMatrix,0,  1.0f, ratio, 1.0f, 1000.0f);
 	}
 
 	@Override
@@ -227,23 +239,36 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		//colorAttribute = GLES20.glGetAttribLocation(program, COLOR_ATTRIBUTE);
 
 		// Calculate position of the light. Push into the distance.
-		Matrix.setIdentityM(lightModelMatrix, 0);
-		Matrix.translateM(lightModelMatrix, 0, 0.0f, 7.5f, -8.0f);
-
-		Matrix.multiplyMV(lightPosInWorldSpace, 0, lightModelMatrix, 0, lightPosInModelSpace, 0);
-		Matrix.multiplyMV(lightPosInEyeSpace, 0, viewMatrix, 0, lightPosInWorldSpace, 0);
-
+		DrawWindTurbine(0.0f,0.0f,10.0f,0.5f,0);
+		DrawWindTurbine(30.0f,0.0f,70.0f,0.2f,1);
+		DrawWindTurbine(-60.0f,0.0f,30.0f,1.2f,2);
+		DrawWindTurbine(60.0f,0.0f,10.0f,3.2f,3);
+	/*	
+		Matrix.setLookAtM(viewMatrix, 0, (80.0f-deltaY) *(float)java.lang.Math.cos(deltaX*0.015f),0.0f, (80.0f-deltaY)*(float)java.lang.Math.sin(deltaX*0.015f), 0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f);
 		// Draw the heightmap.
 		// Translate the heightmap into the screen.
 		Matrix.setIdentityM(modelMatrix, 0);
-		Matrix.translateM(modelMatrix, 0, 0.0f, 0.0f, -12f);
+		//Matrix.rotateM(modelMatrix, 0, deltaZ, 0.0f, 1.0f, 0.0f);
 
+		Matrix.translateM(modelMatrix, 0, 0.0f, 30.0f, -00.0f);
+		Matrix.rotateM(modelMatrix, 0, deltaZ, 0.0f, 0.0f, 1.0f);
+
+		//Matrix.rotateM(currentRotation, 0, deltaY, 0.0f, 1.0f, 0.0f);
+		deltaZ += 1.5;
 		// Set a matrix that contains the current rotation.
+
+		Matrix.translateM(modelMatrix, 0, 0.0f, -70.0f, 0.0f);
+		
+		//Matrix.rotateM(modelMatrix, 0, deltaZ, 0.0f, 1.0f, 0.0f);
+		
+		//Matrix.translateM(modelMatrix, 0, 0.0f, 00.0f, -0.5f);
+		
 		Matrix.setIdentityM(currentRotation, 0);
-		Matrix.rotateM(currentRotation, 0, deltaX, 0.0f, 1.0f, 0.0f);
-		Matrix.rotateM(currentRotation, 0, deltaY, 1.0f, 0.0f, 0.0f);
-		deltaX = 0.0f;
-		deltaY = 0.0f;
+		//Matrix.rotateM(currentRotation, 0, deltaX, 0.0f, 1.0f, 0.0f);
+		//Matrix.translateM(currentRotation, 0, 0, 0, deltaX);
+		//Matrix.translateM(currentRotation, 0, 0, deltaY, 0);
+		//deltaX = 0.0f;
+		//deltaY = 0.0f;
 
 		// Multiply the current rotation by the accumulated rotation, and then
 		// set the accumulated rotation to the result.
@@ -259,6 +284,16 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		// (which currently contains model * view).
 		Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0);
 
+		
+		//Matrix.setIdentityM(modelMatrix, 0);		
+		//Matrix.setIdentityM(currentRotation, 0);
+		//Matrix.rotateM(currentRotation, 0, deltaX, 0.0f, 1.0f, 0.0f);
+		//Matrix.translateM(currentRotation, 0, 0, 0, deltaX);
+		//Matrix.translateM(currentRotation, 0, 0, deltaY, 0);
+		//deltaX = 0.0f;
+		//deltaY = 0.0f;
+		
+		
 		// Pass in the modelview matrix.
 		GLES20.glUniformMatrix4fv(mvMatrixUniform, 1, false, mvpMatrix, 0);
 
@@ -270,13 +305,131 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 
 		// Pass in the combined matrix.
 		GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mvpMatrix, 0);
+		
+		Matrix.setIdentityM(lightModelMatrix, 0);
+		Matrix.translateM(lightModelMatrix, 0, 0.0f, 20.5f, -8.0f);
+
+		Matrix.multiplyMV(lightPosInWorldSpace, 0, lightModelMatrix, 0, lightPosInModelSpace, 0);
+		Matrix.multiplyMV(lightPosInEyeSpace, 0, viewMatrix, 0, lightPosInWorldSpace, 0);
+		
 
 		// Pass in the light position in eye space.
 		GLES20.glUniform3f(lightPosUniform, lightPosInEyeSpace[0], lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
 
 		// Render the heightmap.
 		heightMap.render();
+		
+		Matrix.setIdentityM(modelMatrix, 0);
+		Matrix.translateM(modelMatrix, 0, 0.0f, -40.0f, 0.0f);
+		Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+		Matrix.multiplyMM(temporaryMatrix, 0, projectionMatrix, 0, mvpMatrix, 0);
+		System.arraycopy(temporaryMatrix, 0, mvpMatrix, 0, 16);
+
+		// Pass in the combined matrix.
+		GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mvpMatrix, 0);
+		GLES20.glUniform3f(lightPosUniform, lightPosInEyeSpace[0], lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
+		// Render the heightmap.
+		tower.render();
+		nacelle.render();
+		//porche.render();
+		 
+		 */
 	}
+	
+	 public void DrawWindTurbine(float moveX,float moveY,float moveZ,float rotoSpeed,int i)
+	 {
+		    //static float rotorSpeed =0;
+			Matrix.setLookAtM(viewMatrix, 0, (80.0f-deltaY) *(float)java.lang.Math.cos(deltaX*0.015f),0.0f, (80.0f-deltaY)*(float)java.lang.Math.sin(deltaX*0.015f), 0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f);
+			// Draw the heightmap.
+			// Translate the heightmap into the screen.
+			Matrix.setIdentityM(modelMatrix, 0);
+			//Matrix.rotateM(modelMatrix, 0, deltaZ, 0.0f, 1.0f, 0.0f);
+
+			Matrix.translateM(modelMatrix, 0, moveX, 30.0f+moveY, moveZ);
+			Matrix.rotateM(modelMatrix, 0, rotorSpeed[i], 0.0f, 0.0f, 1.0f);
+
+			//Matrix.rotateM(currentRotation, 0, deltaY, 0.0f, 1.0f, 0.0f);
+			rotorSpeed[i] += rotoSpeed;
+			// Set a matrix that contains the current rotation.
+
+			Matrix.translateM(modelMatrix, 0, 0.0f, -70.0f, 0.0f);
+			
+			//Matrix.rotateM(modelMatrix, 0, deltaZ, 0.0f, 1.0f, 0.0f);
+			
+			//Matrix.translateM(modelMatrix, 0, 0.0f, 00.0f, -0.5f);
+			
+			Matrix.setIdentityM(currentRotation, 0);
+			//Matrix.rotateM(currentRotation, 0, deltaX, 0.0f, 1.0f, 0.0f);
+			//Matrix.translateM(currentRotation, 0, 0, 0, deltaX);
+			//Matrix.translateM(currentRotation, 0, 0, deltaY, 0);
+			//deltaX = 0.0f;
+			//deltaY = 0.0f;
+
+			// Multiply the current rotation by the accumulated rotation, and then
+			// set the accumulated rotation to the result.
+			Matrix.multiplyMM(temporaryMatrix, 0, currentRotation, 0, accumulatedRotation, 0);
+			System.arraycopy(temporaryMatrix, 0, accumulatedRotation, 0, 16);
+
+			// Rotate the cube taking the overall rotation into account.
+			Matrix.multiplyMM(temporaryMatrix, 0, modelMatrix, 0, accumulatedRotation, 0);
+			System.arraycopy(temporaryMatrix, 0, modelMatrix, 0, 16);
+
+			// This multiplies the view matrix by the model matrix, and stores
+			// the result in the MVP matrix
+			// (which currently contains model * view).
+			Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+
+			
+			//Matrix.setIdentityM(modelMatrix, 0);		
+			//Matrix.setIdentityM(currentRotation, 0);
+			//Matrix.rotateM(currentRotation, 0, deltaX, 0.0f, 1.0f, 0.0f);
+			//Matrix.translateM(currentRotation, 0, 0, 0, deltaX);
+			//Matrix.translateM(currentRotation, 0, 0, deltaY, 0);
+			//deltaX = 0.0f;
+			//deltaY = 0.0f;
+			
+			
+			// Pass in the modelview matrix.
+			GLES20.glUniformMatrix4fv(mvMatrixUniform, 1, false, mvpMatrix, 0);
+
+			// This multiplies the modelview matrix by the projection matrix,
+			// and stores the result in the MVP matrix
+			// (which now contains model * view * projection).
+			Matrix.multiplyMM(temporaryMatrix, 0, projectionMatrix, 0, mvpMatrix, 0);
+			System.arraycopy(temporaryMatrix, 0, mvpMatrix, 0, 16);
+
+			// Pass in the combined matrix.
+			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mvpMatrix, 0);
+			
+			Matrix.setIdentityM(lightModelMatrix, 0);
+			Matrix.translateM(lightModelMatrix, 0, 0.0f, 20.5f, -8.0f);
+
+			Matrix.multiplyMV(lightPosInWorldSpace, 0, lightModelMatrix, 0, lightPosInModelSpace, 0);
+			Matrix.multiplyMV(lightPosInEyeSpace, 0, viewMatrix, 0, lightPosInWorldSpace, 0);
+			
+
+			// Pass in the light position in eye space.
+			GLES20.glUniform3f(lightPosUniform, lightPosInEyeSpace[0], lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
+
+			// Render the heightmap.
+			heightMap.render();
+			
+			Matrix.setIdentityM(modelMatrix, 0);
+			Matrix.translateM(modelMatrix, 0, moveX, -40.0f+moveY, moveZ);
+			Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+			Matrix.multiplyMM(temporaryMatrix, 0, projectionMatrix, 0, mvpMatrix, 0);
+			System.arraycopy(temporaryMatrix, 0, mvpMatrix, 0, 16);
+
+			// Pass in the combined matrix.
+			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mvpMatrix, 0);
+			GLES20.glUniform3f(lightPosUniform, lightPosInEyeSpace[0], lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
+			// Render the heightmap.
+			tower.render();
+			nacelle.render();
+			//porche.render();
+			 
+		 
+	 }
 
 	class HeightMap {
 		static final int SIZE_PER_SIDE = 32;
@@ -475,11 +628,11 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 
 			String nextLine,line;
 			final StringBuilder body = new StringBuilder();
-			final float[] Vertices = new float[1307*3];
-			final float[] Normals = new float[1307*3];
+			final float[] Vertices;// = new float[1307*3];
+			final float[] Normals;// = new float[1307*3];
 			//final short[] Indexes = new short[2148*3];
-			final float[] Indexes = new float[2148*3];
-			final short[] Index = new short[2148*3];
+			//final float[] Indexes = new float[2148*3];
+			final short[] Index;// = new short[2148*3];
 			/*
 			final float[] Vertices = new float[5*3];
 			final float[] Normals = new float[5*3];
@@ -487,7 +640,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 			
 			try
 			{   
-				int i;
+				int i,j;
 				while ((nextLine = bufferedReader.readLine()) != null)
 				{
 					body.append(nextLine);
@@ -497,14 +650,25 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 				//if(line.startsWith("Vertices") )
 				{
 					String[] tokens =line.split(":");
-					String[] parts1 = tokens[1].split(",");
-					String[] parts2 = tokens[2].split(",");
-					String[] parts3 = tokens[3].split(",");
-					for(i=0;i<1307*3;i++){
+					String[] arraynum = tokens[1].split(",");
+					String[] parts1 = tokens[2].split(",");
+					String[] parts2 = tokens[3].split(",");
+					String[] parts3 = tokens[4].split(",");
+					j = (int)Float.parseFloat(arraynum[0]);
+					Vertices = new float[j*3];
+					Normals = new float[j*3];
+					//final short[] Indexes = new short[2148*3];
+					//final float[] Indexes = new float[2148*3];
+				
+					
+					for(i=0;i<j*3;i++){
 						Vertices[i] = Float.parseFloat(parts1[i]);	
 						Normals[i] = Float.parseFloat(parts2[i]);
 					}
-					for(i=0;i<2148*3;i++){
+					
+					j = (int)Float.parseFloat(arraynum[1]);
+					Index = new short[j*3];	
+					for(i=0;i<j*3;i++){
 						//parts3[i].replaceAll(" +", ""); 
 						//parts3[i].replaceAll("\n", ""); 
 						//parts3[i].replaceAll("[^0-9.]","");
@@ -525,7 +689,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 					BladeNormalDataBuffer.put(Normals).position(0);
 					
 					final ShortBuffer BladeIndexDataBuffer = ByteBuffer
-							.allocateDirect(Indexes.length * BYTES_PER_SHORT).order(ByteOrder.nativeOrder())
+							.allocateDirect(Index.length * BYTES_PER_SHORT).order(ByteOrder.nativeOrder())
 							.asShortBuffer();
 					BladeIndexDataBuffer.put(Index).position(0);
 					
@@ -567,8 +731,209 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 
 		}	
 		
+		void PorcheDataReader(final Context context,
+				final int resourceId)
+		{
+			
+		 try{
+			 final InputStream in = context.getResources().openRawResource(
+					resourceId);
+			List<String> lines = readLines(in);
+			float[] vertices = new float[lines.size() * 3];
+			float[] normals = new float[lines.size() * 3];
+			float[] uv = new float[lines.size() * 2];
+			
+			int[] facesVerts = new int[lines.size() * 3];
+			int[] facesNormals = new int[lines.size() * 3];
+			int[] facesUV = new int[lines.size() * 3];
+			
+			
+			int numVertices = 0;
+			int numNormals = 0;
+			int numUV = 0;
+			int numFaces = 0;
+			int vertexIndex =0;
+			int normalIndex =0;
+			int faceIndex =0;
+			int uvIndex =0;
+			for (int i = 0; i < lines.size(); i++) {
+				String line = lines.get(i);
+				if (line.startsWith("v ")) {
+					String[] tokens = line.split("[ ]+");
+					vertices[vertexIndex] = Float.parseFloat(tokens[1]);
+					vertices[vertexIndex + 1] = Float.parseFloat(tokens[2]);
+					vertices[vertexIndex + 2] = Float.parseFloat(tokens[3]);
+					vertexIndex += 3;
+					numVertices++;
+					continue;
+					}
+				if (line.startsWith("vn ")) {
+					String[] tokens = line.split("[ ]+");
+					normals[normalIndex] = Float.parseFloat(tokens[1]);
+					normals[normalIndex + 1] = Float.parseFloat(tokens[2]);
+					normals[normalIndex + 2] = Float.parseFloat(tokens[3]);
+					normalIndex += 3;
+					numNormals++;
+					continue;
+					}
+				if (line.startsWith("vt")) {
+					String[] tokens = line.split("[ ]+");
+					uv[uvIndex] = Float.parseFloat(tokens[1]);
+					uv[uvIndex + 1] = Float.parseFloat(tokens[2]);
+					uvIndex += 2;
+					numUV++;
+					continue;
+					}
+				if (line.startsWith("f ")) {
+					String[] tokens = line.split("[ ]+");
+					String[] parts = tokens[1].split("/");
+					facesVerts[faceIndex] = getIndex(parts[0], numVertices);
+					if (parts.length > 2)
+					facesNormals[faceIndex] = getIndex(parts[2], numNormals);
+					if (parts.length > 1)
+					facesUV[faceIndex] = getIndex(parts[1], numUV);
+					faceIndex++;
+					parts = tokens[2].split("/");
+					facesVerts[faceIndex] = getIndex(parts[0], numVertices);
+					if (parts.length > 2)
+					facesNormals[faceIndex] = getIndex(parts[2], numNormals);
+					if (parts.length > 1)
+					facesUV[faceIndex] = getIndex(parts[1], numUV);
+					faceIndex++;
+					parts = tokens[3].split("/");
+					facesVerts[faceIndex] = getIndex(parts[0], numVertices);
+					if (parts.length > 2)
+					facesNormals[faceIndex] = getIndex(parts[2], numNormals);
+					if (parts.length > 1)
+					facesUV[faceIndex] = getIndex(parts[1], numUV);
+					faceIndex++;
+					numFaces++;
+					continue;
+					}
+				}
+					//float[] verts = new float[(numFaces * 3)
+			        //                  * (3 + (numNormals > 0 ? 3 : 0) + (numUV > 0 ? 2 : 0))];
+	    /*
+					float[] Vertices = new float[numFaces*9];
+					float[] Normals = new float[numFaces*9];
+					short[] Index = new short[numFaces*3];
+					for (int i = 0, vi = 0,ni =0,ii =0; i < numFaces * 3; i++) {
+						int vertexIdx = facesVerts[i] * 3;
+						Vertices[vi++] = vertices[vertexIdx];
+						Vertices[vi++] = vertices[vertexIdx + 1];
+						Vertices[vi++] = vertices[vertexIdx + 2];
+						if (numUV > 0) {
+						int uvIdx = facesUV[i] * 2;
+						verts[vi++] = uv[uvIdx];
+						verts[vi++] = 1 - uv[uvIdx + 1];
+						}
+						if (numNormals > 0) {
+							int normalIdx = facesNormals[i] * 3;
+							Normals[ni++] = normals[normalIdx];
+							Normals[ni++] = normals[normalIdx + 1];
+							Normals[ni++] = normals[normalIdx + 2];
+						}	
+						Index[ii++] = (short)(3*i);
+						Index[ii++] = (short)(3*i+1);
+						Index[ii++] = (short)(3*i+2);
+					}*/
+			
+			//float[] Vertices = new float[]{100.0f,50.0f,0.0f,10.0f,0.0f,180.0f,0.0f,10.0f,100.0f};
+			//float[] Normals = new float[]{1.0f,1.0f,0.0f,1.0f,1.0f,0.0f,1.0f,1.0f,0.0f};
+			//short[] Index = new short[]{0,1,2,1,1,2,0};	
+			float[] Vertices = new float[numVertices*3];
+			float[] Normals = new float[vertexIndex];
+			short[] Index = new short[22011*3];
+			for (int i = 0; i < numVertices; i++) {
+				
+				Vertices[3*i] = vertices[3*i]*20.0f;
+				Vertices[3*i+1] = vertices[3*i+1]*20.0f;
+				Vertices[3*i+2] = vertices[3*i+2]*20.0f;
+				if(i<=7000){ //21554
+					Normals[3*i ]   = vertices[3*i]*20.0f;
+					Normals[3*i +1] = vertices[3*i+1]*20.0f;
+					Normals[3*i +2] = vertices[3*i+2]*20.0f;
+				}
+				else{
+				Normals[3*i ] =1.0f;
+				Normals[3*i +1] =0.0f;
+				Normals[3*i +2] =1.0f;
+				}
+				
+			}
+			for (int i = 0; i < 22011*3; i++) {
+				Index[i] = (short)facesVerts[i];
+			}		
+					//return 	Vertices;	 
+					final FloatBuffer BladeVertexDataBuffer = ByteBuffer
+							.allocateDirect(Vertices.length * BYTES_PER_FLOAT).order(ByteOrder.nativeOrder())
+							.asFloatBuffer();
+					BladeVertexDataBuffer.put(Vertices).position(0);
+					
+					final FloatBuffer BladeNormalDataBuffer = ByteBuffer
+							.allocateDirect(Normals.length * BYTES_PER_FLOAT).order(ByteOrder.nativeOrder())
+							.asFloatBuffer();
+					BladeNormalDataBuffer.put(Normals).position(0);
+					
+					final ShortBuffer BladeIndexDataBuffer = ByteBuffer
+							.allocateDirect(Index.length * BYTES_PER_SHORT).order(ByteOrder.nativeOrder())
+							.asShortBuffer();
+					BladeIndexDataBuffer.put(Index).position(0);
+					
+					indexCount = Index.length;
+					
+					GLES20.glGenBuffers(2, vbo, 0);
+					GLES20.glGenBuffers(1, ibo, 0);
 
-		
+					if (vbo[0] > 0 && ibo[0] > 0 && vbo[1] > 0) {
+						GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
+						GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, BladeVertexDataBuffer.capacity() * BYTES_PER_FLOAT,
+								BladeVertexDataBuffer, GLES20.GL_STATIC_DRAW);
+						
+						GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[1]);
+						GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, BladeNormalDataBuffer.capacity() * BYTES_PER_FLOAT,
+								BladeNormalDataBuffer, GLES20.GL_STATIC_DRAW);
+						
+						GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
+						GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, BladeIndexDataBuffer.capacity()
+								* BYTES_PER_SHORT, BladeIndexDataBuffer, GLES20.GL_STATIC_DRAW);
+
+						GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+						GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+					} else {
+						errorHandler.handleError(ErrorType.BUFFER_CREATION_ERROR, "glGenBuffers");
+					}				
+										
+					
+		   } catch (Exception ex) {
+			   throw new RuntimeException("couldn't load '" + "'", ex);
+				} finally {
+					//if (in != null)
+					//	try {
+					//		in.close();
+					//	} catch (Exception ex) {
+					//	}
+				}
+		 
+		 
+	   }
+
+	   int getIndex(String index, int size) {
+			int idx = Integer.parseInt(index);
+			if (idx < 0)
+			return size + idx;
+			else
+			return idx - 1;
+	   }
+	   
+	   List<String> readLines(InputStream in) throws IOException {
+			List<String> lines = new ArrayList<String>();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+			String line = null;
+			while ((line = reader.readLine()) != null)
+			lines.add(line);
+			return lines;
+		}
 		
 		void release() {
 			if (vbo[0] > 0) {

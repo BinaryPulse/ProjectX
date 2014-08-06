@@ -20,17 +20,17 @@ void main()
 	// pointing in the same direction then it will get max illumination.
 	float diffuse;
 
-	if (gl_FrontFacing) {
-        diffuse = max(dot(v_Normal, lightVector), 0.0);
-    } else {
-    	diffuse = max(dot(-v_Normal, lightVector), 0.0);
-    }               	  		  													  
+	//if (gl_FrontFacing) {
+        diffuse = max(dot(v_Normal, lightVector), 1.0);
+    //} else {
+    //	diffuse = max(dot(-v_Normal, lightVector), 0.0);
+    //}               	  		  													  
 
 	// Add attenuation. 
-    diffuse = diffuse * (1.0 / (1.0 + (0.10 * distance)));
+    diffuse = diffuse * (1.0 / (1.0 + (0.020 * distance)));
     
     // Add ambient lighting
-    diffuse = diffuse + 0.3;  
+    diffuse = diffuse;// + 0.5;  
 
 	// Multiply the color by the diffuse illumination level to get final output color.
     gl_FragColor = (v_Color * diffuse);                                  		
