@@ -26,7 +26,11 @@ import android.util.Log;
 import com.BinaryPulse.ProjectX.R;
 import com.BinaryPulse.ProjectX.common.RawResourceReader;
 import com.BinaryPulse.ProjectX.common.ShaderHelper;
+import com.BinaryPulse.ProjectX.common.TextureHelper;
 import com.BinaryPulse.ProjectX.lesson8.ErrorHandler.ErrorType;
+
+import com.BinaryPulse.ProjectX.MyFont.MyFont;
+
 
 /**
  * This class implements our custom renderer. Note that the GL10 parameter
@@ -55,12 +59,15 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	 * eye.
 	 */
 	private final float[] viewMatrix = new float[16];
+	
+	private final float[] viewMatrixFont = new float[16];
 
 	/**
 	 * Store the projection matrix. This is used to project the scene onto a 2D
 	 * viewport.
 	 */
 	private final float[] projectionMatrix = new float[16];
+	
 
 	/**
 	 * Allocate storage for the final combined matrix. This will be passed into
@@ -135,6 +142,8 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	public volatile float[] rotorSpeed;
 	/** The current heightmap object. */
 	private HeightMap heightMap,tower,nacelle,porche;
+	
+	private MyFont glText;                             // A GLText Instance
 
 	/**
 	 * Initialize the model data.
@@ -152,10 +161,10 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		nacelle = new HeightMap(); 
 		porche = new HeightMap(); 
 		// Set the background clear color to black.
-		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		//////GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 		// Enable depth testing
-		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+		//////GLES20.glEnable(GLES20.GL_DEPTH_TEST);
 
 		// Position the eye in front of the origin.
 		final float eyeX = 0.0f;
@@ -198,10 +207,37 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 				R.raw.tower);	
 		nacelle.MeshDataReader(lessonEightActivity,
 				R.raw.nacelle);	
+		
+		// Create the GLText
+		
+		// Set the background frame color
+		GLES20.glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+		glText = new MyFont(lessonEightActivity,(lessonEightActivity.getAssets()));
+
+		// Load the font from file (set size + padding), creates the texture
+		// NOTE: after a successful call to this the font is ready for rendering!
+		glText.load( "Roboto-Regular.ttf", 48, 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
+		// enable texture + alpha blending
+		GLES20.glEnable(GLES20.GL_BLEND);
+		//GLES20.glDisable(GLES20.GL_CULL_FACE);
+		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+				
 		//porche.PorcheDataReader(lessonEightActivity,
 		//		R.raw.porsche);	
 		// Initialize the accumulated rotation matrix
 		Matrix.setIdentityM(accumulatedRotation, 0);
+		
+		// Load the texture
+		final int mAndroidDataHandle = TextureHelper.loadTexture(lessonEightActivity, R.drawable.usb_android);		
+		GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);			
+		
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);		
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);		
+		
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);		
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);		
+     		
+		
 	}
 
 	@Override
@@ -221,12 +257,27 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 
 		Matrix.frustumM(projectionMatrix, 0, left, right, bottom, top, near, far);
 		//Matrix.perspectiveM(projectionMatrix,0,  1.0f, ratio, 1.0f, 1000.0f);
+		
+		
+		int useForOrtho = Math.min(width, height);
+		
+		//TODO: Is this wrong?
+		Matrix.orthoM(viewMatrixFont, 0,
+				-useForOrtho/2,
+				useForOrtho/2,
+				-useForOrtho/2,
+				useForOrtho/2, 1f, 1000f);		
 	}
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
+		
+		GLES20.glDisable(GLES20.GL_BLEND);
+		//GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+		GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+		GLES20.glEnable(GLES20.GL_CULL_FACE);
 		// Set our per-vertex lighting program.
 		GLES20.glUseProgram(program);
 
@@ -243,6 +294,23 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		DrawWindTurbine(30.0f,0.0f,70.0f,0.2f,1);
 		DrawWindTurbine(-60.0f,0.0f,30.0f,1.2f,2);
 		DrawWindTurbine(60.0f,0.0f,10.0f,3.2f,3);
+		
+		
+		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrixFont, 0);
+		
+		// TEST: render the entire font texture
+		//GLES20.glColorMask({0.0, 1.0, 0.0,0.5},0,0)
+		//glText.drawTexture( width/2, height/2, mVPMatrix);            // Draw the Entire Texture
+		GLES20.glEnable(GLES20.GL_BLEND);
+		//GLES20.glDisable(GLES20.GL_CULL_FACE);
+		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+		//GLES20.glEnable(GLES20.GL_CULL_FACE);
+		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+		// TEST: render some strings with the font
+		glText.SetColor( 0.0f, 1.0f, 0.0f, 0.5f, mvpMatrix );         // Begin Text Rendering (Set Color WHITE)
+		glText.drawC("Jason Mraz!", 0f, 0f, 150f, 0, 0, 0);
+		glText.draw( "123456790", -10,-300, 60);
+		
 	/*	
 		Matrix.setLookAtM(viewMatrix, 0, (80.0f-deltaY) *(float)java.lang.Math.cos(deltaX*0.015f),0.0f, (80.0f-deltaY)*(float)java.lang.Math.sin(deltaX*0.015f), 0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f);
 		// Draw the heightmap.
@@ -334,6 +402,9 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		//porche.render();
 		 
 		 */
+		
+		
+		
 	}
 	
 	 public void DrawWindTurbine(float moveX,float moveY,float moveZ,float rotoSpeed,int i)
@@ -427,7 +498,8 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 			tower.render();
 			nacelle.render();
 			//porche.render();
-			 
+	
+
 		 
 	 }
 
@@ -607,7 +679,8 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 
 				// Draw
 				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
-				GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, indexCount, GLES20.GL_UNSIGNED_SHORT, 0);
+				GLES20.glDrawElements(GLES20.GL_TRIANGLES, indexCount, GLES20.GL_UNSIGNED_SHORT, 0);
+				//GLES20.glDrawElements(GLES20.GL_LINES, indexCount, GLES20.GL_UNSIGNED_SHORT, 0);
 
 				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
