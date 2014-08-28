@@ -213,14 +213,14 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		// Set the background frame color
 		GLES20.glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
 		glText = new MyFont(lessonEightActivity,(lessonEightActivity.getAssets()));
-
-		// Load the font from file (set size + padding), creates the texture
-		// NOTE: after a successful call to this the font is ready for rendering!
-		glText.load( "Roboto-Regular.ttf", 48, 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
-		// enable texture + alpha blending
 		GLES20.glEnable(GLES20.GL_BLEND);
 		//GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+		// Load the font from file (set size + padding), creates the texture
+		// NOTE: after a successful call to this the font is ready for rendering!
+		glText.load( "Roboto-Regular.ttf", 32, 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
+		// enable texture + alpha blending
+
 				
 		//porche.PorcheDataReader(lessonEightActivity,
 		//		R.raw.porsche);	
@@ -253,12 +253,11 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		final float bottom = -1.0f*1.0f;
 		final float top = 1.0f*1.0f;
 		final float near = 1.0f;
-		final float far = 200.0f;
+		final float far = 1000.0f;
 
 		Matrix.frustumM(projectionMatrix, 0, left, right, bottom, top, near, far);
 		//Matrix.perspectiveM(projectionMatrix,0,  1.0f, ratio, 1.0f, 1000.0f);
-		
-		
+			
 		int useForOrtho = Math.min(width, height);
 		
 		//TODO: Is this wrong?
@@ -266,7 +265,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 				-useForOrtho/2,
 				useForOrtho/2,
 				-useForOrtho/2,
-				useForOrtho/2, 1f, 1000f);		
+				useForOrtho/2, 1f, 100f);		
 	}
 
 	@Override
@@ -290,11 +289,11 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		//colorAttribute = GLES20.glGetAttribLocation(program, COLOR_ATTRIBUTE);
 
 		// Calculate position of the light. Push into the distance.
-		DrawWindTurbine(0.0f,0.0f,10.0f,0.5f,0);
-		DrawWindTurbine(30.0f,0.0f,70.0f,0.2f,1);
-		DrawWindTurbine(-60.0f,0.0f,30.0f,1.2f,2);
-		DrawWindTurbine(60.0f,0.0f,10.0f,3.2f,3);
-		
+		DrawWindTurbine(0.0f,0.0f,70.0f,0.5f,0);
+		//DrawWindTurbine(30.0f,0.0f,20.0f,0.2f,1);
+		DrawWindTurbine(-60.0f,0.0f,50.0f,1.2f,2);
+		DrawWindTurbine(60.0f,0.0f,30.0f,3.2f,3);
+		GLES20.glUseProgram(0);
 		
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrixFont, 0);
 		
@@ -308,7 +307,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		// TEST: render some strings with the font
 		glText.SetColor( 0.0f, 1.0f, 0.0f, 0.5f, mvpMatrix );         // Begin Text Rendering (Set Color WHITE)
-		glText.drawC("Jason Mraz!", 0f, 0f, 150f, 0, 0, 0);
+		glText.drawC("Jason Mraz!", 0f, 0f, 0.0f, 0, 0, 0);
 		glText.draw( "123456790", -10,-300, 60);
 		
 	/*	

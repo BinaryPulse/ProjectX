@@ -4,6 +4,6 @@ uniform vec4 u_Color;
 varying vec2 v_TexCoordinate;  // Interpolated texture coordinate per fragment.
 void main()     // The entry point for our fragment shader.
 {                         
-gl_FragColor = texture2D(u_Texture, v_TexCoordinate).w * vec4(0.1f,1.0f,0.1f,1.0f);//u_Color; // texture is grayscale so take only grayscale value from  
+gl_FragColor = texture2D(u_Texture, v_TexCoordinate).w * vec4(0.1,1.0,0.1,1.0);//u_Color; // texture is grayscale so take only grayscale value from  
  // it when computing color output (otherwise font is always black)
 } 

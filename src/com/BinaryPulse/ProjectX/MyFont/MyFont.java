@@ -100,7 +100,7 @@ public class MyFont {
 
 	/** OpenGL handles to our program attributes. */
 	private int positionAttribute;
-	private int normalAttribute;
+	private int texcordAttribute;
 	private int colorAttribute;	
 
 	/** Identifiers for our uniforms and attributes inside the shaders. */	
@@ -403,6 +403,7 @@ public class MyFont {
 			//lightPosUniform = GLES20.glGetUniformLocation(program, LIGHT_POSITION_UNIFORM);
 			positionAttribute = GLES20.glGetAttribLocation(program, POSITION_ATTRIBUTE);
 			//normalAttribute = GLES20.glGetAttribLocation(program, NORMAL_ATTRIBUTE);
+			texcordAttribute = GLES20.glGetAttribLocation(program, TEXCORD_ATTRIBUTE);
 			
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
 
@@ -411,10 +412,13 @@ public class MyFont {
 					4*4, 0);
 			GLES20.glEnableVertexAttribArray(positionAttribute);
 
-			GLES20.glVertexAttribPointer(TextureUniformHandle, 2, GLES20.GL_FLOAT, false,
+			//GLES20.glVertexAttribPointer(TextureUniformHandle, 2, GLES20.GL_FLOAT, false,
+			//		4*4, 2*4);
+			//GLES20.glEnableVertexAttribArray(TextureUniformHandle);
+			GLES20.glVertexAttribPointer(texcordAttribute, 2, GLES20.GL_FLOAT, false,
 					4*4, 2*4);
-			GLES20.glEnableVertexAttribArray(TextureUniformHandle);
-
+			GLES20.glEnableVertexAttribArray(texcordAttribute);			
+			
 		
 			// Draw
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
@@ -465,6 +469,7 @@ public class MyFont {
 			{
 				
 				Matrix.multiplyMM(mMVPMatrix, 0, mVPMatrix , 0, modelMatrix, 0);
+				//Matrix.multiplyMM(modelMatrix, 0, mVPMatrix , 0, mMVPMatrix, 0);
 				
 				DrawSprite(letterX, letterY, (charWidths[c])*scaleX, chrHeight, charRgn[c], mMVPMatrix);  // Draw the Character
 			
