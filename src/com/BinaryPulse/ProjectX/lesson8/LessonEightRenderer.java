@@ -30,8 +30,8 @@ import com.BinaryPulse.ProjectX.common.TextureHelper;
 import com.BinaryPulse.ProjectX.lesson8.ErrorHandler.ErrorType;
 
 import com.BinaryPulse.ProjectX.MyFont.MyFont;
-
-
+import com.BinaryPulse.ProjectX.MyUI.OscilloScope;
+import android.util.DisplayMetrics;
 /**
  * This class implements our custom renderer. Note that the GL10 parameter
  * passed in is unused for OpenGL ES 2.0 renderers -- the static class GLES20 is
@@ -144,7 +144,11 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	private HeightMap heightMap,tower,nacelle,porche;
 	
 	private MyFont glText;                             // A GLText Instance
-
+    private OscilloScope OscilloScope_1;
+    
+    private DisplayMetrics dm;
+    private int windowWidth;
+    private int windowHeight;
 	/**
 	 * Initialize the model data.
 	 */
@@ -207,6 +211,13 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 				R.raw.tower);	
 		nacelle.MeshDataReader(lessonEightActivity,
 				R.raw.nacelle);	
+	
+
+		dm = new DisplayMetrics();
+		lessonEightActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
+		windowWidth = dm.widthPixels;
+		windowHeight = dm.heightPixels;		
+		
 		
 		// Create the GLText
 		
@@ -218,10 +229,12 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		// Load the font from file (set size + padding), creates the texture
 		// NOTE: after a successful call to this the font is ready for rendering!
-		glText.load( "Roboto-Regular.ttf", 32, 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
+		glText.load( "Roboto-Regular.ttf", 18, 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
 		// enable texture + alpha blending
 
-				
+		OscilloScope_1=new OscilloScope(lessonEightActivity,0,100.0f,10.0f,1.0f,(float)windowWidth,(float)windowHeight,2.0f);	
+	    OscilloScope_1.SetScopeParameters(0,0, 100,200, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
+	    OscilloScope_1.SetDispWiodowSize(windowWidth,windowHeight);	
 		//porche.PorcheDataReader(lessonEightActivity,
 		//		R.raw.porsche);	
 		// Initialize the accumulated rotation matrix
@@ -236,8 +249,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);		
 		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);		
-     		
-		
+   
 	}
 
 	@Override
@@ -258,18 +270,25 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		Matrix.frustumM(projectionMatrix, 0, left, right, bottom, top, near, far);
 		//Matrix.perspectiveM(projectionMatrix,0,  1.0f, ratio, 1.0f, 1000.0f);
 			
-		int useForOrtho = Math.min(width, height);
+		/*int useForOrtho = Math.min(width, height);
 		
 		//TODO: Is this wrong?
 		Matrix.orthoM(viewMatrixFont, 0,
 				-useForOrtho/2,
 				useForOrtho/2,
 				-useForOrtho/2,
-				useForOrtho/2, 1f, 100f);		
+				useForOrtho/2, 0f, 1f);		*/
+		Matrix.orthoM(viewMatrixFont, 0,
+				-width/2,
+				width/2,
+				-height/2,
+				height/2, 0f, 1f);		
+		
 	}
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
+	     
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
 		
@@ -297,6 +316,8 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrixFont, 0);
 		
+		GLES20.glDisable(GLES20.GL_CULL_FACE);
+		OscilloScope_1.Render(viewMatrixFont);
 		// TEST: render the entire font texture
 		//GLES20.glColorMask({0.0, 1.0, 0.0,0.5},0,0)
 		//glText.drawTexture( width/2, height/2, mVPMatrix);            // Draw the Entire Texture
@@ -306,9 +327,11 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		//GLES20.glEnable(GLES20.GL_CULL_FACE);
 		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		// TEST: render some strings with the font
-		glText.SetColor( 0.0f, 1.0f, 0.0f, 0.5f, mvpMatrix );         // Begin Text Rendering (Set Color WHITE)
-		glText.drawC("Jason Mraz!", 0f, 0f, 0.0f, 0, 0, 0);
-		glText.draw( "123456790", -10,-300, 60);
+		glText.SetColor( 1.0f, 0.0f, 0.0f, 1.0f, viewMatrixFont );         // Begin Text Rendering (Set Color WHITE)
+		glText.drawC("Jason Mraz!", 80f, 100f, 0.0f, 0, 0, 0);
+		glText.SetColor( 1.0f, 0.0f, 1.0f, 1.0f, viewMatrixFont );  
+		glText.draw( Integer.toString(windowHeight), -10,-200, 60);
+		
 		
 	/*	
 		Matrix.setLookAtM(viewMatrix, 0, (80.0f-deltaY) *(float)java.lang.Math.cos(deltaX*0.015f),0.0f, (80.0f-deltaY)*(float)java.lang.Math.sin(deltaX*0.015f), 0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f);
@@ -636,7 +659,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		}
 
 		void render() {
-/*			if (vbo[0] > 0 && ibo[0] > 0) {				
+			/*if (vbo[0] > 0 && ibo[0] > 0) {				
 				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
 
 				// Bind Attributes
@@ -678,8 +701,8 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 
 				// Draw
 				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
-				GLES20.glDrawElements(GLES20.GL_TRIANGLES, indexCount, GLES20.GL_UNSIGNED_SHORT, 0);
-				//GLES20.glDrawElements(GLES20.GL_LINES, indexCount, GLES20.GL_UNSIGNED_SHORT, 0);
+				//GLES20.glDrawElements(GLES20.GL_TRIANGLES, indexCount, GLES20.GL_UNSIGNED_SHORT, 0);
+				GLES20.glDrawElements(GLES20.GL_LINES, indexCount, GLES20.GL_UNSIGNED_SHORT, 0);
 
 				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);

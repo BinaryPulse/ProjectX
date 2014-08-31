@@ -6,17 +6,30 @@ import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.MotionEvent;
+
+
 
 public class LessonEightActivity extends Activity {	
 	private LessonEightGLSurfaceView glSurfaceView;
 	private LessonEightRenderer renderer;
+	//private SystemUiHider mSystemUiHider;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);		
-
-		glSurfaceView = new LessonEightGLSurfaceView(this);
 		
+				
+		super.onCreate(savedInstanceState);		
+		
+	    requestWindowFeature(Window.FEATURE_NO_TITLE);
+	    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+	   
+		glSurfaceView = new LessonEightGLSurfaceView(this);
+	
+		//glSurfaceView.setSystemUiVisibility(glSurfaceView.SYSTEM_UI_FLAG_HIDE_NAVIGATION);  
+  		//this.hideSystemUI();
 		setContentView(glSurfaceView);
 
 		// Check if the system supports OpenGL ES 2.0.
@@ -47,6 +60,7 @@ public class LessonEightActivity extends Activity {
 		// onResume().
 		super.onResume();
 		glSurfaceView.onResume();
+  
 	}
 
 	@Override
@@ -54,6 +68,16 @@ public class LessonEightActivity extends Activity {
 		// The activity must call the GL surface view's onPause() on activity
 		// onPause().
 		super.onPause();
-		glSurfaceView.onPause();
+		glSurfaceView.onPause();	  
 	}
+
+	private void hideSystemUI()
+	{
+		    
+		//glSurfaceView.setSystemUiVisibility(glSurfaceView.SYSTEM_UI_FLAG_HIDE_NAVIGATION);//.SYSTEM_UI_FLAG_HIDE_NAVIGATION;)
+		glSurfaceView.setSystemUiVisibility(glSurfaceView.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+				| glSurfaceView.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);//.SYSTEM_UI_FLAG_HIDE_NAVIGATION;)
+		
+	}
+
 }
