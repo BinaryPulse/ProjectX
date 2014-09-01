@@ -229,11 +229,11 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		// Load the font from file (set size + padding), creates the texture
 		// NOTE: after a successful call to this the font is ready for rendering!
-		glText.load( "Roboto-Regular.ttf", 18, 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
+		glText.load( "Roboto-Regular.ttf", 38, 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
 		// enable texture + alpha blending
 
 		OscilloScope_1=new OscilloScope(lessonEightActivity,0,100.0f,10.0f,1.0f,(float)windowWidth,(float)windowHeight,2.0f);	
-	    OscilloScope_1.SetScopeParameters(0,0, 100,200, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
+	    OscilloScope_1.SetScopeParameters(180,0, 200,300, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
 	    OscilloScope_1.SetDispWiodowSize(windowWidth,windowHeight);	
 		//porche.PorcheDataReader(lessonEightActivity,
 		//		R.raw.porsche);	
@@ -256,14 +256,13 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
 		// Set the OpenGL viewport to the same size as the surface.
 		GLES20.glViewport(0, 0, width, height);
-
 		// Create a new perspective projection matrix. The height will stay the
 		// same while the width will vary as per aspect ratio.
 		final float ratio = (float) width / height;
-		final float left = -ratio*1.0f;
-		final float right = ratio*1.0f;
-		final float bottom = -1.0f*1.0f;
-		final float top = 1.0f*1.0f;
+		final float left = -ratio/2.0f;//-width/2.0f;//-ratio*1.0f;
+		final float right = ratio/2.0f;//width/2.0f;//ratio*1.0f;
+		final float bottom =-0.5f;//1/ratio;// -height/2.0f;//-1.0f*1.0f;
+		final float top = 0.5f;//1/ratio;//height/2.0f;//1.0f*1.0f;
 		final float near = 1.0f;
 		final float far = 1000.0f;
 
@@ -317,6 +316,9 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrixFont, 0);
 		
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
+		GLES20.glDisable(GLES20.GL_BLEND);
+		
+		//GLES20.gl
 		OscilloScope_1.Render(viewMatrixFont);
 		// TEST: render the entire font texture
 		//GLES20.glColorMask({0.0, 1.0, 0.0,0.5},0,0)
@@ -327,10 +329,12 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		//GLES20.glEnable(GLES20.GL_CULL_FACE);
 		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		// TEST: render some strings with the font
-		glText.SetColor( 1.0f, 0.0f, 0.0f, 1.0f, viewMatrixFont );         // Begin Text Rendering (Set Color WHITE)
-		glText.drawC("Jason Mraz!", 80f, 100f, 0.0f, 0, 0, 0);
-		glText.SetColor( 1.0f, 0.0f, 1.0f, 1.0f, viewMatrixFont );  
-		glText.draw( Integer.toString(windowHeight), -10,-200, 60);
+		glText.SetMvpMatrix(viewMatrixFont);
+		glText.SetColor( 1.0f, 0.0f, 0.0f, 1.0f );         // Begin Text Rendering (Set Color WHITE)
+		
+		glText.drawC("Jason Mraz!", 350.0f, 100.0f, 0.0f, 0, 0, 0);
+		glText.SetColor( 1.0f, 0.0f, 1.0f, 1.0f );  
+		glText.draw( Integer.toString(windowHeight), 0.0f,0.0f, 60);
 		
 		
 	/*	
@@ -702,7 +706,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 				// Draw
 				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
 				//GLES20.glDrawElements(GLES20.GL_TRIANGLES, indexCount, GLES20.GL_UNSIGNED_SHORT, 0);
-				GLES20.glDrawElements(GLES20.GL_LINES, indexCount, GLES20.GL_UNSIGNED_SHORT, 0);
+				GLES20.glDrawElements(GLES20.GL_TRIANGLES, indexCount, GLES20.GL_UNSIGNED_SHORT, 0);
 
 				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);

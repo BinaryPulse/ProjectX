@@ -117,7 +117,7 @@ public class MyFont {
 	final int[] vbo = new int[2];
 	final int[] ibo = new int[1];
 	
-	private float[] mVPMatrix;		
+	private float[] mVPMatrix= new float[16];		
 	private float[] mMVPMatrix = new float[16];	
 	//--Constructor--//
 	// D: save program + asset manager, create arrays, and initialize the members
@@ -301,7 +301,7 @@ public class MyFont {
 	// 	  vpMatrix - View and projection matrix to use
 	// R: [none]
 
-	public void SetColor(float red, float green, float blue, float alpha,float[] pMatrix) {
+	public void SetColor(float red, float green, float blue, float alpha) {
 		GLES20.glUseProgram(program); // specify the program to use
 		
 		// set color TODO: only alpha component works, text is always black #BUG
@@ -321,10 +321,15 @@ public class MyFont {
 		GLES20.glUniform1i(TextureUniformHandle, 0); 
 		
 		
-		mVPMatrix = pMatrix;		
+		//mVPMatrix = pMatrix;		
 	}
 	
-
+    public void SetMvpMatrix(float[] mvpMatrix)
+    {
+    	
+    	mMVPMatrix = mvpMatrix;
+    }
+    
 	public void DrawSprite(float x, float y, float width, float height, TextureRegion region, float[] modelMatrix)  {
 
 		//if(width<20.0f)
@@ -444,7 +449,7 @@ public class MyFont {
 		float chrWidth = cellWidth * scaleX;            // Calculate Scaled Character Width
 		int len = text.length();                        // Get String Length
 		//x =0;//+= ( chrWidth / 2.0f ) - ( fontPadX * scaleX );  // Adjust Start X
-		y += ( chrHeight / 2.0f ) - ( fontPadY * scaleY );  // Adjust Start Y
+		//y += ( chrHeight / 2.0f ) - ( fontPadY * scaleY );  // Adjust Start Y
 		
 		// create a model matrix based on x, y and angleDeg
 		float[] modelMatrix = new float[16];
@@ -457,7 +462,7 @@ public class MyFont {
 		float letterX, letterY; 
 		letterX = letterY = 0;
 		
-		letterX =x;
+		letterX =0;
 		
 		for (int i = 0; i < len; i++)  {              // FOR Each Character in String
 			int c = (int)text.charAt(i) - CHAR_START;  // Calculate Character Index (Offset by First Char in Font)
@@ -468,10 +473,10 @@ public class MyFont {
 			else
 			{
 				
-				Matrix.multiplyMM(mMVPMatrix, 0, mVPMatrix , 0, modelMatrix, 0);
+				Matrix.multiplyMM(mVPMatrix , 0, mMVPMatrix, 0, modelMatrix, 0);
 				//Matrix.multiplyMM(modelMatrix, 0, mVPMatrix , 0, mMVPMatrix, 0);
 				
-				DrawSprite(letterX, letterY, (charWidths[c])*scaleX, chrHeight, charRgn[c], mMVPMatrix);  // Draw the Character
+				DrawSprite(letterX, letterY, (charWidths[c])*scaleX, chrHeight, charRgn[c], mVPMatrix);  // Draw the Character
 			
 				letterX += (float)(charWidths[c] ) * scaleX;
 			}
@@ -498,7 +503,8 @@ public class MyFont {
 	// R: the total width of the text that was drawn
 	public float drawC(String text, float x, float y, float z, float angleDegX, float angleDegY, float angleDegZ)  {
 		float len = getLength( text );                  // Get Text Length
-		draw( text, x - ( len / 2.0f ), y - ( getCharHeight() / 2.0f ), z, angleDegX, angleDegY, angleDegZ );  // Draw Text Centered
+		//draw( text, x - ( len / 2.0f ), y - ( getCharHeight() / 2.0f ), z, angleDegX, angleDegY, angleDegZ );  // Draw Text Centered
+		draw( text, x , y - ( getCharHeight() / 2.0f ), z, angleDegX, angleDegY, angleDegZ );  // Draw Text Centered
 		return len;                                     // Return Length
 	}
 	public float drawC(String text, float x, float y, float z, float angleDegZ) {

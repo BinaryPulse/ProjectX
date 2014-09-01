@@ -176,87 +176,138 @@ public class OscilloScope extends UIControlUnit {
 /***********************************************************************************
 子函数描述：DrawControlBorder(bool AnimationEnabled), 绘制示波器边框
 ************************************************************************************/
-void  DrawControlBorder(boolean AnimationEnabled ){
-  /*      
-      glDisable(GL_BLEND);  
-
-	  //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	  glEnable(GL_TEXTURE_2D);
-
-	  glBindTexture(GL_TEXTURE_2D, m_TextureObject1);
-	 
-	  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0);
-
-	  glColor3f(0.0f, 1.0f, 1.0f);
-
-	  if(m_IntervalCoordinate<0.48 && m_IntervalCoordinate>=0)
-
-	       m_IntervalCoordinate+=0.0025;
-      else
-           m_IntervalCoordinate=0.0;  
+void  DrawControlBorder(float[] modelMatrix){//boolean AnimationEnabled ){
 	
-      glBegin(GL_TRIANGLE_STRIP);
+	float[] color = {0.0f,1.0f, 1.0f, 1.0f};
+	
+	Matrix.setIdentityM(mMVPMatrix, 0);
+	Matrix.translateM(mMVPMatrix, 0, -mWindowWidth/2.0f, -mWindowHeight/2.0f, 0);	
+	Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);
+	
+	  if(m_IntervalCoordinate<0.48f && m_IntervalCoordinate>=0f)
 
-          glTexCoord2f(0.48-m_IntervalCoordinate, 0.0);
-		  glNormal3f(0,0,1);
-          glVertex3f(0.0, 0.0 ,0.0);
-		  
-		  glTexCoord2f(0.48-m_IntervalCoordinate, 0.1);
-		  glNormal3f(0,0,1);
-          glVertex3f(m_BorderWidth, m_BorderWidth,0.0 );
-
-
-		  glTexCoord2f(0.8-m_IntervalCoordinate, 0.0);
-		  glNormal3f(0,0,1);
-          glVertex3f(m_Width*m_Scale+2*m_BorderWidth, 0.0 ,0.0);
-		 
-		  glTexCoord2f(0.8-m_IntervalCoordinate, 0.1);
-		  glNormal3f(0,0,1);
-          glVertex3f(m_Width*m_Scale+m_BorderWidth, m_BorderWidth,0.0);
-
-
-
-		  glTexCoord2f(1-m_IntervalCoordinate, 0.0);
-		  glNormal3f(0,0,1);
-          glVertex3f(m_Width*m_Scale+2*m_BorderWidth, m_Height*m_Scale+2*m_BorderWidth ,0);
-		  
-		  glTexCoord2f(1-m_IntervalCoordinate, 0.1);
-		  glNormal3f(0,0,1);
-          glVertex3f(m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth ,0);
-
-		  glTexCoord2f(0.48-m_IntervalCoordinate, 0.0);
-		  glNormal3f(0,0,1);
-          glVertex3f(m_Width*m_Scale+2*m_BorderWidth, m_Height*m_Scale+2*m_BorderWidth ,0);
-		  
-		  glTexCoord2f(0.48-m_IntervalCoordinate, 0.1);
-		  glNormal3f(0,0,1);
-          glVertex3f(m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth ,0);
-	   
-		 
-
-		  glTexCoord2f(0.8-m_IntervalCoordinate, 0.0);
-		  glNormal3f(0,0,1);
-          glVertex3f(0, m_Height*m_Scale+2*m_BorderWidth ,0.0);
-		  
-		  glTexCoord2f(0.8-m_IntervalCoordinate, 0.1);
-		  glNormal3f(0,0,1);
-          glVertex3f(m_BorderWidth, m_Height*m_Scale+m_BorderWidth ,0.0);
-
-		  glTexCoord2f(1.0-m_IntervalCoordinate, 0);
-		  glNormal3f(0,0,1);
-          glVertex3f(0.0, 0.0 ,0.0);
-		  
-		  glTexCoord2f(1.0-m_IntervalCoordinate, 0.1);
-		  glNormal3f(0,0,1);
-          glVertex3f(m_BorderWidth, m_BorderWidth ,0.0);
-
-      glEnd();
-	  glDisable(GL_TEXTURE_2D);
-	  //glDisable(GL_BLEND);	
+	       m_IntervalCoordinate+=0.0025f;
+     else
+          m_IntervalCoordinate=0.0f;  
 	  
-	   */
+	if (vbo[0] > 0 && ibo[0] > 0) {		
+		
+		GLES20.glUseProgram(program);
+		ColorHandle          = GLES20.glGetUniformLocation(program, COLOR_UNIFORM);
+        TextureUniformHandle = GLES20.glGetUniformLocation(program, TEXTURE_UNIFORM);
+        TextureMoveUniformHandle = GLES20.glGetUniformLocation(program, TEXTUREMOV_UNIFORM);
+        
+		GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
+		GLES20.glEnableVertexAttribArray(ColorHandle);
+		
+		GLES20.glUniform1f(TextureMoveUniformHandle, m_IntervalCoordinate);//(, 1, mcolor , 0); 
+		GLES20.glEnableVertexAttribArray(TextureMoveUniformHandle);	
+		
+ 	    GLES20.glActiveTexture(GLES20.GL_TEXTURE0);  // Set the active texture unit to texture unit 0
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId); // Bind the texture to this unit
+		// Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0
+		GLES20.glUniform1i(TextureUniformHandle, 0); 
+	
+		// Set program handles for cube drawing.
+		mvpMatrixUniform = GLES20.glGetUniformLocation(program, MVP_MATRIX_UNIFORM);
+		GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mMVPMatrix, 0);
+		//mvMatrixUniform = GLES20.glGetUniformLocation(program, MV_MATRIX_UNIFORM);
+		//lightPosUniform = GLES20.glGetUniformLocation(program, LIGHT_POSITION_UNIFORM);
+		positionAttribute = GLES20.glGetAttribLocation(program, POSITION_ATTRIBUTE);
+		//normalAttribute = GLES20.glGetAttribLocation(program, NORMAL_ATTRIBUTE);
+		texcordAttribute = GLES20.glGetAttribLocation(program, TEXCORD_ATTRIBUTE);
+		
+		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
+
+
+		//GLES20.glVertexAttribPointer(TextureUniformHandle, 2, GLES20.GL_FLOAT, false,
+		//		4*4, 2*4);
+		//GLES20.glEnableVertexAttribArray(TextureUniformHandle);
+		GLES20.glVertexAttribPointer(texcordAttribute, 2, GLES20.GL_FLOAT, false,
+				5*4, 0);
+		GLES20.glEnableVertexAttribArray(texcordAttribute);			
+		
+		// Bind Attributes
+		GLES20.glVertexAttribPointer(positionAttribute, 3, GLES20.GL_FLOAT, false,
+				5*4, 2*4);
+		GLES20.glEnableVertexAttribArray(positionAttribute);
+	
+		// Draw
+		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
+		GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 12, GLES20.GL_UNSIGNED_SHORT, 0);
+		//GLES20.glDrawElements(GLES20.GL_LINES, 4, GLES20.GL_UNSIGNED_SHORT, 0);
+
+		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+		
+		GLES20.glUseProgram(0);
+	}
 }
 
+public void InitGLDataForBorder()
+{
+	  
+    // initiate vertex buffer for border 	
+	float zaxis = 0.0f;
+	float vertexBuffer[] = {
+      0.48f, 0.0f,
+      0.0f, 0.0f,zaxis,	  
+	  0.48f, 0.1f,
+      m_BorderWidth, m_BorderWidth,zaxis,
+
+	  0.8f, 0.0f,
+      m_Width*m_Scale+2*m_BorderWidth, 0.0f ,zaxis,	 
+	  0.8f, 0.1f,
+      m_Width*m_Scale+m_BorderWidth, m_BorderWidth,zaxis,
+
+	  1.0f, 0.0f,
+      m_Width*m_Scale+2*m_BorderWidth, m_Height*m_Scale+2*m_BorderWidth ,zaxis,	  
+	  1.0f, 0.1f,
+      m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth,zaxis,
+
+	  0.48f, 0.0f,
+	  m_Width*m_Scale+2*m_BorderWidth, m_Height*m_Scale+2*m_BorderWidth ,zaxis,	  
+	  0.48f, 0.1f,
+	  m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth ,zaxis, 	 
+
+	  0.8f, 0.0f,
+	  0.0f, m_Height*m_Scale+2*m_BorderWidth,zaxis,	  
+	  0.8f, 0.1f,
+	  m_BorderWidth, m_Height*m_Scale+m_BorderWidth,zaxis,
+
+	  1.0f, 0.0f,
+	  0.0f, 0.0f,zaxis,	  
+	  1.0f, 0.1f,
+	  m_BorderWidth, m_BorderWidth ,zaxis
+	};
+
+    short indexBuffer[]  ={0,1,2,3,4,5,6,7,8,9,10,11};	
+		
+	final FloatBuffer VertexDataBuffer = ByteBuffer
+				.allocateDirect(vertexBuffer.length * 4).order(ByteOrder.nativeOrder())
+				.asFloatBuffer();
+	VertexDataBuffer.put(vertexBuffer).position(0);
+		
+	final ShortBuffer IndexDataBuffer = ByteBuffer
+				.allocateDirect(indexBuffer.length * 2).order(ByteOrder.nativeOrder())
+				.asShortBuffer();
+	IndexDataBuffer.put(indexBuffer).position(0);
+
+
+
+	if (vbo[0] > 0 && ibo[0] > 0) {
+			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
+			GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, VertexDataBuffer.capacity() * 4,
+					VertexDataBuffer, GLES20.GL_STATIC_DRAW);
+
+			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
+			GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, IndexDataBuffer.capacity()
+					* 2, IndexDataBuffer, GLES20.GL_STATIC_DRAW);
+
+			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+	} 
+}
 /***********************************************************************************
 子函数描述：DrawControlArea(bool AnimationEnabled), 绘制示波器控制区域
 ************************************************************************************/
@@ -289,7 +340,69 @@ void DrawControlArea(boolean AnimationEnabled){
 /***********************************************************************************
 子函数描述：DrawBackPanel(), 绘制示波器背景（说明文字、单位以及绘制网格刻度）
 ************************************************************************************/
- void DrawBackPanel(){
+ void DrawBackPanel(float[] modelMatrix){//boolean AnimationEnabled ){
+		
+		float[] color = {0.0f,1.0f, 1.0f, 1.0f};
+		
+		Matrix.setIdentityM(mMVPMatrix, 0);
+		Matrix.translateM(mMVPMatrix, 0, -mWindowWidth/2.0f, -mWindowHeight/2.0f, 0);	
+		Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);
+		
+		  if(m_IntervalCoordinate<0.48f && m_IntervalCoordinate>=0f)
+
+		       m_IntervalCoordinate+=0.0025f;
+	     else
+	          m_IntervalCoordinate=0.0f;  
+		  
+		if (vbo[0] > 0 && ibo[0] > 0) {		
+			
+			GLES20.glUseProgram(program);
+			ColorHandle          = GLES20.glGetUniformLocation(program, COLOR_UNIFORM);
+	        //TextureUniformHandle = GLES20.glGetUniformLocation(program, TEXTURE_UNIFORM);
+	        //TextureMoveUniformHandle = GLES20.glGetUniformLocation(program, TEXTUREMOV_UNIFORM);
+	        
+			GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
+			GLES20.glEnableVertexAttribArray(ColorHandle);
+			
+			//GLES20.glUniform1f(TextureMoveUniformHandle, m_IntervalCoordinate);//(, 1, mcolor , 0); 
+			//GLES20.glEnableVertexAttribArray(TextureMoveUniformHandle);	
+			
+	 	    //GLES20.glActiveTexture(GLES20.GL_TEXTURE0);  // Set the active texture unit to texture unit 0
+			//GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId); // Bind the texture to this unit
+			// Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0
+			//GLES20.glUniform1i(TextureUniformHandle, 0); 
+		
+			// Set program handles for cube drawing.
+			mvpMatrixUniform = GLES20.glGetUniformLocation(program, MVP_MATRIX_UNIFORM);
+			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mMVPMatrix, 0);
+			//mvMatrixUniform = GLES20.glGetUniformLocation(program, MV_MATRIX_UNIFORM);
+			//lightPosUniform = GLES20.glGetUniformLocation(program, LIGHT_POSITION_UNIFORM);
+			positionAttribute = GLES20.glGetAttribLocation(program, POSITION_ATTRIBUTE);
+			//normalAttribute = GLES20.glGetAttribLocation(program, NORMAL_ATTRIBUTE);
+			//texcordAttribute = GLES20.glGetAttribLocation(program, TEXCORD_ATTRIBUTE);
+			
+			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
+
+
+			//GLES20.glVertexAttribPointer(texcordAttribute, 2, GLES20.GL_FLOAT, false,
+			//		5*4, 0);
+			//GLES20.glEnableVertexAttribArray(texcordAttribute);			
+			
+			// Bind Attributes
+			GLES20.glVertexAttribPointer(positionAttribute, 3, GLES20.GL_FLOAT, false,
+					3*4, 0);
+			GLES20.glEnableVertexAttribArray(positionAttribute);
+		
+			// Draw
+			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
+			GLES20.glDrawElements(GLES20.GL_LINE_LOOP, (5 + (m_DivNumY+m_DivNumX)*4 + m_CurveNum*(2+m_DivNumY*2)), GLES20.GL_UNSIGNED_SHORT, 0);
+			//GLES20.glDrawElements(GLES20.GL_LINES, 4, GLES20.GL_UNSIGNED_SHORT, 0);
+
+			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+			
+			GLES20.glUseProgram(0);
+		}
    /*
 	  //1.Draw X axis and Y axis 
 	   int i;
@@ -429,7 +542,147 @@ void DrawControlArea(boolean AnimationEnabled){
 	    }
 */
 }
+ public void InitGLDataForBackPanel()
+ {
+ 	  
+     // initiate vertex buffer for border 	
+	int i,j,k;
+ 	//float vertexBuffer[] =new float[(5 + (m_DivNumY+m_DivNumX)*4 + m_CurveNum*(2+m_DivNumY*2))*3];
+	//Maximum Curve Num is 4 
+	float vertexBuffer[] =new float[(5 + (m_DivNumY+m_DivNumX)*4 + m_CurveNum*(2+m_DivNumY*2))*3];
+	 
+    short indexBuffer[]  =new short[(5 + (m_DivNumY+m_DivNumX)*4 + m_CurveNum*(2+m_DivNumY*2))*3];
 
+ 	vertexBuffer[0] = m_GraphOffsetX;
+ 	vertexBuffer[1] = m_GraphOffsetY;
+ 	vertexBuffer[2] = 0.0f;
+ 	vertexBuffer[3] = m_GraphOffsetX;
+ 	vertexBuffer[4] = m_GraphOffsetY+m_GraphHeight;
+ 	vertexBuffer[5] =  0.0f;
+ 	vertexBuffer[6] = m_GraphOffsetX+m_GraphWidth;
+ 	vertexBuffer[7] = m_GraphOffsetY+m_GraphHeight;
+ 	vertexBuffer[8] = 0.0f;
+ 	vertexBuffer[9] = m_GraphOffsetX+m_GraphWidth;
+ 	vertexBuffer[10] = m_GraphOffsetY;
+ 	vertexBuffer[11] = 0.0f;
+ 	vertexBuffer[12] = m_GraphOffsetX;
+ 	vertexBuffer[13] = m_GraphOffsetY;
+ 	vertexBuffer[14] = 0.0f;          
+    // length =15;
+	for( i =0;i<m_DivNumY;i++){			
+		  vertexBuffer[15+6*i] = m_GraphOffsetX;
+		  vertexBuffer[16+6*i] =m_GraphOffsetY+m_GraphUnitHeight*i;
+		  vertexBuffer[17+6*i] =0.0f;
+		  vertexBuffer[18+6*i] =m_GraphOffsetX+15;
+		  vertexBuffer[19+6*i] =m_GraphOffsetY+m_GraphUnitHeight*i;
+		  vertexBuffer[20+6*i] =0.0f;
+	 }
+	
+	 for(i =0;i<m_DivNumX;i++){
+		 
+		  vertexBuffer[21+6*(m_DivNumY -1 +i)] = m_GraphOffsetX+m_GraphUnitWidth*(i+1);
+		  vertexBuffer[22+6*(m_DivNumY -1 +i)] = m_GraphOffsetY+m_GraphHeight;
+		  vertexBuffer[23+6*(m_DivNumY -1 +i)] =0.0f;
+		  vertexBuffer[24+6*(m_DivNumY -1 +i)] =m_GraphOffsetX+m_GraphUnitWidth*(i+1);
+		  vertexBuffer[25+6*(m_DivNumY -1 +i)] =m_GraphOffsetY+m_GraphHeight-15;
+		  vertexBuffer[26+6*(m_DivNumY -1 +i)] =0.0f;		 
+
+	 }	
+     //length = 15 +6*(m_DivNumY+m_DivNumX)
+	 
+		for( i =0;i<m_DivNumY;i++){			
+			  vertexBuffer[15 +6*(m_DivNumY+m_DivNumX)+6*i] = m_GraphOffsetX;
+			  vertexBuffer[16 +6*(m_DivNumY+m_DivNumX)+6*i] =m_GraphOffsetY+m_GraphUnitHeight*i;
+			  vertexBuffer[17 +6*(m_DivNumY+m_DivNumX)+6*i] =0.0f;
+			  vertexBuffer[18 +6*(m_DivNumY+m_DivNumX)+6*i] =m_GraphOffsetX+m_GraphWidth;
+			  vertexBuffer[19 +6*(m_DivNumY+m_DivNumX)+6*i] =m_GraphOffsetY+m_GraphUnitHeight*i;
+			  vertexBuffer[20 +6*(m_DivNumY+m_DivNumX)+6*i] =0.0f;
+		 }
+		
+		 for(i =0;i<m_DivNumX;i++){			 
+			  vertexBuffer[15 +6*(2*m_DivNumY+m_DivNumX)+6*i] = m_GraphOffsetX+m_GraphUnitWidth*(i+1);
+			  vertexBuffer[16 +6*(2*m_DivNumY+m_DivNumX)+6*i] =m_GraphOffsetY+m_GraphHeight;
+			  vertexBuffer[17 +6*(2*m_DivNumY+m_DivNumX)+6*i] =0.0f;
+			  vertexBuffer[18 +6*(2*m_DivNumY+m_DivNumX)+6*i] =m_GraphOffsetX+m_GraphUnitWidth*(i+1);
+			  vertexBuffer[19 +6*(2*m_DivNumY+m_DivNumX)+6*i] =m_GraphOffsetY;
+			  vertexBuffer[20 +6*(2*m_DivNumY+m_DivNumX)+6*i] =0.0f;
+		  }	
+		  //length = 15 +12*(m_DivNumY+m_DivNumX)	 
+	
+
+		
+		for(i =0;i<m_CurveNum;i++){
+			if(i<2){
+			  vertexBuffer[15 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] = m_GraphOffsetX-(6*i+6)*m_GraphLabelWidth;
+			  vertexBuffer[16 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =m_GraphOffsetY;
+			  vertexBuffer[17 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =0.0f;	 
+			  vertexBuffer[18 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] = m_GraphOffsetX-(6*i+6)*m_GraphLabelWidth;
+			  vertexBuffer[19 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =m_GraphOffsetY+m_GraphHeight;
+			  vertexBuffer[20 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =0.0f;	 
+			}
+			else{
+			  vertexBuffer[15 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] = m_Width*m_Scale-(6*(i-2)+6)*m_GraphLabelWidth;
+			  vertexBuffer[16 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =m_GraphOffsetY;
+			  vertexBuffer[17 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =0.0f;	 
+			  vertexBuffer[18 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] = m_Width*m_Scale-(6*(i-2)+6)*m_GraphLabelWidth;
+			  vertexBuffer[19 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =m_GraphOffsetY+m_GraphHeight;
+			  vertexBuffer[20 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =0.0f;	
+			}
+			
+			for(j =0;j<m_DivNumY;j++){		 
+				 
+				for(i =0;i<4;i++){
+				 if(i<2){
+					 vertexBuffer[15 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] = m_GraphOffsetX-(6*i+6)*m_GraphLabelWidth;
+					 vertexBuffer[16 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] = m_GraphOffsetY+m_GraphUnitHeight*j;
+					 vertexBuffer[17 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =0.0f;	 
+					 vertexBuffer[18 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] = m_GraphOffsetX-(6*i+6)*m_GraphLabelWidth+10;
+					 vertexBuffer[19 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =m_GraphOffsetY+m_GraphUnitHeight*j;
+					 vertexBuffer[20 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =0.0f;	 
+				 }
+				 else{
+					 vertexBuffer[15 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] = m_Width*m_Scale-(6*(i-2)+6)*m_GraphLabelWidth;
+					 vertexBuffer[16 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =m_GraphOffsetY+m_GraphUnitHeight*j;
+					 vertexBuffer[17 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =0.0f;	 
+					 vertexBuffer[18 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =m_Width*m_Scale-(6*(i-2)+6)*m_GraphLabelWidth+10;
+					 vertexBuffer[19 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =m_GraphOffsetY+m_GraphUnitHeight*j;
+					 vertexBuffer[20 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =0.0f;	 
+				 }
+				}
+			}				
+			
+		}
+
+	for( i =0;i<(5 + (m_DivNumY+m_DivNumX)*4 + m_CurveNum*(2+m_DivNumY*2))*3;i++){	
+		indexBuffer[i] = (short)i;
+	}
+
+ 		
+ 	final FloatBuffer VertexDataBuffer = ByteBuffer
+ 				.allocateDirect(vertexBuffer.length * 4).order(ByteOrder.nativeOrder())
+ 				.asFloatBuffer();
+ 	VertexDataBuffer.put(vertexBuffer).position(0);
+ 		
+ 	final ShortBuffer IndexDataBuffer = ByteBuffer
+ 				.allocateDirect(indexBuffer.length * 2).order(ByteOrder.nativeOrder())
+ 				.asShortBuffer();
+ 	IndexDataBuffer.put(indexBuffer).position(0);
+
+
+
+ 	if (vbo[0] > 0 && ibo[0] > 0) {
+ 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
+ 			GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, VertexDataBuffer.capacity() * 4,
+ 					VertexDataBuffer, GLES20.GL_STATIC_DRAW);
+
+ 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
+ 			GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, IndexDataBuffer.capacity()
+ 					* 2, IndexDataBuffer, GLES20.GL_STATIC_DRAW);
+
+ 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+ 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+ 	} 
+ }
 /***********************************************************************************
 子函数描述：DrawData(), 绘制示波器背景（说明文字、单位以及绘制网格刻度）
 ************************************************************************************/
@@ -767,8 +1020,8 @@ public void SetScopeParameters(float OffsetX, float OffsetY,float Height, float 
 
 	  m_DataSampleTimeInterval=1;//DataSampleTimeInterval;
 
-      m_DivNumX=1;//DivNumX; 
-      m_DivNumY=1;//DivNumY; 
+      m_DivNumX=5;//DivNumX; 
+      m_DivNumY=5;//DivNumY; 
 
 	  m_GridOn=true;//GridOn;
 
@@ -837,76 +1090,11 @@ public void SetScopeParameters(float OffsetX, float OffsetY,float Height, float 
       m_IsResetAxisXY=true;
 	  m_AutomaticDisplay=true; 
 	  m_StartRecieve=false;
-	  
-      // initiate vertex buffer for border 	
-	  float zaxis = 0.0f;
-	  float vertexBuffer[] = {
-      0.48f, 0.0f,
-      0.0f, 0.0f,zaxis,	  
-	  0.48f, 0.1f,
-      m_BorderWidth, m_BorderWidth,zaxis,
 
-	  0.8f, 0.0f,
-      m_Width*m_Scale+2*m_BorderWidth, 0.0f ,zaxis,	 
-	  0.8f, 0.1f,
-      m_Width*m_Scale+m_BorderWidth, m_BorderWidth,zaxis,
-
-	  1.0f, 0.0f,
-      m_Width*m_Scale+2*m_BorderWidth, m_Height*m_Scale+2*m_BorderWidth ,zaxis,	  
-	  1.0f, 0.1f,
-      m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth,zaxis,
-
-	  0.48f, 0.0f,
-      m_Width*m_Scale+2*m_BorderWidth, m_Height*m_Scale+2*m_BorderWidth ,zaxis,	  
-	  0.48f, 0.1f,
-      m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth ,zaxis, 	 
-
-	  0.8f, 0.0f,
-      0.0f, m_Height*m_Scale+2*m_BorderWidth,zaxis,	  
-	  0.8f, 0.1f,
-      m_BorderWidth, m_Height*m_Scale+m_BorderWidth,zaxis,
-
-	  1.0f, 0.0f,
-      0.0f, 0.0f,zaxis,	  
-	  1.0f, 0.1f,
-      m_BorderWidth, m_BorderWidth ,zaxis
-	  };
-
-      short indexBuffer[]  ={0,1,2,3,4,5,6,7,8,9,10,11};	
-
-
-		
-		final FloatBuffer VertexDataBuffer = ByteBuffer
-				.allocateDirect(vertexBuffer.length * 4).order(ByteOrder.nativeOrder())
-				.asFloatBuffer();
-		VertexDataBuffer.put(vertexBuffer).position(0);
-		
-		final ShortBuffer IndexDataBuffer = ByteBuffer
-				.allocateDirect(indexBuffer.length * 2).order(ByteOrder.nativeOrder())
-				.asShortBuffer();
-		IndexDataBuffer.put(indexBuffer).position(0);
-
-
-
-		if (vbo[0] > 0 && ibo[0] > 0) {
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
-			GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, VertexDataBuffer.capacity() * 4,
-					VertexDataBuffer, GLES20.GL_STATIC_DRAW);
-
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
-			GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, IndexDataBuffer.capacity()
-					* 2, IndexDataBuffer, GLES20.GL_STATIC_DRAW);
-
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-		} 
-		
-		
-		// set color TODO: only alpha component works, text is always black #BUG
-		float[] color = {0.0f,1.0f, 1.0f, 1.0f}; 	
-		mcolor = color;
- 
+	  //InitGLDataForBorder();
+	  InitGLDataForBackPanel();
 }
+
 
 public void SetDispWiodowSize(int width, int height)
 {
@@ -1010,8 +1198,9 @@ void DrawScaleRullerXY(){
  子函数描述：Render(),绘制整个示波器模块
  ************************************************************************************/
 public void  Render(float[] modelMatrix){    
-	
-	
+	DrawBackPanel(modelMatrix);
+	//DrawControlBorder(modelMatrix);
+/*	
 	Matrix.setIdentityM(mMVPMatrix, 0);
 	Matrix.translateM(mMVPMatrix, 0, -mWindowWidth/2.0f, -mWindowHeight/2.0f, 0);	
 	Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);
@@ -1074,7 +1263,7 @@ public void  Render(float[] modelMatrix){
 		
 		GLES20.glUseProgram(0);
 		
-	}
+	}*/
 	
 /*
 	    static float tempAngle=0;
