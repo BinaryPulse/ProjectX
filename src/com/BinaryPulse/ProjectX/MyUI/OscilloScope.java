@@ -9,6 +9,7 @@ import android.content.Context;
 import android.opengl.GLES20;
 
 import com.BinaryPulse.ProjectX.R;
+import com.BinaryPulse.ProjectX.MyFont.MyFont;
 import com.BinaryPulse.ProjectX.common.RawResourceReader;
 import com.BinaryPulse.ProjectX.common.ShaderHelper;
 import com.BinaryPulse.ProjectX.common.TextureHelper;
@@ -164,8 +165,8 @@ public class OscilloScope extends UIControlUnit {
 	private float[] mcolor;
 	
 
-    private int mWindowWidth;
-    private int mWindowHeight;
+    protected int mWindowWidth;
+    protected int mWindowHeight;
 
 /*##############################################################################
            
@@ -344,8 +345,12 @@ void DrawControlArea(boolean AnimationEnabled){
 		
 		float[] color = {0.0f,1.0f, 1.0f, 1.0f};
 		
+		float[] color1 = {1.0f,0.0f, 1.0f, 1.0f};
+		
+		float[] color2 = {0.3f,0.3f, 0.3f, 1.0f};
+		
 		Matrix.setIdentityM(mMVPMatrix, 0);
-		Matrix.translateM(mMVPMatrix, 0, -mWindowWidth/2.0f, -mWindowHeight/2.0f, 0);	
+		Matrix.translateM(mMVPMatrix, 0, m_OffSetX/2.0f, m_OffSetY/2.0f, 0);	
 		Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);
 		
 		  if(m_IntervalCoordinate<0.48f && m_IntervalCoordinate>=0f)
@@ -393,9 +398,29 @@ void DrawControlArea(boolean AnimationEnabled){
 					3*4, 0);
 			GLES20.glEnableVertexAttribArray(positionAttribute);
 		
+			GLES20.glLineWidth(3.0f);
 			// Draw
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
-			GLES20.glDrawElements(GLES20.GL_LINE_LOOP, (5 + (m_DivNumY+m_DivNumX)*4 + m_CurveNum*(2+m_DivNumY*2)), GLES20.GL_UNSIGNED_SHORT, 0);
+			GLES20.glDrawElements(GLES20.GL_LINE_LOOP, (5), GLES20.GL_UNSIGNED_SHORT, 0);
+			GLES20.glDrawElements(GLES20.GL_LINES,  (m_DivNumY)*2, GLES20.GL_UNSIGNED_SHORT, 5*2);	
+			GLES20.glDrawElements(GLES20.GL_LINES,  (m_DivNumX)*2, GLES20.GL_UNSIGNED_SHORT, 5*2 + (m_DivNumY)*4);
+			
+			ColorHandle          = GLES20.glGetUniformLocation(program, COLOR_UNIFORM);
+			GLES20.glUniform4fv(ColorHandle, 1, color2 , 0); 
+			GLES20.glLineWidth(1.0f);
+			GLES20.glDrawElements(GLES20.GL_LINES,  (m_DivNumY)*2, GLES20.GL_UNSIGNED_SHORT, 5*2 + (m_DivNumY+m_DivNumX)*4);
+			GLES20.glDrawElements(GLES20.GL_LINES,  (m_DivNumX)*2, GLES20.GL_UNSIGNED_SHORT, 5*2 + (2*m_DivNumY+m_DivNumX)*4);
+			
+			ColorHandle          = GLES20.glGetUniformLocation(program, COLOR_UNIFORM);
+			GLES20.glUniform4fv(ColorHandle, 1, color1 , 0); 
+			for(int i =0;i<m_CurveNum;i++)
+				GLES20.glDrawElements(GLES20.GL_LINES, (4+m_DivNumY*2), GLES20.GL_UNSIGNED_SHORT, ((m_DivNumY+m_DivNumX)*4 +5 +(4*i+m_DivNumY*2*i))*2);
+			//GLES20.glDrawElements(GLES20.GL_LINES, (4+m_DivNumY*2), GLES20.GL_UNSIGNED_SHORT, ((m_DivNumY+m_DivNumX)*4 +5 )*2);
+			//GLES20.glDrawElements(GLES20.GL_LINES, (4+m_DivNumY*2), GLES20.GL_UNSIGNED_SHORT, ((m_DivNumY+m_DivNumX)*4 +5 + (4+m_DivNumY*2))*2);
+			//GLES20.glDrawElements(GLES20.GL_LINES, (4+m_DivNumY*2), GLES20.GL_UNSIGNED_SHORT, ((m_DivNumY+m_DivNumX)*4 +5 + (8+m_DivNumY*4))*2);
+			//GLES20.glDrawElements(GLES20.GL_LINES, (4+m_DivNumY*2), GLES20.GL_UNSIGNED_SHORT, ((m_DivNumY+m_DivNumX)*4 +5 + (12+m_DivNumY*6))*2);
+			//GLES20.glDrawElements(GLES20.GL_LINES, ( m_CurveNum*(m_DivNumY*2)), GLES20.GL_UNSIGNED_SHORT, ((m_DivNumY+m_DivNumX)*4 +5+(m_CurveNum*2) )*3);
+			//GLES20.glDrawElements(GLES20.GL_LINES, (5 + (m_DivNumY+m_DivNumX)*4 + m_CurveNum*(2+m_DivNumY*2)), GLES20.GL_UNSIGNED_SHORT, 0);
 			//GLES20.glDrawElements(GLES20.GL_LINES, 4, GLES20.GL_UNSIGNED_SHORT, 0);
 
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
@@ -549,9 +574,9 @@ void DrawControlArea(boolean AnimationEnabled){
 	int i,j,k;
  	//float vertexBuffer[] =new float[(5 + (m_DivNumY+m_DivNumX)*4 + m_CurveNum*(2+m_DivNumY*2))*3];
 	//Maximum Curve Num is 4 
-	float vertexBuffer[] =new float[(5 + (m_DivNumY+m_DivNumX)*4 + m_CurveNum*(2+m_DivNumY*2))*3];
+	float vertexBuffer[] =new float[(5 + (m_DivNumY+m_DivNumX)*4 + m_CurveNum*(4+m_DivNumY*2))*3];
 	 
-    short indexBuffer[]  =new short[(5 + (m_DivNumY+m_DivNumX)*4 + m_CurveNum*(2+m_DivNumY*2))*3];
+    short indexBuffer[]  =new short[(5 + (m_DivNumY+m_DivNumX)*4 + m_CurveNum*(4+m_DivNumY*2))*3];
 
  	vertexBuffer[0] = m_GraphOffsetX;
  	vertexBuffer[1] = m_GraphOffsetY;
@@ -581,10 +606,10 @@ void DrawControlArea(boolean AnimationEnabled){
 	 for(i =0;i<m_DivNumX;i++){
 		 
 		  vertexBuffer[21+6*(m_DivNumY -1 +i)] = m_GraphOffsetX+m_GraphUnitWidth*(i+1);
-		  vertexBuffer[22+6*(m_DivNumY -1 +i)] = m_GraphOffsetY+m_GraphHeight;
+		  vertexBuffer[22+6*(m_DivNumY -1 +i)] = m_GraphOffsetY;//+m_GraphHeight;
 		  vertexBuffer[23+6*(m_DivNumY -1 +i)] =0.0f;
 		  vertexBuffer[24+6*(m_DivNumY -1 +i)] =m_GraphOffsetX+m_GraphUnitWidth*(i+1);
-		  vertexBuffer[25+6*(m_DivNumY -1 +i)] =m_GraphOffsetY+m_GraphHeight-15;
+		  vertexBuffer[25+6*(m_DivNumY -1 +i)] =m_GraphOffsetY+15;//+m_GraphHeight-15;
 		  vertexBuffer[26+6*(m_DivNumY -1 +i)] =0.0f;		 
 
 	 }	
@@ -608,52 +633,53 @@ void DrawControlArea(boolean AnimationEnabled){
 			  vertexBuffer[20 +6*(2*m_DivNumY+m_DivNumX)+6*i] =0.0f;
 		  }	
 		  //length = 15 +12*(m_DivNumY+m_DivNumX)	 
-	
-
+	  
+        k=0;
 		
 		for(i =0;i<m_CurveNum;i++){
 			if(i<2){
-			  vertexBuffer[15 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] = m_GraphOffsetX-(6*i+6)*m_GraphLabelWidth;
-			  vertexBuffer[16 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =m_GraphOffsetY;
-			  vertexBuffer[17 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =0.0f;	 
-			  vertexBuffer[18 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] = m_GraphOffsetX-(6*i+6)*m_GraphLabelWidth;
-			  vertexBuffer[19 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =m_GraphOffsetY+m_GraphHeight;
-			  vertexBuffer[20 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =0.0f;	 
+			  vertexBuffer[15 +12*(m_DivNumY+m_DivNumX) + i*(6+k*6)] = m_GraphOffsetX-(i+1f)*m_GraphLabelWidth;
+			  vertexBuffer[16 +12*(m_DivNumY+m_DivNumX) + i*(6+k*6)] =m_GraphOffsetY;
+			  vertexBuffer[17 +12*(m_DivNumY+m_DivNumX) + i*(6+k*6)] =0.0f;	 
+			  vertexBuffer[18 +12*(m_DivNumY+m_DivNumX) +i*(6+k*6)] = m_GraphOffsetX-(i+1f)*m_GraphLabelWidth;
+			  vertexBuffer[19 +12*(m_DivNumY+m_DivNumX) + i*(6+k*6)] =m_GraphOffsetY+m_GraphHeight;
+			  vertexBuffer[20 +12*(m_DivNumY+m_DivNumX) + i*(6+k*6)] =0.0f;	 
 			}
 			else{
-			  vertexBuffer[15 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] = m_Width*m_Scale-(6*(i-2)+6)*m_GraphLabelWidth;
-			  vertexBuffer[16 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =m_GraphOffsetY;
-			  vertexBuffer[17 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =0.0f;	 
-			  vertexBuffer[18 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] = m_Width*m_Scale-(6*(i-2)+6)*m_GraphLabelWidth;
-			  vertexBuffer[19 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =m_GraphOffsetY+m_GraphHeight;
-			  vertexBuffer[20 +12*(m_DivNumY+m_DivNumX) + i*(6+m_DivNumY*6)] =0.0f;	
+			  vertexBuffer[15 +12*(m_DivNumY+m_DivNumX) + i*(6+k*6)] = m_GraphOffsetX+ m_GraphWidth*m_Scale+((i-2)+0.1f)*m_GraphLabelWidth;
+			  vertexBuffer[16 +12*(m_DivNumY+m_DivNumX) + i*(6+k*6)] =m_GraphOffsetY;
+			  vertexBuffer[17 +12*(m_DivNumY+m_DivNumX) + i*(6+k*6)] =0.0f;	 
+			  vertexBuffer[18 +12*(m_DivNumY+m_DivNumX) + i*(6+k*6)] = m_GraphOffsetX+m_GraphWidth*m_Scale+((i-2)+0.1f)*m_GraphLabelWidth;
+			  vertexBuffer[19 +12*(m_DivNumY+m_DivNumX) + i*(6+k*6)] =m_GraphOffsetY+m_GraphHeight;
+			  vertexBuffer[20 +12*(m_DivNumY+m_DivNumX) + i*(6+k*6)] =0.0f;	
 			}
 			
-			for(j =0;j<m_DivNumY;j++){		 
+			for(j =0;j<m_DivNumY+1;j++){		 
 				 
-				for(i =0;i<4;i++){
+				//for(k =0;i<4;i++){
 				 if(i<2){
-					 vertexBuffer[15 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] = m_GraphOffsetX-(6*i+6)*m_GraphLabelWidth;
-					 vertexBuffer[16 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] = m_GraphOffsetY+m_GraphUnitHeight*j;
-					 vertexBuffer[17 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =0.0f;	 
-					 vertexBuffer[18 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] = m_GraphOffsetX-(6*i+6)*m_GraphLabelWidth+10;
-					 vertexBuffer[19 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =m_GraphOffsetY+m_GraphUnitHeight*j;
-					 vertexBuffer[20 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =0.0f;	 
+					 vertexBuffer[15 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(12+m_DivNumY*6) +j*6] = m_GraphOffsetX-(i+1)*m_GraphLabelWidth;
+					 vertexBuffer[16 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(12+m_DivNumY*6) +j*6] = m_GraphOffsetY+m_GraphUnitHeight*j;
+					 vertexBuffer[17 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(12+m_DivNumY*6) +j*6] =0.0f;	 
+					 vertexBuffer[18 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(12+m_DivNumY*6) +j*6] = m_GraphOffsetX-(i+1)*m_GraphLabelWidth+10;
+					 vertexBuffer[19 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(12+m_DivNumY*6) +j*6] =m_GraphOffsetY+m_GraphUnitHeight*j;
+					 vertexBuffer[20 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(12+m_DivNumY*6) +j*6] =0.0f;	 
 				 }
 				 else{
-					 vertexBuffer[15 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] = m_Width*m_Scale-(6*(i-2)+6)*m_GraphLabelWidth;
-					 vertexBuffer[16 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =m_GraphOffsetY+m_GraphUnitHeight*j;
-					 vertexBuffer[17 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =0.0f;	 
-					 vertexBuffer[18 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =m_Width*m_Scale-(6*(i-2)+6)*m_GraphLabelWidth+10;
-					 vertexBuffer[19 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =m_GraphOffsetY+m_GraphUnitHeight*j;
-					 vertexBuffer[20 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(6+m_DivNumY*6) +j*6] =0.0f;	 
+					 vertexBuffer[15 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(12+m_DivNumY*6) +j*6] = m_GraphOffsetX+ m_GraphWidth*m_Scale+((i-2)+0.1f)*m_GraphLabelWidth;;
+					 vertexBuffer[16 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(12+m_DivNumY*6) +j*6] =m_GraphOffsetY+m_GraphUnitHeight*j;
+					 vertexBuffer[17 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(12+m_DivNumY*6) +j*6] =0.0f;	 
+					 vertexBuffer[18 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(12+m_DivNumY*6) +j*6] =m_GraphOffsetX+ m_GraphWidth*m_Scale+((i-2)+0.1f)*m_GraphLabelWidth+10;
+					 vertexBuffer[19 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(12+m_DivNumY*6) +j*6] =m_GraphOffsetY+m_GraphUnitHeight*j;
+					 vertexBuffer[20 +12*(m_DivNumY+m_DivNumX)  + 6 + i*(12+m_DivNumY*6) +j*6] =0.0f;	 
 				 }
-				}
-			}				
+				//}
+			}	
+			k=j;//*(m_DivNumY+1);
 			
 		}
 
-	for( i =0;i<(5 + (m_DivNumY+m_DivNumX)*4 + m_CurveNum*(2+m_DivNumY*2))*3;i++){	
+	for( i =0;i<(5 + (m_DivNumY+m_DivNumX)*4 + m_CurveNum*(4+m_DivNumY*2))*3;i++){	
 		indexBuffer[i] = (short)i;
 	}
 
@@ -682,6 +708,55 @@ void DrawControlArea(boolean AnimationEnabled){
  			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
  			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
  	} 
+ }
+ 
+ public void DrawLables(float[] modelMatrix)
+ {      
+	  	int i,j;
+	  	float x,y,z;
+		GLES20.glEnable(GLES20.GL_BLEND);
+		//GLES20.glDisable(GLES20.GL_CULL_FACE);
+		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+		//GLES20.glEnable(GLES20.GL_CULL_FACE);
+		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+		// TEST: render some strings with the font
+		m_Font.SetMvpMatrix(modelMatrix);
+		m_Font.SetColor( 1.0f, 0.0f, 0.0f, 1.0f );         // Begin Text Rendering (Set Color WHITE)
+		
+		//m_Font.drawC("Jason Mraz!", 350.0f, 100.0f, 0.0f, 0, 0, 0);
+		m_Font.SetColor( 1.0f, 0.0f, 1.0f, 1.0f );  
+		
+		
+		
+		for(i =0;i<m_CurveNum;i++){
+			if(i<2){
+			  x = m_GraphOffsetX-(i+0.9f)*m_GraphLabelWidth;
+			  z =0.0f;	 
+			}
+			else{
+			  x = m_GraphOffsetX+ m_GraphWidth*m_Scale+((i-2)+0.2f)*m_GraphLabelWidth;
+			  z = 0.0f;	
+			}
+			
+			for(j =0;j<m_DivNumY+1;j++){		 
+				 
+				//for(k =0;i<4;i++){
+				 if(i<2){
+					 y =m_GraphOffsetY+m_GraphUnitHeight*(j-0.1f);
+
+				 }
+				 else{
+					
+					 y = m_GraphOffsetY+m_GraphUnitHeight*(j-0.1f);
+	 
+				 }
+				 
+				 m_Font.draw( Integer.toString(i*m_CurveNum+j), x,y, z); 
+				//}
+			}	
+			
+		}
+		
  }
 /***********************************************************************************
 子函数描述：DrawData(), 绘制示波器背景（说明文字、单位以及绘制网格刻度）
@@ -917,8 +992,8 @@ OscilloScope(Context context){
 OscilloScope(Context context,int ControlType,float OffSetX,float OffSetY,float Scale,float BorderWith){
 	 
 	  super(context,ControlType, OffSetX, OffSetY, Scale, BorderWith);
-	  m_Width=ContrlUnitWidth[ControlType];
-	  m_Height=ContrlUnitHeight[ControlType];
+	  m_Width=ContrlUnitWidth[ControlType]*m_Scale;
+	  m_Height=ContrlUnitHeight[ControlType]*m_Scale;
 	  ShaderRelatedInit(m_Context);
 
 }
@@ -929,9 +1004,18 @@ OscilloScope(Context context,int ControlType,float OffSetX,float OffSetY,float S
 public OscilloScope(Context context,int ControlType,float OffSetX,float OffSetY,float Scale,float Width,float Height,float BorderWith)
 {
 	super(context,ControlType, OffSetX, OffSetY, Scale, BorderWith);	  
-	m_Width=Width-2.0f*BorderWith;
-	m_Height=Height-2.0f*BorderWith;	
+	m_Width=Width*m_Scale-2.0f*BorderWith;
+	m_Height=Height*m_Scale-2.0f*BorderWith;	
 	ShaderRelatedInit(m_Context);
+	
+	m_Font = new MyFont(m_Context,(m_Context.getAssets()));
+	GLES20.glEnable(GLES20.GL_BLEND);
+	//GLES20.glDisable(GLES20.GL_CULL_FACE);
+	GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+	// Load the font from file (set size + padding), creates the texture
+	// NOTE: after a successful call to this the font is ready for rendering!
+	m_Font.load( "Roboto-Regular.ttf", 18, 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
+	
 }
 
 void ShaderRelatedInit(Context context){
@@ -1002,17 +1086,23 @@ float GetEndIndex(){
  子函数描述：SetScopeParameters(), 变量初始化
  ************************************************************************************/
 //void SetScopeParameters(float OffsetX, float OffsetY,float Height, float Width, int CurveNum, String[] CurveLabelString, int[] Color,float DataSampleTimeInterval,int DataSize,int DivNumX, int DivNumY, boolean GridOn){
-public void SetScopeParameters(float OffsetX, float OffsetY,float Height, float Width, int CurveNum){//, String[] CurveLabelString, int[] Color,float DataSampleTimeInterval,int DataSize,int DivNumX, int DivNumY, boolean GridOn){
+public void SetScopeParameters(float Height, float Width, int CurveNum){//, String[] CurveLabelString, int[] Color,float DataSampleTimeInterval,int DataSize,int DivNumX, int DivNumY, boolean GridOn){
 		        
 	  int i;
   
-	  m_GraphOffsetX=OffsetX; 
-      m_GraphOffsetY=OffsetY; 
+
 
 	  m_GraphHeight=Height;
 	  m_GraphWidth=Width;
 
+
 	  m_CurveNum=CurveNum;
+	  
+	  m_GraphOffsetX= -(m_GraphWidth)/2.0f;//(mWindowWidth -m_GraphWidth)/2.0f; 
+      m_GraphOffsetY= -(m_GraphHeight)/2.0f; 
+      
+	  //m_GraphLabelHeight=30*0.5f;//m_GraphUnitHeight*0.5;
+	  m_GraphLabelWidth=(m_Width -m_GraphWidth)/m_CurveNum;
 	  
 	  //m_LabelStringY = CurveLabelString;
 	  m_LabelStringX= "";//CurveLabelString[CurveNum];//"t(ms)";
@@ -1020,16 +1110,15 @@ public void SetScopeParameters(float OffsetX, float OffsetY,float Height, float 
 
 	  m_DataSampleTimeInterval=1;//DataSampleTimeInterval;
 
-      m_DivNumX=5;//DivNumX; 
-      m_DivNumY=5;//DivNumY; 
+      m_DivNumX=10;//DivNumX; 
+      m_DivNumY=10;//DivNumY; 
 
 	  m_GridOn=true;//GridOn;
 
       m_GraphUnitHeight=m_GraphHeight/m_DivNumY; 
       m_GraphUnitWidth=m_GraphWidth/m_DivNumX; 
 	  
-	  m_GraphLabelHeight=40*0.5f;//m_GraphUnitHeight*0.5;
-	  m_GraphLabelWidth=m_GraphLabelHeight*1.0f;
+
 
 	  m_AxisLineWidth=2;
 	  m_GridLineWidth=1.0f;  
@@ -1199,6 +1288,7 @@ void DrawScaleRullerXY(){
  ************************************************************************************/
 public void  Render(float[] modelMatrix){    
 	DrawBackPanel(modelMatrix);
+	DrawLables(modelMatrix);
 	//DrawControlBorder(modelMatrix);
 /*	
 	Matrix.setIdentityM(mMVPMatrix, 0);

@@ -62,9 +62,10 @@ public abstract class  UIControlUnit{
 			 m_ControlType=ControlType;
 		     m_OffSetX=OffSetX;//+100;
 			 m_OffSetY=OffSetY;//+100;
-			 m_Width=ContrlUnitWidth[m_ControlType];
-		     m_Height=ContrlUnitHeight[m_ControlType];
-	         m_Scale=Scale;
+	         m_Scale=1.0f;
+			 m_Width=ContrlUnitWidth[m_ControlType]*m_Scale;
+		     m_Height=ContrlUnitHeight[m_ControlType]*m_Scale;
+
 
 	         //m_OnEventProcessPointer=NULL;
 			 //m_SetActiveKey=SET_ACTIVE_KEY;

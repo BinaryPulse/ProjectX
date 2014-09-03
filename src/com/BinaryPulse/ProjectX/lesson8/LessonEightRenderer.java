@@ -222,7 +222,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		// Create the GLText
 		
 		// Set the background frame color
-		GLES20.glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+		/*GLES20.glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
 		glText = new MyFont(lessonEightActivity,(lessonEightActivity.getAssets()));
 		GLES20.glEnable(GLES20.GL_BLEND);
 		//GLES20.glDisable(GLES20.GL_CULL_FACE);
@@ -231,10 +231,11 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		// NOTE: after a successful call to this the font is ready for rendering!
 		glText.load( "Roboto-Regular.ttf", 38, 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
 		// enable texture + alpha blending
+        */
+		OscilloScope_1=new OscilloScope(lessonEightActivity,0,0.0f,0.0f,1.0f,(float)windowWidth,(float)windowHeight,2.0f);
+	    //OscilloScope_1.SetDispWiodowSize(windowWidth,windowHeight);	
+	    OscilloScope_1.SetScopeParameters(windowHeight*0.6f,windowWidth*0.7f, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
 
-		OscilloScope_1=new OscilloScope(lessonEightActivity,0,100.0f,10.0f,1.0f,(float)windowWidth,(float)windowHeight,2.0f);	
-	    OscilloScope_1.SetScopeParameters(180,0, 200,300, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
-	    OscilloScope_1.SetDispWiodowSize(windowWidth,windowHeight);	
 		//porche.PorcheDataReader(lessonEightActivity,
 		//		R.raw.porsche);	
 		// Initialize the accumulated rotation matrix
@@ -315,7 +316,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrixFont, 0);
 		
-		GLES20.glDisable(GLES20.GL_CULL_FACE);
+		GLES20.glEnable(GLES20.GL_CULL_FACE);
 		GLES20.glDisable(GLES20.GL_BLEND);
 		
 		//GLES20.gl
@@ -323,7 +324,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		// TEST: render the entire font texture
 		//GLES20.glColorMask({0.0, 1.0, 0.0,0.5},0,0)
 		//glText.drawTexture( width/2, height/2, mVPMatrix);            // Draw the Entire Texture
-		GLES20.glEnable(GLES20.GL_BLEND);
+		/*GLES20.glEnable(GLES20.GL_BLEND);
 		//GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 		//GLES20.glEnable(GLES20.GL_CULL_FACE);
@@ -335,7 +336,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		glText.drawC("Jason Mraz!", 350.0f, 100.0f, 0.0f, 0, 0, 0);
 		glText.SetColor( 1.0f, 0.0f, 1.0f, 1.0f );  
 		glText.draw( Integer.toString(windowHeight), 0.0f,0.0f, 60);
-		
+		*/
 		
 	/*	
 		Matrix.setLookAtM(viewMatrix, 0, (80.0f-deltaY) *(float)java.lang.Math.cos(deltaX*0.015f),0.0f, (80.0f-deltaY)*(float)java.lang.Math.sin(deltaX*0.015f), 0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f);
