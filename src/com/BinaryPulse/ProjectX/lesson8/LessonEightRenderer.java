@@ -232,9 +232,9 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		glText.load( "Roboto-Regular.ttf", 38, 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
 		// enable texture + alpha blending
         */
-		OscilloScope_1=new OscilloScope(lessonEightActivity,0,0.0f,0.0f,1.0f,(float)windowWidth,(float)windowHeight,2.0f);
+		OscilloScope_1=new OscilloScope(lessonEightActivity,0,0.0f,0.0f,1.0f,(float)windowWidth*0.8f,(float)windowHeight*0.8f,5.0f,1.0f);
 	    //OscilloScope_1.SetDispWiodowSize(windowWidth,windowHeight);	
-	    OscilloScope_1.SetScopeParameters(windowHeight*0.6f,windowWidth*0.7f, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
+	    OscilloScope_1.SetScopeParameters(windowHeight*0.6f,windowWidth*0.5f, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
 
 		//porche.PorcheDataReader(lessonEightActivity,
 		//		R.raw.porsche);	
@@ -242,14 +242,14 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		Matrix.setIdentityM(accumulatedRotation, 0);
 		
 		// Load the texture
-		final int mAndroidDataHandle = TextureHelper.loadTexture(lessonEightActivity, R.drawable.usb_android);		
+		/*final int mAndroidDataHandle = TextureHelper.loadTexture(lessonEightActivity, R.drawable.usb_android);		
 		GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);			
 		
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);		
 		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);		
 		
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);		
-		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);		
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);	*/	
    
 	}
 
@@ -316,7 +316,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrixFont, 0);
 		
-		GLES20.glEnable(GLES20.GL_CULL_FACE);
+		GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glDisable(GLES20.GL_BLEND);
 		
 		//GLES20.gl
