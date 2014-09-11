@@ -143,8 +143,8 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	/** The current heightmap object. */
 	private HeightMap heightMap,tower,nacelle,porche;
 	
-	private MyFont glText;                             // A GLText Instance
-    private OscilloScope OscilloScope_1;
+	private static MyFont glText;                             // A GLText Instance
+    private static OscilloScope OscilloScope_1;
     
     private DisplayMetrics dm;
     private int windowWidth;
@@ -157,7 +157,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		this.errorHandler = errorHandler;
 		
 	}
-
+	
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
 		heightMap = new HeightMap();
@@ -232,9 +232,9 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		glText.load( "Roboto-Regular.ttf", 38, 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
 		// enable texture + alpha blending
         */
-		OscilloScope_1=new OscilloScope(lessonEightActivity,0,0.0f,0.0f,1.0f,(float)windowWidth*0.8f,(float)windowHeight*0.8f,5.0f,1.0f);
+		OscilloScope_1=new OscilloScope(lessonEightActivity,0,0.0f,0.0f,1.0f,(float)windowWidth*1.0f,(float)windowHeight*1.0f,5.0f,1.0f);
 	    //OscilloScope_1.SetDispWiodowSize(windowWidth,windowHeight);	
-	    OscilloScope_1.SetScopeParameters(windowHeight*0.6f,windowWidth*0.5f, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
+	    OscilloScope_1.SetScopeParameters(windowHeight*0.7f,windowWidth*0.7f, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
 
 		//porche.PorcheDataReader(lessonEightActivity,
 		//		R.raw.porsche);	

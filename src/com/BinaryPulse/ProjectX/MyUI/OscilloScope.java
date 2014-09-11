@@ -1,5 +1,6 @@
 package com.BinaryPulse.ProjectX.MyUI;
 import java.lang.Math;
+import java.text.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -87,57 +88,58 @@ public class OscilloScope extends UIControlUnit {
 
 	protected float    m_CuveLineWidth;
 
-	protected int m_DisplayDataStartTimeIndex;
-	protected int m_DisplayDataEndTimeIndex;
-	protected int m_DisplayDataMaxTimeIndex;
-	protected int m_LatestTimeIndex;
-	protected float m_DisplayDataTimeLength;
-	protected float[] m_RecievedTime;//[];
-	protected float[][] m_RecievedData;//[];//[];
-	protected float m_TimeDrawCof;
-	protected float[] m_DataDrawCof;//[];
-	protected float[] m_DisplayDataRange;//[];
-	protected float[] m_MaxRecievedData;//[];
-	protected float[] m_MinRecievedData;//[];;
+	protected static int m_DisplayDataStartTimeIndex;
+	protected static int m_DisplayDataEndTimeIndex;
+	protected static int m_DisplayDataMaxTimeIndex;
+	protected static int m_LatestTimeIndex;
+	protected static float m_DisplayDataTimeLength;
+	protected static float[] m_RecievedTime;//[];
+	protected static float[][] m_RecievedData;//[];//[];
+	protected static float[][] m_DataColor;//[];//[];
+	protected static float m_TimeDrawCof;
+	protected static float[] m_DataDrawCof;//[];
+	protected static float[] m_DisplayDataRange;//[];
+	protected static float[] m_MaxRecievedData;//[];
+	protected static float[] m_MinRecievedData;//[];;
 
-	protected int m_ActiveMouseX;
-	protected int m_ActiveMouseY;
+	protected static int m_ActiveMouseX;
+	protected static int m_ActiveMouseY;
 
-	protected int m_ReleaseMouseX;
-	protected int m_ReleaseMouseY;
+	protected static int m_ReleaseMouseX;
+	protected static int m_ReleaseMouseY;
 
-	protected float m_UserSelectedStartX;
-	protected float m_UserSelectedEndX;
-	protected float[] m_UserSelectedStartY;//[];
-	protected float[] m_UserSelectedEndY;//[];
+	protected static float m_UserSelectedStartX;
+	protected static float m_UserSelectedEndX;
+	protected static float[] m_UserSelectedStartY;//[];
+	protected static float[] m_UserSelectedEndY;//[];
 
-	protected float m_DataSampleTimeInterval;
+	protected static float m_DataSampleTimeInterval;
 
 	protected boolean m_IsResetAxisX;
 	protected boolean m_IsResetAxisY;
 	protected boolean m_IsResetAxisXY;
 
-	protected boolean m_AutomaticDisplay; 
-	protected boolean m_StartRecieve;
+	protected static boolean m_AutomaticDisplay; 
+	protected static boolean m_StartRecieve;
 
-	protected float m_RecievedTimeToRealTimeScale;
-	protected float m_RecievedDataToRealDataScale;
+	protected static float m_RecievedTimeToRealTimeScale;
+	protected static float m_RecievedDataToRealDataScale;
 
-	protected float m_MaxRecievedTime;
-	protected float m_MinRecievedTime;
-	protected int m_RefreshMode;
+	protected static float m_MaxRecievedTime;
+	protected static float m_MinRecievedTime;
+	protected static int m_RefreshMode;
 
 
 	/** This is a handle to our cube shading program. */
-	protected int program[];						   // OpenGL Program object
+	protected  int program[];						   // OpenGL Program object
 	protected int ColorHandle;						   // Shader color handle	
 	protected int TextureUniformHandle;                 // Shader texture handle
 	protected int TextureMoveUniformHandle;
 	protected int textureId; 
 	/** OpenGL handles to our program uniforms. */
-	protected int mvpMatrixUniform;
-	protected int mvMatrixUniform;
-	protected int lightPosUniform;
+	protected  int mvpMatrixUniform;
+	protected  int mvMatrixUniform;
+	protected  int lightPosUniform;
 
 	
 	/** OpenGL handles to our program attributes. */
@@ -168,8 +170,9 @@ public class OscilloScope extends UIControlUnit {
     protected int mWindowWidth;
     protected int mWindowHeight;
     
-    protected float m_timer;
-    protected float m_TestData[] = new float[4];
+    protected static float m_timer;
+    protected static float m_EffectDataStartIndex[];
+    protected static float m_TestData[] = new float[4];
 
 /*##############################################################################
            
@@ -347,7 +350,7 @@ void DrawControlArea(boolean AnimationEnabled){
 ************************************************************************************/
  void DrawBackPanel(float[] modelMatrix){//boolean AnimationEnabled ){
 		
-		float[] color = {0.0f,1.0f, 1.0f, 1.0f};
+		float[] color = {0.0f,0.3f, 0.3f, 0.3f};
 		
 		float[] color1 = {1.0f,0.0f, 1.0f, 1.0f};
 		
@@ -415,10 +418,13 @@ void DrawControlArea(boolean AnimationEnabled){
 			GLES20.glDrawElements(GLES20.GL_LINES,  (m_DivNumY)*2, GLES20.GL_UNSIGNED_SHORT, 5*2 + (m_DivNumY+m_DivNumX)*4);
 			GLES20.glDrawElements(GLES20.GL_LINES,  (m_DivNumX)*2, GLES20.GL_UNSIGNED_SHORT, 5*2 + (2*m_DivNumY+m_DivNumX)*4);
 			
-			ColorHandle          = GLES20.glGetUniformLocation(program[1], COLOR_UNIFORM);
-			GLES20.glUniform4fv(ColorHandle, 1, color1 , 0); 
+
 			for(int i =0;i<m_CurveNum;i++)
+			{	
+				ColorHandle          = GLES20.glGetUniformLocation(program[1], COLOR_UNIFORM);
+				GLES20.glUniform4fv(ColorHandle, 1, m_DataColor[i] , 0); 
 				GLES20.glDrawElements(GLES20.GL_LINES, (4+m_DivNumY*2), GLES20.GL_UNSIGNED_SHORT, ((m_DivNumY+m_DivNumX)*4 +5 +(4*i+m_DivNumY*2*i))*2);
+			}
 			//GLES20.glDrawElements(GLES20.GL_LINES, (4+m_DivNumY*2), GLES20.GL_UNSIGNED_SHORT, ((m_DivNumY+m_DivNumX)*4 +5 )*2);
 			//GLES20.glDrawElements(GLES20.GL_LINES, (4+m_DivNumY*2), GLES20.GL_UNSIGNED_SHORT, ((m_DivNumY+m_DivNumX)*4 +5 + (4+m_DivNumY*2))*2);
 			//GLES20.glDrawElements(GLES20.GL_LINES, (4+m_DivNumY*2), GLES20.GL_UNSIGNED_SHORT, ((m_DivNumY+m_DivNumX)*4 +5 + (8+m_DivNumY*4))*2);
@@ -718,6 +724,7 @@ void DrawControlArea(boolean AnimationEnabled){
  {      
 	  	int i,j;
 	  	float x,y,z;
+	  	 String s;
 		GLES20.glEnable(GLES20.GL_BLEND);
 		//GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
@@ -730,9 +737,11 @@ void DrawControlArea(boolean AnimationEnabled){
 		//m_Font.drawC("Jason Mraz!", 350.0f, 100.0f, 0.0f, 0, 0, 0);
 		m_Font.SetColor( 1.0f, 0.0f, 1.0f, 1.0f );  
 		
-		
+        DecimalFormat format = new DecimalFormat("#.00");
 		
 		for(i =0;i<m_CurveNum;i++){
+			//GLES20.glUniform4fv(ColorHandle, 1, m_DataColor[i] , 0); 
+			m_Font.SetColor(  m_DataColor[i][0],  m_DataColor[i][1],  m_DataColor[i][2],  m_DataColor[i][3]);  
 			if(i<2){
 			  x = m_GraphOffsetX-(i+0.9f)*m_GraphLabelWidth;
 			  z =0.0f;	 
@@ -746,20 +755,34 @@ void DrawControlArea(boolean AnimationEnabled){
 				 
 				//for(k =0;i<4;i++){
 				 if(i<2){
-					 y =m_GraphOffsetY+m_GraphUnitHeight*(j-0.1f);
+					 y =m_GraphOffsetY+m_GraphUnitHeight*(j+0.0f);
 
 				 }
 				 else{
 					
-					 y = m_GraphOffsetY+m_GraphUnitHeight*(j-0.1f);
+					 y = m_GraphOffsetY+m_GraphUnitHeight*(j+0.0f);
 	 
 				 }
 				 
-				 m_Font.draw( Integer.toString(i*m_CurveNum+j), x,y, z); 
+			        
+
+			        
+			      s = format.format((float)(m_OriginValueY[i]+(j)*m_DivValueY[i])); //×ª»»³É×Ö·û´®
+			        
+			        //System.out.print(s);
+
+				 
+				 m_Font.draw( s , x,y, z); 
 				//}
 			}	
 			
 		}
+		m_Font.SetColor( 0.0f, 1.0f, 1.0f, 1.0f );  
+		for(j=0; j<=m_DivNumX; j++){			
+	         //glWindowPos2i(m_OffSetX+m_GraphOffsetX+m_GraphUnitWidth*j-m_GraphLabelWidth, GetSystemMetrics(SM_CYSCREEN)-m_GraphOffsetY-m_GraphHeight-m_GraphLabelHeight-m_OffSetY);
+		      s = format.format((float)(m_OriginValueX+(j)*m_DivValueX)); //×ª»»³É×Ö·û´®
+			  m_Font.draw( s , m_GraphOffsetX+m_GraphUnitWidth*j-m_GraphLabelWidth*0.5f,m_GraphOffsetY-18.0f, 0); 
+       }
 		
  }
 /***********************************************************************************
@@ -771,8 +794,8 @@ void DrawData(float[] modelMatrix){
      float tempX,tempY;
      float x,y,z;
 
- 	float vertexBuffer[] = new float[(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*m_CurveNum*3];
- 	short indexBuffer[] = new short[(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*m_CurveNum*3];
+ 	float vertexBuffer[] = new float[(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*m_CurveNum*6];
+ 	short indexBuffer[] = new short[(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*m_CurveNum*6];
 
      //short indexBuffer[]  ={0,1,2,3,4,5,6,7,8,9,10,11};	
     
@@ -781,15 +804,16 @@ if(m_RefreshMode ==0){
 	 for(i=0;i<m_CurveNum;i++){
 	      //glColor4f((i==1?1.0:0.0),((i==0|| i==3)?1.0:0.0),((i==2|| i==3)?1.0:0.0),1.0);//m_Color[i]);	
           //glColor4f(float((m_Color[i] & 0x0F00)>>8)/15,float((m_Color[i] & 0x00F0)>>4)/15,float((m_Color[i] & 0x00F))/15,1.0);
-		  //glBegin(GL_LINE_STRIP);		 
+		  //glBegin(GL_LINE_STRIP);		
+		 m_EffectDataStartIndex[i] =0;
 		  for(j=m_DisplayDataStartTimeIndex;j<=m_DisplayDataEndTimeIndex;j++){	   
 
 			   tempX=m_GraphOffsetX+(m_RecievedTime[j]-m_OriginValueX)*m_TimeDrawCof;
-			   tempY=m_GraphOffsetY+m_GraphHeight-(m_RecievedData[i][j]-m_OriginValueY[i])*m_DataDrawCof[i];
+			   tempY=m_GraphOffsetY+(m_RecievedData[i][j]-m_OriginValueY[i])*m_DataDrawCof[i];
 			   if(m_RecievedData[i][j]>m_OriginValueY[i]+(m_DivNumY)*m_DivValueY[i])
-				   tempY=m_GraphOffsetY;
+				   tempY=m_GraphOffsetY+ m_GraphHeight;
 			   if(m_RecievedData[i][j]<m_OriginValueY[i])
-				   tempY=m_GraphOffsetY+m_GraphHeight;
+				   tempY=m_GraphOffsetY;//+m_GraphHeight;
 			   //if(m_RecievedTime[j]<(m_OriginValueX-m_DivValueX))//+(m_DivNumY)*m_DivValueY[i])
 			   //{
 				   //tempX=m_GraphOffsetX;               
@@ -797,7 +821,21 @@ if(m_RefreshMode ==0){
 			   //}
 			   if(m_RecievedTime[j]<(m_OriginValueX-m_DivValueX) && tempX < m_GraphOffsetX){
 
-			      //tempX=m_GraphOffsetX;
+			       tempX=m_GraphOffsetX;
+			       tempY=m_GraphOffsetY;
+				   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6]= tempX;
+				   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1]= tempY;
+				   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2]= 0;
+				   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6 );
+				   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1);
+				   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2);
+				   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3]= tempX;
+				   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4]= tempY;
+				   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5]= 0;
+				   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3 );
+				   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4);
+				   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6+(j-m_DisplayDataStartTimeIndex)*6+5);
+				   m_EffectDataStartIndex[i] +=2;	      
 				   continue;
 
 			   }
@@ -808,8 +846,22 @@ if(m_RefreshMode ==0){
 				   	   //tempX =m_GraphOffsetX+(m_RecievedTime[j]-m_OriginValueX)*m_TimeDrawCof;  
 					   tempX =m_GraphOffsetX+(m_RecievedTime[j+1]-m_OriginValueX)*m_TimeDrawCof; 
 					   if(tempX < m_GraphOffsetX) {
-					   
-					      continue;
+					       tempX=m_GraphOffsetX;
+					       tempY=m_GraphOffsetY;
+						   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6]= tempX;
+						   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1]= tempY;
+						   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2]= 0;
+						   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6 );
+						   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1);
+						   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2);
+						   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3]= tempX;
+						   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4]= tempY;
+						   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5]= 0;
+						   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3 );
+						   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4);
+						   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6+(j-m_DisplayDataStartTimeIndex)*6+5);
+						   m_EffectDataStartIndex[i] += 2;	  
+						   continue;
 					   }
 					   else{
 					      tempX = m_GraphOffsetX;
@@ -823,7 +875,13 @@ if(m_RefreshMode ==0){
 		       //glVertex3f(tempX,tempY,0.0);
 			   x = tempX;
 			   y = tempY;
-
+			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6]= x;
+			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1]= y;
+			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2]= 0;
+			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6 );
+			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1);
+			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2);
+			   
 			   if(j<m_DisplayDataEndTimeIndex){
 
 				   if ((m_RecievedTime[j]-m_OriginValueX)*m_TimeDrawCof >= 0)
@@ -841,12 +899,12 @@ if(m_RefreshMode ==0){
 			   }
 			   z = 0;
 			   
-			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3]= x;
-			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3+1]= y;
-			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3+2]= z;
-			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3 );
-			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3+1] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3+1);
-			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3+2] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3+2);
+			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3]= x;
+			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4]= y;
+			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5]= z;
+			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3 );
+			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4);
+			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6+(j-m_DisplayDataStartTimeIndex)*6+5);
 		  }           
 	      //glEnd();	
 	  } 
@@ -860,11 +918,11 @@ if(m_RefreshMode ==0){
 		  for(j=m_DisplayDataStartTimeIndex;j<=m_DisplayDataEndTimeIndex;j++){	   
 
 			   tempX=m_GraphOffsetX+(m_RecievedTime[j]-m_OriginValueX)*m_TimeDrawCof;
-			   tempY=m_GraphOffsetY+m_GraphHeight-(m_RecievedData[i][j]-m_OriginValueY[i])*m_DataDrawCof[i];
+			   tempY=m_GraphOffsetY+(m_RecievedData[i][j]-m_OriginValueY[i])*m_DataDrawCof[i];
 			   if(m_RecievedData[i][j]>m_OriginValueY[i]+(m_DivNumY)*m_DivValueY[i])
-				   tempY=m_GraphOffsetY;
-			   if(m_RecievedData[i][j]<m_OriginValueY[i])
 				   tempY=m_GraphOffsetY+m_GraphHeight;
+			   if(m_RecievedData[i][j]<m_OriginValueY[i])
+				   tempY=m_GraphOffsetY;
 			   if(m_RecievedTime[j]<(m_OriginValueX))//-m_DivValueX))//+(m_DivNumY)*m_DivValueY[i])
 			   {
 				   tempX=m_GraphOffsetX;               
@@ -919,20 +977,16 @@ IndexDataBuffer.put(indexBuffer).position(0);
 if (vbo[2] > 0 && ibo[2] > 0) {
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[2]);
 		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, VertexDataBuffer.capacity() * 4,
-				VertexDataBuffer, GLES20.GL_STATIC_DRAW);
+				VertexDataBuffer, GLES20.GL_DYNAMIC_DRAW);
 
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[2]);
 		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, IndexDataBuffer.capacity()
-				* 2, IndexDataBuffer, GLES20.GL_STATIC_DRAW);
+				* 2, IndexDataBuffer, GLES20.GL_DYNAMIC_DRAW);
 
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 } 
 
-
-float[] color = {0.0f,0.0f, 1.0f, 1.0f};
-float[] color1 = {1.0f,1.0f, 0.0f, 1.0f};
-float[] color2 = {1.0f,0.0f, 1.0f, 1.0f};
 
 Matrix.setIdentityM(mMVPMatrix, 0);
 //Matrix.translateM(mMVPMatrix, 0, m_OffSetX/2.0f, m_OffSetY/2.0f, 0);	
@@ -945,8 +999,8 @@ if (vbo[2] > 0 && ibo[2] > 0) {
 	GLES20.glUseProgram(program[1]);
 	ColorHandle          = GLES20.glGetUniformLocation(program[1], COLOR_UNIFORM);
 
-	GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
-	GLES20.glEnableVertexAttribArray(ColorHandle);
+	//GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
+	//GLES20.glEnableVertexAttribArray(ColorHandle);
 
 	// Set program handles for cube drawing.
 	mvpMatrixUniform = GLES20.glGetUniformLocation(program[1], MVP_MATRIX_UNIFORM);
@@ -965,18 +1019,38 @@ if (vbo[2] > 0 && ibo[2] > 0) {
 	GLES20.glLineWidth(1.0f);
 	// Draw
 	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[2]);
-	GLES20.glDrawElements(GLES20.GL_LINE_STRIP, ((m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)), GLES20.GL_UNSIGNED_SHORT, 0);
-
-
+	/*if(m_RefreshMode == 0)
+	GLES20.glDrawElements(GLES20.GL_LINE_STRIP, ((m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*2 -(int)m_EffectDataStartIndex[0]), GLES20.GL_UNSIGNED_SHORT, (int)m_EffectDataStartIndex[0]*2);
+	else
+		GLES20.glDrawElements(GLES20.GL_LINE_STRIP, ((m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)), GLES20.GL_UNSIGNED_SHORT, 0);	
+    */
 	
-	ColorHandle          = GLES20.glGetUniformLocation(program[1], COLOR_UNIFORM);
 
-	GLES20.glUniform4fv(ColorHandle, 1, color1 , 0); 
-	GLES20.glEnableVertexAttribArray(ColorHandle);
 	// Draw
 	//GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[2]);
-	GLES20.glDrawElements(GLES20.GL_LINE_STRIP, ((m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)), GLES20.GL_UNSIGNED_SHORT,(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*2);
-/*
+
+	m_DataColor[0] = new float[]{1.0f, 0.0f, 0.0f,1.0f};;
+
+	m_DataColor[1] = new float[]{0.0f, 1.0f, 0.0f,1.0f};;
+
+	m_DataColor[2] = new float[]{1.0f, 0.0f, 1.0f,1.0f};;
+
+	m_DataColor[3] = new float[]{1.0f, 1.0f, 0.0f,1.0f};;
+	
+	for(i =0; i<4;i++){
+	
+		//m_DataColor[i] = tempcolor;
+		ColorHandle          = GLES20.glGetUniformLocation(program[1], COLOR_UNIFORM);
+		GLES20.glUniform4fv(ColorHandle, 1, m_DataColor[i] , 0); 
+		GLES20.glEnableVertexAttribArray(ColorHandle);		
+		if(m_RefreshMode == 0)
+			GLES20.glDrawElements(GLES20.GL_LINE_STRIP, ((m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*2 -(int)m_EffectDataStartIndex[i]), GLES20.GL_UNSIGNED_SHORT,(int)m_EffectDataStartIndex[i]*2 + (m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*4*i);
+		else
+			GLES20.glDrawElements(GLES20.GL_LINE_STRIP, ((m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)), GLES20.GL_UNSIGNED_SHORT, (m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*2*i);		
+			//GLES20.glDrawElements(GLES20.GL_LINE_STRIP, ((m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*2), GLES20.GL_UNSIGNED_SHORT,(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*2);
+	
+	}
+	/*
 	GLES20.glUniform4fv(ColorHandle, 1, color2 , 0); 
 	GLES20.glEnableVertexAttribArray(ColorHandle);
 	// Draw
@@ -1146,7 +1220,7 @@ public OscilloScope(Context context,int ControlType,float OffSetX,float OffSetY,
 	GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 	// Load the font from file (set size + padding), creates the texture
 	// NOTE: after a successful call to this the font is ready for rendering!
-	m_Font.load( "Roboto-Regular.ttf", (int)(18*FontSize), 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
+	m_Font.load( "Roboto-Regular.ttf", (int)(13*FontSize), 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
 	
 }
 
@@ -1256,8 +1330,8 @@ public void SetScopeParameters(float Height, float Width, int CurveNum){//, Stri
 
 	  m_DataSampleTimeInterval=1;//DataSampleTimeInterval;
 
-      m_DivNumX=10;//DivNumX; 
-      m_DivNumY=10;//DivNumY; 
+      m_DivNumX=8;//DivNumX; 
+      m_DivNumY=8;//DivNumY; 
 
 	  m_GridOn=true;//GridOn;
 
@@ -1287,7 +1361,7 @@ public void SetScopeParameters(float Height, float Width, int CurveNum){//, Stri
 	  m_DisplayDataTimeLength=500;//ms
       m_MaxRecievedTime=500;
 	  m_MinRecievedTime=0;
-	  m_RefreshMode=1;
+	  m_RefreshMode=0;
 
 	  m_RecievedTime=new float[5000];//new float[DataSize];//[];
 	  m_RecievedData=new float[CurveNum][];//[DataSize];//[DataSize];
@@ -1326,7 +1400,8 @@ public void SetScopeParameters(float Height, float Width, int CurveNum){//, Stri
 	  m_AutomaticDisplay=true; 
 	  m_StartRecieve=false;
 	  
-	  
+	  m_EffectDataStartIndex =new float[CurveNum];
+	  m_DataColor = new float[CurveNum][4];
 	  m_timer =0.0f;
 
 	  InitGLDataForBorder();
@@ -1437,11 +1512,12 @@ void DrawScaleRullerXY(){
  ************************************************************************************/
 public void  Render(float[] modelMatrix){    
 
-	 m_timer+= 2.0f;
+	 m_timer+= 1.0f;
 	
 	 for(int i=0;i<4;i++)
-		 m_TestData[i] =2000*(i+1)*(float)Math.cos(m_timer/500.0f)*(float)Math.sin((i+1)*m_timer/205.0f)*(i+1)/40.0f+i*5.0f;
+		 m_TestData[i] =2000*(i+1)*(float)Math.cos(m_timer/500.0f)*(float)Math.sin((i+1)*m_timer/40.0f+i*5.0f);
 	    			//float yyy=2000*cos(double(iFrames)/500.0)*sin(double(iFrames)/4.0);            
+	 //ReciedveData(m_TestData[0],m_TestData);  
 	 ReciedveData(m_timer,m_TestData);  
 	 RefreshDisplay();
 	 DrawData(modelMatrix);

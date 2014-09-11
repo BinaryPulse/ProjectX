@@ -37,9 +37,9 @@ public class LessonOneRenderer implements GLSurfaceView.Renderer
 	private float[] mMVPMatrix = new float[16];
 	
 	/** Store our model data in a float buffer. */
-	private final FloatBuffer mTriangle1Vertices;
-	private final FloatBuffer mTriangle2Vertices;
-	private final FloatBuffer mTriangle3Vertices;
+	private  final FloatBuffer mTriangle1Vertices;
+	private  final FloatBuffer mTriangle2Vertices;
+	private  final FloatBuffer mTriangle3Vertices;
 
 	/** This will be used to pass in the transformation matrix. */
 	private int mMVPMatrixHandle;
@@ -67,6 +67,8 @@ public class LessonOneRenderer implements GLSurfaceView.Renderer
 	
 	/** Size of the color data in elements. */
 	private final int mColorDataSize = 4;		
+	
+	private static long timeX;
 				
 	/**
 	 * Initialize the model data.
@@ -125,6 +127,7 @@ public class LessonOneRenderer implements GLSurfaceView.Renderer
 		mTriangle1Vertices.put(triangle1VerticesData).position(0);
 		mTriangle2Vertices.put(triangle2VerticesData).position(0);
 		mTriangle3Vertices.put(triangle3VerticesData).position(0);
+		timeX =0;
 	}
 	
 	@Override
@@ -132,7 +135,9 @@ public class LessonOneRenderer implements GLSurfaceView.Renderer
 	{
 		// Set the background clear color to gray.
 		GLES20.glClearColor(0.5f, 0.5f, 0.5f, 0.5f);
-	
+
+		
+		//timeX =0;
 		// Position the eye behind the origin.
 		final float eyeX = 0.0f;
 		final float eyeY = 0.0f;
@@ -305,7 +310,9 @@ public class LessonOneRenderer implements GLSurfaceView.Renderer
                 
         // Do a complete rotation every 10 seconds.
         long time = SystemClock.uptimeMillis() % 10000L;
-        float angleInDegrees = (360.0f / 10000.0f) * ((int) time);
+        
+        timeX += 1;
+        float angleInDegrees = (360.0f / 10000.0f) * ((int) timeX);
         
         // Draw the triangle facing straight on.
         Matrix.setIdentityM(mModelMatrix, 0);

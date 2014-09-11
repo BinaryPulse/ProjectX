@@ -19,6 +19,7 @@ public class LessonOneActivity extends Activity
 		
 		mGLSurfaceView = new GLSurfaceView(this);
 
+		setContentView(mGLSurfaceView);
 		// Check if the system supports OpenGL ES 2.0.
 		final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 		final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
@@ -39,7 +40,6 @@ public class LessonOneActivity extends Activity
 			return;
 		}
 
-		setContentView(mGLSurfaceView);
 	}
 
 	@Override
