@@ -149,7 +149,7 @@ public class OscilloScope extends UIControlUnit {
 
 	/** Identifiers for our uniforms and attributes inside the shaders. */	
 	private static final String MVP_MATRIX_UNIFORM = "u_MVPMatrix";
-	private static final String MV_MATRIX_UNIFORM = "u_MVMatrix";
+	//private static final String MV_MATRIX_UNIFORM = "u_MVMatrix";
 	private static final String LIGHT_POSITION_UNIFORM = "u_LightPos";
 
 	private static final String POSITION_ATTRIBUTE = "a_Position";
@@ -781,7 +781,7 @@ void DrawControlArea(boolean AnimationEnabled){
 		for(j=0; j<=m_DivNumX; j++){			
 	         //glWindowPos2i(m_OffSetX+m_GraphOffsetX+m_GraphUnitWidth*j-m_GraphLabelWidth, GetSystemMetrics(SM_CYSCREEN)-m_GraphOffsetY-m_GraphHeight-m_GraphLabelHeight-m_OffSetY);
 		      s = format.format((float)(m_OriginValueX+(j)*m_DivValueX)); //×ª»»³É×Ö·û´®
-			  m_Font.draw( s , m_GraphOffsetX+m_GraphUnitWidth*j-m_GraphLabelWidth*0.5f,m_GraphOffsetY-18.0f, 0); 
+			  m_Font.draw( s  , m_GraphOffsetX+m_GraphUnitWidth*j-m_GraphLabelWidth*0.5f,m_GraphOffsetY-18.0f, 0); 
        }
 		
  }
@@ -1525,6 +1525,11 @@ public void  Render(float[] modelMatrix){
 	DrawControlBorder(modelMatrix);
 	DrawBackPanel(modelMatrix);
 	DrawLables(modelMatrix);
+
+	 //String s ="123456";
+	 //int kz = s.length(); 
+	//m_Font.draw( Integer.toString(), 100, 100, 0); 
+
 
 /*	
 	Matrix.setIdentityM(mMVPMatrix, 0);
