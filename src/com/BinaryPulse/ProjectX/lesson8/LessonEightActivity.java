@@ -28,34 +28,11 @@ public class LessonEightActivity extends Activity {
 	    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 	   
 		glSurfaceView = new LessonEightGLSurfaceView(this);	
-	
+/*
 		glSurfaceView.setSystemUiVisibility(LessonEightGLSurfaceView.SYSTEM_UI_FLAG_HIDE_NAVIGATION //|LessonEightGLSurfaceView.SYSTEM_UI_FLAG_FULLSCREEN);//
 				|LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_STABLE|LessonEightGLSurfaceView.SYSTEM_UI_FLAG_FULLSCREEN |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN ); 
-		//this.hideSystemUI();
-		//glSurfaceView.setFocusable(true);
-  		//this.hideSystemUI();
-
-		setContentView(glSurfaceView);
-		/*
-		glSurfaceView.setOnSystemUiVisibilityChangeListener(new LessonEightGLSurfaceView.OnSystemUiVisibilityChangeListener(){
-		@Override
-		public void onSystemUiVisibilityChange(int visibility){
-			
-			if((visibility & LessonEightGLSurfaceView.SYSTEM_UI_FLAG_FULLSCREEN) == 0){
-				
-				//glSurfaceView.setSystemUiVisibility();  
-			}
-			else
-			{
-				
-				glSurfaceView.setSystemUiVisibility(LessonEightGLSurfaceView.SYSTEM_UI_FLAG_HIDE_NAVIGATION 
-						|LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_FULLSCREEN 
-						| LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);  
-			}
-		}
-			
-		});*/
-		
+*/
+		setContentView(glSurfaceView);		
 
 		// Check if the system supports OpenGL ES 2.0.
 		final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -68,13 +45,13 @@ public class LessonEightActivity extends Activity {
 
 			final DisplayMetrics displayMetrics = new DisplayMetrics();
 			getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+			//setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 			// Set the renderer to our demo renderer, defined below.
 			renderer = new LessonEightRenderer(this, glSurfaceView);
 			glSurfaceView.setRenderer(renderer, displayMetrics.density);
 			
 			
-			
+/*			
 			glSurfaceView.setOnSystemUiVisibilityChangeListener(new LessonEightGLSurfaceView.OnSystemUiVisibilityChangeListener(){
 				@Override
 				public void onSystemUiVisibilityChange(int visibility){
@@ -82,15 +59,7 @@ public class LessonEightActivity extends Activity {
 
 					
 					if((visibility & LessonEightGLSurfaceView.SYSTEM_UI_FLAG_FULLSCREEN) == 0){
-						
-						//glSurfaceView.setSystemUiVisibility();  
-						// getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-						 //decorView.setSystemUiVisibility(LessonEightGLSurfaceView.SYSTEM_UI_FLAG_HIDE_NAVIGATION);// |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_FULLSCREEN);  
-						//View decorView =  getWindow().getDecorView();
-						
-					    //requestWindowFeature(Window.FEATURE_NO_TITLE);
-					    //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-						glSurfaceView.getHandler().postDelayed(new Runnable(){
+							glSurfaceView.getHandler().postDelayed(new Runnable(){
 							@Override
 							public void run() {
 								glSurfaceView.setSystemUiVisibility(LessonEightGLSurfaceView.SYSTEM_UI_FLAG_HIDE_NAVIGATION// |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_FULLSCREEN ); 
@@ -100,47 +69,23 @@ public class LessonEightActivity extends Activity {
 					else
 					{
 						
-						//glSurfaceView.setSystemUiVisibility(LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION );     
-						//requestWindowFeature(Window.FEATURE_NO_TITLE);
-					   // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-					/*	
-						//View decorView =  getWindow().getDecorView();
-						glSurfaceView.getHandler().postDelayed(new Runnable(){
-							@Override
-							public void run() {						
-						glSurfaceView.setSystemUiVisibility(LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_STABLE |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN );     
-
-				    }}, 5000);*/
-			      }
+			        }
 			
 				}
 				
 			});		
-			
-		
+*/			
+/*		
 			glSurfaceView.setOnTouchListener( new LessonEightGLSurfaceView.OnTouchListener(){
 				@Override
 				public boolean onTouch(View view1, MotionEvent event) {
-					//glSurfaceView.setFocusable(true);
-					
-					//glSurfaceView.requestFocus();
-					
-					{
-						//requestWindowFeature(Window.FEATURE_NO_TITLE);
-					   // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-						
-						//View decorView =  getWindow().getDecorView();
-						//glSurfaceView.setSystemUiVisibility(LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-							//	|LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION|LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_STABLE |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_FULLSCREEN |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-						//glSurfaceView.hideSystemUI();
-                       // return true;
-					}
-					//glSurfaceView.setFocusable(true);
+
 					return glSurfaceView.onTouchEvent(event);
 					
 				}
 					
 				});	
+*/				
 		} else {
 			// This is where you could create an OpenGL ES 1.x compatible
 			// renderer if you wanted to support both ES 1 and ES 2.
@@ -154,12 +99,7 @@ public class LessonEightActivity extends Activity {
 		// onResume().
 		super.onResume();
 		glSurfaceView.onResume();
-		if(getRequestedOrientation()!=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);   }  
-		//glSurfaceView.setSystemUiVisibility(LessonEightGLSurfaceView.SYSTEM_UI_FLAG_HIDE_NAVIGATION// |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_FULLSCREEN);//
-		//		|LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_STABLE|LessonEightGLSurfaceView.SYSTEM_UI_FLAG_FULLSCREEN |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN );
-		//this.hideSystemUI();
-		//glSurfaceView.setFocusable(true);
-		//glSurfaceView.requestFocus();
+		//if(getRequestedOrientation()!=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);   }  
   
 	}
 
@@ -168,30 +108,18 @@ public class LessonEightActivity extends Activity {
 		// The activity must call the GL surface view's onPause() on activity
 		// onPause().
 		super.onPause();
-
 		glSurfaceView.onPause();	  
-		//glSurfaceView.setSystemUiVisibility(LessonEightGLSurfaceView.SYSTEM_UI_FLAG_HIDE_NAVIGATION// |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_FULLSCREEN);//
-		//		|LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_STABLE|LessonEightGLSurfaceView.SYSTEM_UI_FLAG_FULLSCREEN |LessonEightGLSurfaceView.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN );
-		//this.hideSystemUI();
-		//glSurfaceView.setFocusable(true);
-		//glSurfaceView.requestFocus();
 	}
 
-	@Override
+	/*	@Override
 	public void onWindowFocusChanged(boolean hasFocus){
-		
-		
+			
 		glSurfaceView.setFocusable(true);
 		glSurfaceView.requestFocus();
 		super.onWindowFocusChanged(hasFocus);
-		//glSurfaceView.setFocusable(true);
-		//glSurfaceView.requestFocus();
-		//if(hasFocus){
-		//	this.hideSystemUI();
-		//}
 		
 	}
-	
+*/	
 	public void hideSystemUI()
 	{
 		    

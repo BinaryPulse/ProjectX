@@ -31,7 +31,10 @@ import com.BinaryPulse.ProjectX.lesson8.ErrorHandler.ErrorType;
 
 import com.BinaryPulse.ProjectX.MyFont.MyFont;
 import com.BinaryPulse.ProjectX.MyUI.OscilloScope;
+import com.BinaryPulse.ProjectX.MyUI.LedList;
+import com.BinaryPulse.ProjectX.MyUI.Button;
 import android.util.DisplayMetrics;
+import com.BinaryPulse.ProjectX.AcDriveModeling.SychronousMotor;
 /**
  * This class implements our custom renderer. Note that the GL10 parameter
  * passed in is unused for OpenGL ES 2.0 renderers -- the static class GLES20 is
@@ -85,20 +88,24 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	private int mvpMatrixUniform;
 	private int mvMatrixUniform;
 	private int lightPosUniform;
-
+	private int TextureUniformHandle;                 // Shader texture handle
 	/** OpenGL handles to our program attributes. */
 	private int positionAttribute;
 	private int normalAttribute;
 	private int colorAttribute;
-
+	private int texcordAttribute;
+	int texture_head,texture_legwings,texture_topbody,texture_eye_diff,texture_eye_emis;                                     //
 	/** Identifiers for our uniforms and attributes inside the shaders. */
 	private static final String MVP_MATRIX_UNIFORM = "u_MVPMatrix";
 	private static final String MV_MATRIX_UNIFORM = "u_MVMatrix";
 	private static final String LIGHT_POSITION_UNIFORM = "u_LightPos";
+	private static final String TEXTURE_UNIFORM = "u_Texture";
 
 	private static final String POSITION_ATTRIBUTE = "a_Position";
 	private static final String NORMAL_ATTRIBUTE = "a_Normal";
 	private static final String COLOR_ATTRIBUTE = "a_Color";
+	private static final String TEXCORD_ATTRIBUTE = "a_TexCoordinate";
+
 
 	/** Additional constants. */
 	private static final int POSITION_DATA_SIZE_IN_ELEMENTS = 3;
@@ -141,10 +148,16 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	public volatile float deltaZ;
 	public volatile float[] rotorSpeed;
 	/** The current heightmap object. */
-	private HeightMap heightMap,tower,nacelle,porche;
+	private HeightMap heightMap,tower,nacelle,head,topbody,bottombody,wings,eyeofqueen;
 	
 	private static MyFont glText;                             // A GLText Instance
     private static OscilloScope OscilloScope_1;
+    private static LedList LedList1;  
+    private static Button Button1;   
+    
+    public static  SychronousMotor   gSychronousMotor;
+    private static  float m_timer;
+    private static   float[] m_TestData;
     
     private DisplayMetrics dm;
     private int windowWidth;
@@ -163,7 +176,11 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		heightMap = new HeightMap();
 		tower= new HeightMap();
 		nacelle = new HeightMap(); 
-		porche = new HeightMap(); 
+		head = new HeightMap(); 
+		topbody = new HeightMap(); 
+		bottombody = new HeightMap(); 
+		wings = new HeightMap(); 
+		eyeofqueen = new HeightMap(); 
 		// Set the background clear color to black.
 		//////GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -200,19 +217,80 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 
 		final int vertexShaderHandle = ShaderHelper.compileShader(GLES20.GL_VERTEX_SHADER, vertexShader);
 		final int fragmentShaderHandle = ShaderHelper.compileShader(GLES20.GL_FRAGMENT_SHADER, fragmentShader);
+		// Load the texture
+		texture_head = TextureHelper.loadTexture(lessonEightActivity,R.drawable.queen);		// 
+		GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);			
+		
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture_head);		
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);		
+		
+		//GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);		
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);			
 
+		texture_topbody = TextureHelper.loadTexture(lessonEightActivity,R.drawable.torso);		// 
+		GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);			
+		
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture_topbody);		
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);		
+		
+		//GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);		
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);			
+
+		
+		texture_legwings = TextureHelper.loadTexture(lessonEightActivity,R.drawable.legswings);		// 
+		GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);			
+		
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture_legwings);		
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);		
+		
+		//GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);		
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);			
+
+		
+		texture_eye_diff = TextureHelper.loadTexture(lessonEightActivity,R.drawable.eye_diff);		// 
+		GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);			
+		
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture_eye_diff);		
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);		
+		
+		//GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);		
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);			
+
+		
+		texture_eye_emis = TextureHelper.loadTexture(lessonEightActivity,R.drawable.eye_emis);		// 
+		GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);			
+		
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture_eye_emis);		
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);		
+			
+		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);			
+
+		
 		//program = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, new String[] {
 		//		POSITION_ATTRIBUTE, NORMAL_ATTRIBUTE, COLOR_ATTRIBUTE });
 		program = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, new String[] {
-				POSITION_ATTRIBUTE, NORMAL_ATTRIBUTE});
-		heightMap.MeshDataReader(lessonEightActivity,
+				POSITION_ATTRIBUTE, NORMAL_ATTRIBUTE,TEXCORD_ATTRIBUTE});
+/*		heightMap.MeshDataReader(lessonEightActivity,
 				R.raw.blade);
 		tower.MeshDataReader(lessonEightActivity,
 				R.raw.tower);	
 		nacelle.MeshDataReader(lessonEightActivity,
 				R.raw.nacelle);	
-	
 
+		head.PorcheDataReader(lessonEightActivity,
+				R.raw.head_withhair);	
+		topbody.PorcheDataReader(lessonEightActivity,
+				R.raw.top_body);	
+		bottombody.PorcheDataReader(lessonEightActivity,
+				R.raw.bottom_body);	
+		wings.PorcheDataReader(lessonEightActivity,
+				R.raw.blades);	
+		
+		
+		eyeofqueen.PorcheDataReader(lessonEightActivity,
+				R.raw.eyeofqueen1);	
+		*/
+		
 		dm = new DisplayMetrics();
 		lessonEightActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
 		windowWidth = dm.widthPixels;
@@ -232,10 +310,21 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		glText.load( "Roboto-Regular.ttf", 38, 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
 		// enable texture + alpha blending
         */
-		OscilloScope_1=new OscilloScope(lessonEightActivity,0,0.0f,0.0f,1.0f,(float)windowWidth*1.0f,(float)windowHeight*0.8f,5.0f,1.0f);
+		OscilloScope_1=new OscilloScope(lessonEightActivity,0,0.0f,50.0f,1.0f,(float)windowWidth*1.0f,(float)windowHeight*0.8f,5.0f,1.0f);
 	    //OscilloScope_1.SetDispWiodowSize(windowWidth,windowHeight);	
 	    OscilloScope_1.SetScopeParameters(windowHeight*0.56f,windowWidth*0.7f, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
 
+	    Button1=new Button(lessonEightActivity,0,0.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,2.0f,3.0f);
+	   Button1.SetDispWiodowSize(windowWidth,windowHeight);	
+	   	    
+	    
+	    
+	    gSychronousMotor = new SychronousMotor();
+	    
+	    LedList1 =new LedList(lessonEightActivity,(lessonEightActivity.getAssets()));
+	    LedList1.SetDigitalLedPara(6,30,8,4);
+	    
+	    m_TestData    =new float[4];
 		//porche.PorcheDataReader(lessonEightActivity,
 		//		R.raw.porsche);	
 		// Initialize the accumulated rotation matrix
@@ -250,7 +339,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);		
 		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);	*/	
-   
+       
 	}
 
 	@Override
@@ -288,6 +377,10 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
+		
+		//float m_timer;
+		//float[] m_TestData;
+		int[] digits =new int[]{1,2,3,4}; 
 	     
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
@@ -299,28 +392,62 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		// Set our per-vertex lighting program.
 		GLES20.glUseProgram(program);
 
-		// Set program handles for cube drawing.
+
+		
 		mvpMatrixUniform = GLES20.glGetUniformLocation(program, MVP_MATRIX_UNIFORM);
 		mvMatrixUniform = GLES20.glGetUniformLocation(program, MV_MATRIX_UNIFORM);
 		lightPosUniform = GLES20.glGetUniformLocation(program, LIGHT_POSITION_UNIFORM);
 		positionAttribute = GLES20.glGetAttribLocation(program, POSITION_ATTRIBUTE);
 		normalAttribute = GLES20.glGetAttribLocation(program, NORMAL_ATTRIBUTE);
+		texcordAttribute = GLES20.glGetAttribLocation(program, TEXCORD_ATTRIBUTE);
+		
 		//colorAttribute = GLES20.glGetAttribLocation(program, COLOR_ATTRIBUTE);
 
 		// Calculate position of the light. Push into the distance.
-		DrawWindTurbine(0.0f,0.0f,70.0f,0.5f,0);
+		//DrawWindTurbine(0.0f,-80.0f,70.0f,0.5f,0);
 		//DrawWindTurbine(30.0f,0.0f,20.0f,0.2f,1);
-		DrawWindTurbine(-60.0f,0.0f,50.0f,1.2f,2);
-		DrawWindTurbine(60.0f,0.0f,30.0f,3.2f,3);
+		//DrawWindTurbine(-60.0f,0.0f,50.0f,1.2f,2);
+		//DrawWindTurbine(60.0f,0.0f,30.0f,3.2f,3);
 		GLES20.glUseProgram(0);
 		
-		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrixFont, 0);
+
+		
+
 		
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glDisable(GLES20.GL_BLEND);
 		
 		//GLES20.gl
+		gSychronousMotor.CalculateRealTimeData(1);
+		//m_timer = gSychronousMotor.getTime()*20;
+		/*m_TestData[0] = gSychronousMotor.getTime()*20;
+		m_TestData[1] = 1.0f;
+		m_TestData[2] = 100;
+		m_TestData[3] = 200;*/
+		m_timer+= 1.0f;
+		m_TestData = gSychronousMotor.getOutput();
+		 for(int i=0;i<4;i++)
+			 m_TestData[i] =2000*(i+1)*(float)Math.cos(m_timer/500.0f)*(float)Math.sin((i+1)*m_timer/40.0f+i*5.0f);
+		    			//float yyy=2000*cos(double(iFrames)/500.0)*sin(double(iFrames)/4.0);    
+		
+		OscilloScope_1.ReciedveData(m_timer,m_TestData);
 		OscilloScope_1.Render(viewMatrixFont);
+		
+		Button1.Render(viewMatrixFont);
+		
+		
+		Matrix.setLookAtM(viewMatrix, 0, (0.0f-deltaY) *(float)java.lang.Math.cos(deltaX*0.015f),0.0f, (0.0f-deltaY)*(float)java.lang.Math.sin(deltaX*0.015f), 0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f);
+		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+		
+		LedList1.SetMvpMatrix(mvpMatrix);
+		LedList1.SetColor( 0.0f, 1.0f, 0.0f, 1.0f );  
+		digits[3] = (int)m_timer-((int)m_timer/10)*10;
+		digits[2] = (int)(m_timer/10)-((int)m_timer/100)*10;
+		digits[1] = (int)(m_timer/100)-((int)m_timer/1000)*10;
+		digits[0] = (int)(m_timer/1000)-((int)m_timer/10000)*10;
+		LedList1.draw( digits,-100,50,-580,0,0.0f,0); 
+		LedList1.RenderLedList();	
+
 		// TEST: render the entire font texture
 		//GLES20.glColorMask({0.0, 1.0, 0.0,0.5},0,0)
 		//glText.drawTexture( width/2, height/2, mVPMatrix);            // Draw the Entire Texture
@@ -510,7 +637,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 			GLES20.glUniform3f(lightPosUniform, lightPosInEyeSpace[0], lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
 
 			// Render the heightmap.
-			heightMap.render();
+			////heightMap.render();
 			
 			Matrix.setIdentityM(modelMatrix, 0);
 			Matrix.translateM(modelMatrix, 0, moveX, -40.0f+moveY, moveZ);
@@ -522,10 +649,25 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mvpMatrix, 0);
 			GLES20.glUniform3f(lightPosUniform, lightPosInEyeSpace[0], lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
 			// Render the heightmap.
-			tower.render();
-			nacelle.render();
-			//porche.render();
-	
+			////tower.render();
+			////nacelle.render();
+			
+			// Set program handles for cube drawing.
+	        TextureUniformHandle = GLES20.glGetUniformLocation(program, TEXTURE_UNIFORM);		
+			GLES20.glActiveTexture(GLES20.GL_TEXTURE0);  // Set the active texture unit to texture unit 0			
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture_head); // Bind the texture to this unit			
+			GLES20.glUniform1i(TextureUniformHandle, 0); 	
+			head.render();
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture_topbody); // Bind the texture to this unit			
+			GLES20.glUniform1i(TextureUniformHandle, 0); 	
+			topbody.render();
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture_legwings); // Bind the texture to this unit			
+			GLES20.glUniform1i(TextureUniformHandle, 0); 	
+			bottombody.render();
+			wings.render();
+			GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture_eye_emis); // Bind the texture to this unit			
+			GLES20.glUniform1i(TextureUniformHandle, 0); 			
+			eyeofqueen.render();
 
 		 
 	 }
@@ -535,7 +677,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		static final float MIN_POSITION = -5f;
 		static final float POSITION_RANGE = 10f;
 
-		final int[] vbo = new int[2];
+		final int[] vbo = new int[3];
 		final int[] ibo = new int[1];
 /*        final float[] kzVertices = RawResourceReader.MeshDataReader(lessonEightActivity,
 				R.raw.blade);*/
@@ -696,17 +838,23 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 						0, 0);
 				GLES20.glEnableVertexAttribArray(positionAttribute);
 
+				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[1]);
 				GLES20.glVertexAttribPointer(normalAttribute, NORMAL_DATA_SIZE_IN_ELEMENTS, GLES20.GL_FLOAT, false,
 						0, 0);
 				GLES20.glEnableVertexAttribArray(normalAttribute);
 
+				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[2]);
+				GLES20.glVertexAttribPointer(texcordAttribute, 2, GLES20.GL_FLOAT, false,
+						0, 0);
+				GLES20.glEnableVertexAttribArray(texcordAttribute);			
+				
 				//GLES20.glVertexAttribPointer(colorAttribute, COLOR_DATA_SIZE_IN_ELEMENTS, GLES20.GL_FLOAT, false,
 				//		STRIDE, (POSITION_DATA_SIZE_IN_ELEMENTS + NORMAL_DATA_SIZE_IN_ELEMENTS) * BYTES_PER_FLOAT);
 				//GLES20.glEnableVertexAttribArray(colorAttribute);
 
 				// Draw
 				GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
-				//GLES20.glDrawElements(GLES20.GL_TRIANGLES, indexCount, GLES20.GL_UNSIGNED_SHORT, 0);
+				//GLES20.glDrawElements(GLES20.GL_LINES, indexCount, GLES20.GL_UNSIGNED_SHORT, 0);
 				GLES20.glDrawElements(GLES20.GL_TRIANGLES, indexCount, GLES20.GL_UNSIGNED_SHORT, 0);
 
 				GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
@@ -913,19 +1061,20 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 				}
 					//float[] verts = new float[(numFaces * 3)
 			        //                  * (3 + (numNormals > 0 ? 3 : 0) + (numUV > 0 ? 2 : 0))];
-	    /*
+	    
 					float[] Vertices = new float[numFaces*9];
 					float[] Normals = new float[numFaces*9];
-					short[] Index = new short[numFaces*3];
-					for (int i = 0, vi = 0,ni =0,ii =0; i < numFaces * 3; i++) {
+					float[] Texture = new float[numFaces*6];
+					short[] Index = new short[numFaces*9];
+					for (int i = 0, ti=0,vi = 0,ni =0,ii =0; i < numFaces * 3; i++) {
 						int vertexIdx = facesVerts[i] * 3;
-						Vertices[vi++] = vertices[vertexIdx];
-						Vertices[vi++] = vertices[vertexIdx + 1];
-						Vertices[vi++] = vertices[vertexIdx + 2];
+						Vertices[vi++] = vertices[vertexIdx]*20;
+						Vertices[vi++] = vertices[vertexIdx + 1]*20;
+						Vertices[vi++] = vertices[vertexIdx + 2]*20;
 						if (numUV > 0) {
 						int uvIdx = facesUV[i] * 2;
-						verts[vi++] = uv[uvIdx];
-						verts[vi++] = 1 - uv[uvIdx + 1];
+						Texture[ti++] = uv[uvIdx];
+						Texture[ti++] = 1 - uv[uvIdx + 1];
 						}
 						if (numNormals > 0) {
 							int normalIdx = facesNormals[i] * 3;
@@ -936,13 +1085,14 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 						Index[ii++] = (short)(3*i);
 						Index[ii++] = (short)(3*i+1);
 						Index[ii++] = (short)(3*i+2);
-					}*/
+					}
 			
 			//float[] Vertices = new float[]{100.0f,50.0f,0.0f,10.0f,0.0f,180.0f,0.0f,10.0f,100.0f};
 			//float[] Normals = new float[]{1.0f,1.0f,0.0f,1.0f,1.0f,0.0f,1.0f,1.0f,0.0f};
 			//short[] Index = new short[]{0,1,2,1,1,2,0};	
-			float[] Vertices = new float[numVertices*3];
+			/*float[] Vertices = new float[numVertices*3];
 			float[] Normals = new float[vertexIndex];
+			//float[] Texture = new float[vertexIndex];
 			short[] Index = new short[22011*3];
 			for (int i = 0; i < numVertices; i++) {
 				
@@ -963,7 +1113,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 			}
 			for (int i = 0; i < 22011*3; i++) {
 				Index[i] = (short)facesVerts[i];
-			}		
+			}	*/	
 					//return 	Vertices;	 
 					final FloatBuffer BladeVertexDataBuffer = ByteBuffer
 							.allocateDirect(Vertices.length * BYTES_PER_FLOAT).order(ByteOrder.nativeOrder())
@@ -975,6 +1125,13 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 							.asFloatBuffer();
 					BladeNormalDataBuffer.put(Normals).position(0);
 					
+					
+					final FloatBuffer BladeTextureDataBuffer = ByteBuffer
+							.allocateDirect(Texture.length * BYTES_PER_FLOAT).order(ByteOrder.nativeOrder())
+							.asFloatBuffer();
+					BladeTextureDataBuffer.put(Texture).position(0);
+									
+					
 					final ShortBuffer BladeIndexDataBuffer = ByteBuffer
 							.allocateDirect(Index.length * BYTES_PER_SHORT).order(ByteOrder.nativeOrder())
 							.asShortBuffer();
@@ -982,7 +1139,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 					
 					indexCount = Index.length;
 					
-					GLES20.glGenBuffers(2, vbo, 0);
+					GLES20.glGenBuffers(3, vbo, 0);
 					GLES20.glGenBuffers(1, ibo, 0);
 
 					if (vbo[0] > 0 && ibo[0] > 0 && vbo[1] > 0) {
@@ -994,6 +1151,10 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 						GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, BladeNormalDataBuffer.capacity() * BYTES_PER_FLOAT,
 								BladeNormalDataBuffer, GLES20.GL_STATIC_DRAW);
 						
+						GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[2]);
+						GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, BladeTextureDataBuffer.capacity() * BYTES_PER_FLOAT,
+								BladeTextureDataBuffer, GLES20.GL_STATIC_DRAW);
+												
 						GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
 						GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, BladeIndexDataBuffer.capacity()
 								* BYTES_PER_SHORT, BladeIndexDataBuffer, GLES20.GL_STATIC_DRAW);

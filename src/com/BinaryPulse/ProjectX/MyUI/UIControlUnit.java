@@ -22,7 +22,7 @@ public abstract class  UIControlUnit{
 	 
 	  
 	  protected  int     	m_ControlType;
-	  protected  static float   	m_OffSetX,m_OffSetY,m_Scale,m_Width,m_Height,m_PositionCoordinate,m_IntervalCoordinate;
+	  protected  float   	m_OffSetX,m_OffSetY,m_Scale,m_Width,m_Height,m_PositionCoordinate,m_IntervalCoordinate;
 	  protected	 boolean    m_IsOnfocus;
 	  protected	 boolean    m_IsActive;
 

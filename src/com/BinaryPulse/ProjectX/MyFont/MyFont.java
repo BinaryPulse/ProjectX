@@ -61,7 +61,7 @@ public class MyFont {
 	public final static int FONT_SIZE_MIN = 6;         // Minumum Font Size (Pixels)
 	public final static int FONT_SIZE_MAX = 180;       // Maximum Font Size (Pixels)
 
-	public final static int CHAR_BATCH_SIZE = 24;     // Number of Characters to Render Per Batch
+	public final static int CHAR_BATCH_SIZE = 100;//24;     // Number of Characters to Render Per Batch
 													  // must be the same as the size of u_MVPMatrix 
 													  // in BatchTextProgram
 	
@@ -130,8 +130,9 @@ public class MyFont {
 	private float[] vertexBuffer = new float[CHAR_BATCH_SIZE * VERTICES_PER_SPRITE * VERTEX_SIZE];  // Create Vertex Buffer
 	private short[] indexBuffer = new short[CHAR_BATCH_SIZE * INDICES_PER_SPRITE];  // Create Temp Index Buffer
 	private int bufferIndex;                                   // Vertex Buffer Start Index
-	private int numSprites;                                    // Number of Sprites Currently in Buffer	
-	private float[] uMVPMatrices = new float[CHAR_BATCH_SIZE*16]; 
+	private int numSprites;
+	private int matrixIndex;// Number of Sprites Currently in Buffer	
+	private float[] uMVPMatrices = new float[12*16]; 
 	//--Constructor--//
 	// D: save program + asset manager, create arrays, and initialize the members
 	public MyFont(Context context,AssetManager assets) {
@@ -179,6 +180,10 @@ public class MyFont {
 		
 		GLES20.glGenBuffers(1, vbo, 0);
 		GLES20.glGenBuffers(1, ibo, 0);
+		
+		bufferIndex =0;
+		matrixIndex =0;
+		numSprites  =0;
 	}
 	
 
@@ -361,25 +366,25 @@ public class MyFont {
 		vertexBuffer[bufferIndex++] = y1;               // Add Y for Vertex 0
 		vertexBuffer[bufferIndex++] = region.u1;        // Add U for Vertex 0
 		vertexBuffer[bufferIndex++] = region.v2;        // Add V for Vertex 0
-		vertexBuffer[bufferIndex++] = numSprites;
+		vertexBuffer[bufferIndex++] = matrixIndex;
 
 		vertexBuffer[bufferIndex++] = x2;               // Add X for Vertex 1
 		vertexBuffer[bufferIndex++] = y1;               // Add Y for Vertex 1
 		vertexBuffer[bufferIndex++] = region.u2;        // Add U for Vertex 1
 		vertexBuffer[bufferIndex++] = region.v2;        // Add V for Vertex 1
-		vertexBuffer[bufferIndex++] = numSprites;
+		vertexBuffer[bufferIndex++] = matrixIndex;
 
 		vertexBuffer[bufferIndex++] = x2;               // Add X for Vertex 2
 		vertexBuffer[bufferIndex++] = y2;               // Add Y for Vertex 2
 		vertexBuffer[bufferIndex++] = region.u2;        // Add U for Vertex 2
 		vertexBuffer[bufferIndex++] = region.v1;        // Add V for Vertex 2
-		vertexBuffer[bufferIndex++] = numSprites;
+		vertexBuffer[bufferIndex++] = matrixIndex;
 
 		vertexBuffer[bufferIndex++] = x1;               // Add X for Vertex 3
 		vertexBuffer[bufferIndex++] = y2;               // Add Y for Vertex 3
 		vertexBuffer[bufferIndex++] = region.u1;        // Add U for Vertex 3
 		vertexBuffer[bufferIndex++] = region.v1;        // Add V for Vertex 3
-		vertexBuffer[bufferIndex++] = numSprites;
+		vertexBuffer[bufferIndex++] = matrixIndex;
 
 		// add the sprite mvp matrix to uMVPMatrices array
 		
@@ -387,7 +392,7 @@ public class MyFont {
 
 		//TODO: make sure numSprites < 24
 		for (int m = 0; m < 16; m++) {
-			uMVPMatrices[numSprites*16+m] = mVPMatrix[m];
+			uMVPMatrices[matrixIndex*16+m] = mVPMatrix[m];
 		}
 		
 		numSprites++;                                   // Increment Sprite Count
@@ -434,7 +439,7 @@ public void RenderFont(){
 		// Set program handles for cube drawing.
 		mvpMatrixUniform = GLES20.glGetUniformLocation(program, MVP_MATRIX_UNIFORM);
 		//GLES20.glUniformMatrix4fv(mvpMatrixUniform, numSprites, false, modelMatrix, 0);
-		GLES20.glUniformMatrix4fv(mvpMatrixUniform, numSprites, false, uMVPMatrices, 0);
+		GLES20.glUniformMatrix4fv(mvpMatrixUniform, matrixIndex, false, uMVPMatrices, 0);
 		//GLES20.glEnableVertexAttribArray(mvpMatrixUniform);
 		//mvMatrixUniform = GLES20.glGetUniformLocation(program, MV_MATRIX_UNIFORM);
 		//lightPosUniform = GLES20.glGetUniformLocation(program, LIGHT_POSITION_UNIFORM);
@@ -472,6 +477,10 @@ public void RenderFont(){
 		GLES20.glUseProgram(0);
 		
 	}		
+	
+	bufferIndex =0;
+	matrixIndex =0;
+	numSprites  =0;
 }
 
 	//--Draw Text--//
@@ -495,8 +504,8 @@ public void RenderFont(){
 		letterX = letterY = 0;
 
 
-		short j = 0;                                    // Counter
-		for ( int k = 0; k < len; k+= INDICES_PER_SPRITE, j += VERTICES_PER_SPRITE)  {  // FOR Each Index Set (Per Sprite)
+		short j = (short)(numSprites*VERTICES_PER_SPRITE);                                    // Counter
+		for ( int k = numSprites*INDICES_PER_SPRITE; k < len +numSprites*INDICES_PER_SPRITE; k+= INDICES_PER_SPRITE, j += VERTICES_PER_SPRITE)  {  // FOR Each Index Set (Per Sprite)
 			indexBuffer[k + 0] = (short)( j + 0 );           // Calculate Index 0
 			indexBuffer[k + 1] = (short)( j + 1 );           // Calculate Index 1
 			indexBuffer[k + 2] = (short)( j + 2 );           // Calculate Index 2
@@ -505,8 +514,7 @@ public void RenderFont(){
 			indexBuffer[k + 5] = (short)( j + 0 );           // Calculate Index 5
 		}		
 		
-		bufferIndex =0;
-		numSprites  =0;
+
 		// create a model matrix based on x, y and angleDeg
 		float[] modelMatrix = new float[16];
 		Matrix.setIdentityM(modelMatrix, 0);
@@ -539,11 +547,10 @@ public void RenderFont(){
 			
 			//letterX += (float)(charWidths[c]) * scaleX;//cellWidth * scaleX/2.0f;//(charWidths[c]) * scaleX;    // Advance X Position by Scaled Character Width
 		}
+		matrixIndex++;
+		//RenderFont();
 		
-		RenderFont();
-		
-		bufferIndex =0;
-		numSprites  =0;
+
 	}
 	public void draw(String text, float x, float y, float z, float angleDegZ) {
 		draw(text, x, y, z, 0, 0, angleDegZ);
