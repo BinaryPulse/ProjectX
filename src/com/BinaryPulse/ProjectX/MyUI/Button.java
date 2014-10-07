@@ -55,7 +55,7 @@ public class Button extends UIControlUnit {
 	private static final String LIGHT_POSITION_UNIFORM = "u_LightPos";
 
 	private static final String POSITION_ATTRIBUTE = "a_Position";
-	private static final String NORMAL_ATTRIBUTE = "a_Normal";
+	private static final String COLOR_ATTRIBUTE = "a_Color";
 	private static final String TEXCORD_ATTRIBUTE = "a_TexCoordinate";
 	private static final String TEXTURE_UNIFORM = "u_Texture";
 	private static final String COLOR_UNIFORM = "u_Color";
@@ -140,50 +140,93 @@ void  DrawControlBorder(float[] modelMatrix){//boolean AnimationEnabled ){
 
 public void InitGLDataForBorder()
 {
-	  
+	/*float vertexBuffer[] = {
+			  
+			0.48f-m_IntervalCoordinate, 0,
+			0.0f,  m_Width*m_CornerProportion*m_Scale+m_BorderWidth, 0.0f,
+			0.48f-m_IntervalCoordinate, 0.1f,
+			m_BorderWidth, m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth, 0.0f,//
+
+			0.6f-m_IntervalCoordinate, 0,
+			m_Width*m_CornerProportion*m_Scale+m_BorderWidth, 0.0f, 0.0f,
+			0.6f-m_IntervalCoordinate, 0.1f,
+	        m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth, m_BorderWidth, 0.0f,//
+
+			0.9f-m_IntervalCoordinate, 0,
+	        m_Width*m_Scale+2*m_BorderWidth, 0.0f, 0.0f,
+			0.9f-m_IntervalCoordinate, 0.1f,
+	        m_Width*m_Scale+m_BorderWidth, m_BorderWidth, 0.0f,
+
+			1-m_IntervalCoordinate, 0,
+			m_Width*m_Scale+2*m_BorderWidth, (m_Height-m_Width*m_CornerProportion)*m_Scale+1.5f*m_BorderWidth, 0.0f,
+			1-m_IntervalCoordinate, 0.1f,
+	        m_Width*m_Scale+m_BorderWidth, (m_Height-m_Width*m_CornerProportion)*m_Scale+m_BorderWidth, 0.0f,//
+
+
+			0.48f-m_IntervalCoordinate, 0,
+			m_Width*m_Scale+2*m_BorderWidth, (m_Height-m_Width*m_CornerProportion)*m_Scale+1.5f*m_BorderWidth, 0.0f,
+			0.48f-m_IntervalCoordinate, 0.1f,
+	        m_Width*m_Scale+m_BorderWidth, (m_Height-m_Width*m_CornerProportion)*m_Scale+m_BorderWidth, 0.0f,//
+	        
+			0.6f-m_IntervalCoordinate, 0,
+	        m_Width*(1-m_CornerProportion)*m_Scale+1.5f*m_BorderWidth, m_Height*m_Scale+2*m_BorderWidth, 0.0f,//
+			0.6f-m_IntervalCoordinate, 0.1f,
+	        m_Width*(1-m_CornerProportion)*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth, 0.0f,		 
+			 
+	        0.9f-m_IntervalCoordinate, 0,
+	        0.0f, m_Height*m_Scale+2*m_BorderWidth, 0.0f,
+			0.9f-m_IntervalCoordinate, 0.1f,
+			m_BorderWidth, m_Height*m_Scale+m_BorderWidth, 0.0f,
+
+		    1-m_IntervalCoordinate, 0,
+	        0.0f, m_Width*m_CornerProportion*m_Scale+m_BorderWidth, 0.0f,
+		    1-m_IntervalCoordinate, 0.1f,
+	        m_BorderWidth, m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth, 0.0f   
+		  
+		};*/ 
     // initiate vertex buffer for border 	
 	float vertexBuffer[] = {
 	  
 		0.48f-m_IntervalCoordinate, 0,
-		0.0f, m_Width*m_CornerProportion*m_Scale+m_BorderWidth, 0.0f,
+		0.0f,  m_Height*m_Scale+m_BorderWidth-( m_Width*m_CornerProportion*m_Scale+m_BorderWidth), 0.0f,
 		0.48f-m_IntervalCoordinate, 0.1f,
-		m_BorderWidth, m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth, 0.0f,//
+		m_BorderWidth, m_Height*m_Scale+m_BorderWidth-(m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth), 0.0f,//
 
 		0.6f-m_IntervalCoordinate, 0,
-		m_Width*m_CornerProportion*m_Scale+m_BorderWidth, 0.0f, 0.0f,
+		m_Width*m_CornerProportion*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth- 0.0f, 0.0f,
 		0.6f-m_IntervalCoordinate, 0.1f,
-        m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth, m_BorderWidth, 0.0f,//
+        m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth, m_Height*m_Scale+m_BorderWidth- m_BorderWidth, 0.0f,//
 
 		0.9f-m_IntervalCoordinate, 0,
-        m_Width*m_Scale+2*m_BorderWidth, 0.0f, 0.0f,
+        m_Width*m_Scale+2*m_BorderWidth, m_Height*m_Scale+m_BorderWidth- 0.0f, 0.0f,
 		0.9f-m_IntervalCoordinate, 0.1f,
-        m_Width*m_Scale+m_BorderWidth, m_BorderWidth, 0.0f,
+        m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth- m_BorderWidth, 0.0f,
 
 		1-m_IntervalCoordinate, 0,
-		m_Width*m_Scale+2*m_BorderWidth, (m_Height-m_Width*m_CornerProportion)*m_Scale+1.5f*m_BorderWidth, 0.0f,
+		m_Width*m_Scale+2*m_BorderWidth,m_Height*m_Scale+m_BorderWidth-( (m_Height-m_Width*m_CornerProportion)*m_Scale+1.5f*m_BorderWidth), 0.0f,
 		1-m_IntervalCoordinate, 0.1f,
-        m_Width*m_Scale+m_BorderWidth, (m_Height-m_Width*m_CornerProportion)*m_Scale+m_BorderWidth, 0.0f,//
+        m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth-((m_Height-m_Width*m_CornerProportion)*m_Scale+m_BorderWidth), 0.0f,//
 
 
 		0.48f-m_IntervalCoordinate, 0,
-		m_Width*m_Scale+2*m_BorderWidth, (m_Height-m_Width*m_CornerProportion)*m_Scale+1.5f*m_BorderWidth, 0.0f,
+		m_Width*m_Scale+2*m_BorderWidth, m_Height*m_Scale+m_BorderWidth-((m_Height-m_Width*m_CornerProportion)*m_Scale+1.5f*m_BorderWidth), 0.0f,
 		0.48f-m_IntervalCoordinate, 0.1f,
-        m_Width*m_Scale+m_BorderWidth, (m_Height-m_Width*m_CornerProportion)*m_Scale+m_BorderWidth, 0.0f,//
+        m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth-((m_Height-m_Width*m_CornerProportion)*m_Scale+m_BorderWidth), 0.0f,//
         
 		0.6f-m_IntervalCoordinate, 0,
-        m_Width*(1-m_CornerProportion)*m_Scale+1.5f*m_BorderWidth, m_Height*m_Scale+2*m_BorderWidth, 0.0f,//
+        m_Width*(1-m_CornerProportion)*m_Scale+1.5f*m_BorderWidth,m_Height*m_Scale+m_BorderWidth-( m_Height*m_Scale+2*m_BorderWidth), 0.0f,//
 		0.6f-m_IntervalCoordinate, 0.1f,
-        m_Width*(1-m_CornerProportion)*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth, 0.0f,		 
+        m_Width*(1-m_CornerProportion)*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth-(m_Height*m_Scale+m_BorderWidth), 0.0f,		 
 		 
         0.9f-m_IntervalCoordinate, 0,
-        0.0f, m_Height*m_Scale+2*m_BorderWidth, 0.0f,
+        0.0f, m_Height*m_Scale+m_BorderWidth-(m_Height*m_Scale+2*m_BorderWidth), 0.0f,
 		0.9f-m_IntervalCoordinate, 0.1f,
-		m_BorderWidth, m_Height*m_Scale+m_BorderWidth, 0.0f,
+		m_BorderWidth, m_Height*m_Scale+m_BorderWidth-(m_Height*m_Scale+m_BorderWidth), 0.0f,
 
 	    1-m_IntervalCoordinate, 0,
-        0.0f, m_Width*m_CornerProportion*m_Scale+m_BorderWidth, 0.0f,
+        0.0f, m_Height*m_Scale+m_BorderWidth-(m_Width*m_CornerProportion*m_Scale+m_BorderWidth), 0.0f,
 	    1-m_IntervalCoordinate, 0.1f,
-        m_BorderWidth, m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth, 0.0f   
+        m_BorderWidth, m_Height*m_Scale+m_BorderWidth-(m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth), 0.0f   
 	  
 	};
 
@@ -223,8 +266,11 @@ void DrawControlArea(float[] modelMatrix){
 	//GLES20.glEnable(GLES20.GL_BLEND);  
 	//GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);	
 		
-		float[] color = {0.0f,0.3f, 0.3f, 0.3f};		
-		
+		//float[] color = {0.0f,0.3f, 0.3f, 0.3f};		
+	GLES20.glEnable(GLES20.GL_BLEND);
+	//GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+	GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+	
 		Matrix.setIdentityM(mMVPMatrix, 0);
 		Matrix.translateM(mMVPMatrix, 0, m_OffSetX -mWindowWidth/2.0f, m_OffSetY -mWindowHeight/2.0f, 0);	
 		Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);
@@ -232,19 +278,24 @@ void DrawControlArea(float[] modelMatrix){
 		if (vbo[1] > 0 && ibo[1] > 0) {		
 			
 			GLES20.glUseProgram(program[1]);
-			ColorHandle          = GLES20.glGetUniformLocation(program[1], COLOR_UNIFORM);	        
+			/*ColorHandle          = GLES20.glGetUniformLocation(program[1], COLOR_UNIFORM);	        
 			GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
 			GLES20.glEnableVertexAttribArray(ColorHandle);
-		
+			 */
 			// Set program handles for cube drawing.
 			mvpMatrixUniform = GLES20.glGetUniformLocation(program[1], MVP_MATRIX_UNIFORM);
 			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mMVPMatrix, 0);
+			
 			positionAttribute = GLES20.glGetAttribLocation(program[1], POSITION_ATTRIBUTE);
+			colorAttribute = GLES20.glGetAttribLocation(program[1], COLOR_ATTRIBUTE);
 			
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[1]);
 			// Bind Attributes
-			GLES20.glVertexAttribPointer(positionAttribute, 3, GLES20.GL_FLOAT, false,3*4, 0);
+			GLES20.glVertexAttribPointer(positionAttribute, 3, GLES20.GL_FLOAT, false,7*4, 0);
 			GLES20.glEnableVertexAttribArray(positionAttribute);
+			
+			GLES20.glVertexAttribPointer(colorAttribute, 4, GLES20.GL_FLOAT, false,7*4, 3*4);
+			GLES20.glEnableVertexAttribArray(colorAttribute);			
 			// Draw
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[1]);
 			GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 8, GLES20.GL_UNSIGNED_SHORT, 0);
@@ -261,35 +312,64 @@ public void InitGLDataForArea()
 {
 	  
     // initiate vertex buffer for border 	
-	float vertexBuffer[] = {
+/*	float vertexBuffer[] = {
 
 			 //0.5f+0.5f*m_PositionCoordinate,0.5f-0.5f*m_PositionCoordinate,
 			 m_Width*m_Scale+m_BorderWidth, m_BorderWidth, 0.0f,
-	       
+			 0.0f,0.0f,0.6f,0.5f,  
 			 //0.5f-0.45f*m_PositionCoordinate,0.5f-0.5f*m_PositionCoordinate,         
 			 m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth, m_BorderWidth, 0.0f,
-              
+			 0.0f,0.0f,0.6f,0.5f,               
 			 // 0.5f+0.5f*m_PositionCoordinate,0.5f-0.45f*m_PositionCoordinate,         
 			 m_Width*m_Scale+m_BorderWidth, m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth, 0.0f,
-             
+			 0.0f,0.0f,0.6f,0.5f,               
 			 //0.5f-0.5f*m_PositionCoordinate,0.5f-0.45f*m_PositionCoordinate,
 			 m_BorderWidth, m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth, 0.0f,
-
+			 0.0f,0.0f,0.6f,0.5f,
 			 //0.5f+0.5f*m_PositionCoordinate,0.5f+0.45f*m_PositionCoordinate,
 			 m_Width*m_Scale+m_BorderWidth, (m_Height-m_Width*m_CornerProportion)*m_Scale+m_BorderWidth, 0.0f,
-     
+			 0.0f,0.0f,0.6f,0.5f,    
 
 			 //0.5f-0.5f*m_PositionCoordinate,0.5f+0.45f*m_PositionCoordinate,
 			 m_BorderWidth, (m_Height-m_Width*m_CornerProportion)*m_Scale+m_BorderWidth, 0.0f,
-	     
+			 0.0f,0.0f,0.6f,0.5f,	     
 			 //0.5f+0.45f*m_PositionCoordinate,0.5f+0.5f*m_PositionCoordinate,  
 			 m_Width*(1-m_CornerProportion)*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth, 0.0f,
-	     
+			 0.6f,0.6f,0.6f,0.3f,	    
 			 //0.5f-0.5f*m_PositionCoordinate,0.5f+0.5f*m_PositionCoordinate,		 
-			 m_BorderWidth, m_Height*m_Scale+m_BorderWidth, 0.0f
+			 m_BorderWidth, m_Height*m_Scale+m_BorderWidth, 0.0f,
+			 0.6f,0.6f,0.6f,0.3f
+	  
+	};*/
+	float vertexBuffer[] = {
+
+			 //0.5f+0.5f*m_PositionCoordinate,0.5f-0.5f*m_PositionCoordinate,
+			 m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth -m_BorderWidth, 0.0f,
+			 0.6f,0.6f,0.6f,0.3f,
+			 //0.5f-0.45f*m_PositionCoordinate,0.5f-0.5f*m_PositionCoordinate,         
+			 m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth, m_Height*m_Scale+m_BorderWidth -m_BorderWidth, 0.0f,
+			 0.6f,0.6f,0.6f,0.3f,             
+			 // 0.5f+0.5f*m_PositionCoordinate,0.5f-0.45f*m_PositionCoordinate,         
+			 m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth -(m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth), 0.0f,
+			 0.0f,0.0f,0.6f,0.5f,               
+			 //0.5f-0.5f*m_PositionCoordinate,0.5f-0.45f*m_PositionCoordinate,
+			 m_BorderWidth, m_Height*m_Scale+m_BorderWidth -(m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth), 0.0f,
+			 0.0f,0.0f,0.6f,0.5f,
+			 //0.5f+0.5f*m_PositionCoordinate,0.5f+0.45f*m_PositionCoordinate,
+			 m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth -((m_Height-m_Width*m_CornerProportion)*m_Scale+m_BorderWidth), 0.0f,
+			 0.0f,0.0f,0.6f,0.5f,    
+
+			 //0.5f-0.5f*m_PositionCoordinate,0.5f+0.45f*m_PositionCoordinate,
+			 m_BorderWidth, m_Height*m_Scale+m_BorderWidth -((m_Height-m_Width*m_CornerProportion)*m_Scale+m_BorderWidth), 0.0f,
+			 0.0f,0.0f,0.6f,0.5f,	     
+			 //0.5f+0.45f*m_PositionCoordinate,0.5f+0.5f*m_PositionCoordinate,  
+			 m_Width*(1-m_CornerProportion)*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth -(m_Height*m_Scale+m_BorderWidth), 0.0f,
+			 0.0f,0.0f,0.6f,0.5f,	    
+			 //0.5f-0.5f*m_PositionCoordinate,0.5f+0.5f*m_PositionCoordinate,		 
+			 m_BorderWidth, m_Height*m_Scale+m_BorderWidth -(m_Height*m_Scale+m_BorderWidth), 0.0f,
+			 0.0f,0.0f,0.6f,0.5f
 	  
 	};
-
     short indexBuffer[]  ={0,1,2,3,4,5,6,7};	
 		
 	final FloatBuffer VertexDataBuffer = ByteBuffer
@@ -324,17 +404,15 @@ public void InitGLDataForArea()
 	  	float x,y,z;
 	  	 String s;
 		GLES20.glEnable(GLES20.GL_BLEND);
-		//GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-		//GLES20.glEnable(GLES20.GL_CULL_FACE);
 		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		// TEST: render some strings with the font
 		m_Font.SetMvpMatrix(modelMatrix);
-		s = "START";
+		//s = "START";
 		m_Font.SetColor( 0.0f, 1.0f, 1.0f, 1.0f );  
-		m_Font.draw( s ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -80, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -18, 0); 
+		m_Font.draw( m_TextString ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -80, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -25, 0); 
 		m_Font.RenderFont();
-
+		GLES20.glDisable(GLES20.GL_BLEND);
  }
 /***********************************************************************************
 子函数描述：UIControlUnit(), 初始化
@@ -404,9 +482,9 @@ void ShaderRelatedInit(Context context){
 
 	
 	String vertexShader1 = RawResourceReader.readTextFileFromRawResource(context,
-			R.raw.per_pixel_vertex_shader_for_panel);
+			R.raw.per_pixel_vertex_shader_for_area);
 	String fragmentShader1 = RawResourceReader.readTextFileFromRawResource(context,
-			R.raw.per_pixel_fragment_shader_for_panel);
+			R.raw.per_pixel_fragment_shader_for_area);
 
 	int vertexShaderHandle1 = ShaderHelper.compileShader(GLES20.GL_VERTEX_SHADER, vertexShader1);
 	int fragmentShaderHandle1 = ShaderHelper.compileShader(GLES20.GL_FRAGMENT_SHADER, fragmentShader1);
@@ -414,7 +492,7 @@ void ShaderRelatedInit(Context context){
 	//program = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, new String[] {
 	//		POSITION_ATTRIBUTE, NORMAL_ATTRIBUTE, COLOR_ATTRIBUTE });
 	program[1] = ShaderHelper.createAndLinkProgram(vertexShaderHandle1, fragmentShaderHandle1, new String[] {
-			POSITION_ATTRIBUTE,TEXCORD_ATTRIBUTE});	
+			POSITION_ATTRIBUTE,COLOR_ATTRIBUTE});	
 
 	// Load the texture
 	textureId = TextureHelper.loadTexture(m_Context,R.drawable.orb);		// 
@@ -469,7 +547,7 @@ public void SetDispWiodowSize(int width, int height)
 /***********************************************************************************
  子函数描述：AddCaption(), 主题标签
  ************************************************************************************/
-void AddCaption(String TextString,int TextLength,float FontSize,int FontList)
+public void AddCaption(String TextString)//,int TextLength,float FontSize,int FontList)
 {
 	 m_TextString  = TextString;
 

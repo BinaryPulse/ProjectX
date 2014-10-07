@@ -212,7 +212,7 @@ public void InitGLDataForBorder()
 	  
     // initiate vertex buffer for border 	
 	float zaxis = 0.0f;
-	float vertexBuffer[] = {
+	/*	float vertexBuffer[] = {
       0.48f, 0.0f,
       0.0f, 0.0f,zaxis,	  
 	  0.48f, 0.1f,
@@ -242,6 +242,39 @@ public void InitGLDataForBorder()
 	  0.0f, 0.0f,zaxis,	  
 	  1.0f, 0.1f,
 	  m_BorderWidth, m_BorderWidth ,zaxis
+
+	};*/
+	
+	float vertexBuffer[] = {
+      0.48f, 0.0f,
+      0.0f, m_Height*m_Scale+m_BorderWidth - 0.0f,zaxis,	  
+	  0.48f, 0.1f,
+      m_BorderWidth, m_Height*m_Scale+m_BorderWidth -m_BorderWidth,zaxis,
+
+	  0.8f, 0.0f,
+      m_Width*m_Scale+2*m_BorderWidth, m_Height*m_Scale+m_BorderWidth - 0.0f ,zaxis,	 
+	  0.8f, 0.1f,
+      m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth - m_BorderWidth,zaxis,
+
+	  1.0f, 0.0f,
+      m_Width*m_Scale+2*m_BorderWidth, m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+2*m_BorderWidth) ,zaxis,	  
+	  1.0f, 0.1f,
+      m_Width*m_Scale+m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+m_BorderWidth),zaxis,
+
+	  0.48f, 0.0f,
+	  m_Width*m_Scale+2*m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+2*m_BorderWidth) ,zaxis,	  
+	  0.48f, 0.1f,
+	  m_Width*m_Scale+m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+m_BorderWidth) ,zaxis, 	 
+
+	  0.8f, 0.0f,
+	  0.0f,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+2*m_BorderWidth),zaxis,	  
+	  0.8f, 0.1f,
+	  m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+m_BorderWidth),zaxis,
+
+	  1.0f, 0.0f,
+	  0.0f,  m_Height*m_Scale+m_BorderWidth - 0.0f,zaxis,	  
+	  1.0f, 0.1f,
+	  m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - m_BorderWidth ,zaxis
 
 	};
 
@@ -752,9 +785,9 @@ if (vbo[2] > 0 && ibo[2] > 0) {
 	m_DataColor[0] = new float[]{1.0f, 0.0f, 0.0f,1.0f};
 	m_DataColor[1] = new float[]{0.0f, 1.0f, 0.0f,1.0f};
 	m_DataColor[2] = new float[]{1.0f, 0.0f, 1.0f,1.0f};
-	m_DataColor[3] = new float[]{1.0f, 1.0f, 0.0f,1.0f};
-	
-	for(i =0; i<4;i++){
+    m_DataColor[3] = new float[]{1.0f, 1.0f, 0.0f,1.0f};
+
+	for(i =0; i<m_CurveNum;i++){
 		ColorHandle          = GLES20.glGetUniformLocation(program[1], COLOR_UNIFORM);
 		GLES20.glUniform4fv(ColorHandle, 1, m_DataColor[i] , 0); 
 		GLES20.glEnableVertexAttribArray(ColorHandle);		
@@ -980,7 +1013,7 @@ public OscilloScope(Context context,int ControlType,float OffSetX,float OffSetY,
 	GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 	// Load the font from file (set size + padding), creates the texture
 	// NOTE: after a successful call to this the font is ready for rendering!
-	m_Font.load( "Roboto-Regular.ttf", (int)(13*FontSize), 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
+	m_Font.load( "Roboto-Regular.ttf", (int)(18*FontSize), 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
 	
 }
 

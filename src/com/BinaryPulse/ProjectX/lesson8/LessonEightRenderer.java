@@ -154,6 +154,8 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
     private static OscilloScope OscilloScope_1;
     private static LedList LedList1;  
     private static Button Button1;   
+    private static Button Button2;   
+    private static Button Button3;   
     
     public static  SychronousMotor   gSychronousMotor;
     private static  float m_timer;
@@ -314,15 +316,22 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	    //OscilloScope_1.SetDispWiodowSize(windowWidth,windowHeight);	
 	    OscilloScope_1.SetScopeParameters(windowHeight*0.56f,windowWidth*0.7f, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
 
-	    Button1=new Button(lessonEightActivity,0,0.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,2.0f,3.0f);
+	    Button1=new Button(lessonEightActivity,0,0.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,3.0f,3.0f);
 	   Button1.SetDispWiodowSize(windowWidth,windowHeight);	
+	   Button1.AddCaption("START");
 	   	    
-	    
-	    
+	    Button2=new Button(lessonEightActivity,0,250.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,3.0f,3.0f);
+	   Button2.SetDispWiodowSize(windowWidth,windowHeight);	
+	   Button2.AddCaption("STOP");
+	   
+	    Button3=new Button(lessonEightActivity,0,500.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,3.0f,3.0f);
+	   Button3.SetDispWiodowSize(windowWidth,windowHeight);	
+	   Button3.AddCaption("SETING");
+	   
 	    gSychronousMotor = new SychronousMotor();
 	    
 	    LedList1 =new LedList(lessonEightActivity,(lessonEightActivity.getAssets()));
-	    LedList1.SetDigitalLedPara(6,30,8,4);
+	    LedList1.SetDigitalLedPara(5,30,8,4);
 	    
 	    m_TestData    =new float[4];
 		//porche.PorcheDataReader(lessonEightActivity,
@@ -434,7 +443,8 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		OscilloScope_1.Render(viewMatrixFont);
 		
 		Button1.Render(viewMatrixFont);
-		
+		Button2.Render(viewMatrixFont);	
+		Button3.Render(viewMatrixFont);	
 		
 		Matrix.setLookAtM(viewMatrix, 0, (0.0f-deltaY) *(float)java.lang.Math.cos(deltaX*0.015f),0.0f, (0.0f-deltaY)*(float)java.lang.Math.sin(deltaX*0.015f), 0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f);
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
