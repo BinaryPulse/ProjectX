@@ -23,7 +23,9 @@ public class Button extends UIControlUnit {
 
 	protected float   m_FontList;
 	protected int[]    m_Color;
-
+	protected float    m_AreaColor;
+	protected float    m_AreaColor1;
+	protected float    m_AreaColor2;
 
 	protected static int m_ActiveMouseX;
 	protected static int m_ActiveMouseY;
@@ -33,23 +35,24 @@ public class Button extends UIControlUnit {
 
 
 	/** This is a handle to our cube shading program. */
-	protected  int program[];						   // OpenGL Program object
+	/*protected  int program[];						   // OpenGL Program object
 	protected int ColorHandle;						   // Shader color handle	
 	protected int TextureUniformHandle;                 // Shader texture handle
 	protected int TextureMoveUniformHandle;
-	protected int textureId; 
+	protected int textureId; */
 	/** OpenGL handles to our program uniforms. */
-	protected  int mvpMatrixUniform;
+	/*protected  int mvpMatrixUniform;
 	protected  int mvMatrixUniform;
-	protected  int lightPosUniform;
+	protected  int lightPosUniform;*/
 
 	
 	/** OpenGL handles to our program attributes. */
-	protected int positionAttribute;
+	/*protected int positionAttribute;
 	protected int texcordAttribute;
-	protected int colorAttribute;	
+	protected int colorAttribute;*/	
 
 	/** Identifiers for our uniforms and attributes inside the shaders. */	
+	/*
 	private static final String MVP_MATRIX_UNIFORM = "u_MVPMatrix";
 	//private static final String MV_MATRIX_UNIFORM = "u_MVMatrix";
 	private static final String LIGHT_POSITION_UNIFORM = "u_LightPos";
@@ -63,13 +66,16 @@ public class Button extends UIControlUnit {
 	
 	protected int[] vbo = new int[3];
 	protected int[] ibo = new int[3];
-	
+	*/
 	//private float[] mVPMatrix;		
 	protected float[] mMVPMatrix = new float[16];	
-	protected float[] mcolor;	
-
+	//protected float[] mcolor;	
+    
     protected int mWindowWidth;
     protected int mWindowHeight;
+    
+    
+
 
 /*##############################################################################
            
@@ -80,7 +86,7 @@ public class Button extends UIControlUnit {
 /***********************************************************************************
 子函数描述：DrawControlBorder(bool AnimationEnabled), 绘制示波器边框
 ************************************************************************************/
-void  DrawControlBorder(float[] modelMatrix){//boolean AnimationEnabled ){
+/*void  DrawControlBorder(float[] modelMatrix){//boolean AnimationEnabled ){
 	
 	float[] color = {0.0f,1.0f, 1.0f, 0.0f};
 	
@@ -136,7 +142,7 @@ void  DrawControlBorder(float[] modelMatrix){//boolean AnimationEnabled ){
 		
 		GLES20.glUseProgram(0);
 	}
-}
+}*/
 
 public void InitGLDataForBorder()
 {
@@ -226,12 +232,35 @@ public void InitGLDataForBorder()
 	    1-m_IntervalCoordinate, 0,
         0.0f, m_Height*m_Scale+m_BorderWidth-(m_Width*m_CornerProportion*m_Scale+m_BorderWidth), 0.0f,
 	    1-m_IntervalCoordinate, 0.1f,
-        m_BorderWidth, m_Height*m_Scale+m_BorderWidth-(m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth), 0.0f   
+        m_BorderWidth, m_Height*m_Scale+m_BorderWidth-(m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth), 0.0f,
+         
 	  
 	};
 
     short indexBuffer[]  ={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};	
-		
+    
+    
+    vertexBufferForBorder = new float[16*5];
+    indexBufferForBorder = new short[16];
+    
+	for(int i =0;i<16;i++)
+	{
+		indexBufferForBorder[i] = indexBuffer[i];
+		vertexBufferForBorder[i*5] = vertexBuffer[i*5];
+		vertexBufferForBorder[i*5 +1] = vertexBuffer[i*5 +1];
+		vertexBufferForBorder[i*5 +2] = vertexBuffer[i*5 +2];
+		vertexBufferForBorder[i*5 +3] = vertexBuffer[i*5 +3];
+		vertexBufferForBorder[i*5 +4] = vertexBuffer[i*5 +4];
+	}
+	//indexBufferForBorder[16] = indexBuffer[16];
+    
+	Matrix.setIdentityM(mMVPMatrix, 0);
+	Matrix.translateM(mMVPMatrix, 0, m_OffSetX -mWindowWidth/2.0f, m_OffSetY -mWindowHeight/2.0f, 0);	
+	for(int i =0;i<16;i++)
+		mMVPMatrixForBorder[i] = mMVPMatrix[i];
+    
+   /* 
+    
 	final FloatBuffer VertexDataBuffer = ByteBuffer
 				.allocateDirect(vertexBuffer.length * 4).order(ByteOrder.nativeOrder())
 				.asFloatBuffer();
@@ -255,12 +284,12 @@ public void InitGLDataForBorder()
 
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-	} 
+	} */
 }
 /***********************************************************************************
 子函数描述：DrawControlArea(bool AnimationEnabled), 绘制示波器控制区域
 ************************************************************************************/
-void DrawControlArea(float[] modelMatrix){
+/*void DrawControlArea(float[] modelMatrix){
 	
          
 	//GLES20.glEnable(GLES20.GL_BLEND);  
@@ -278,10 +307,10 @@ void DrawControlArea(float[] modelMatrix){
 		if (vbo[1] > 0 && ibo[1] > 0) {		
 			
 			GLES20.glUseProgram(program[1]);
-			/*ColorHandle          = GLES20.glGetUniformLocation(program[1], COLOR_UNIFORM);	        
-			GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
-			GLES20.glEnableVertexAttribArray(ColorHandle);
-			 */
+			//ColorHandle          = GLES20.glGetUniformLocation(program[1], COLOR_UNIFORM);	        
+			//GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
+			//GLES20.glEnableVertexAttribArray(ColorHandle);
+			 
 			// Set program handles for cube drawing.
 			mvpMatrixUniform = GLES20.glGetUniformLocation(program[1], MVP_MATRIX_UNIFORM);
 			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mMVPMatrix, 0);
@@ -305,7 +334,7 @@ void DrawControlArea(float[] modelMatrix){
 		}
 		//GLES20.glDisable(GLES20.GL_BLEND);
   
-}
+}*/
 
 
 public void InitGLDataForArea()
@@ -341,37 +370,63 @@ public void InitGLDataForArea()
 			 0.6f,0.6f,0.6f,0.3f
 	  
 	};*/
+	m_AreaColor =0.0f;
+	m_AreaColor1 =0.1f;
+	m_AreaColor2 =0.5f;
+	float m_Alph =0.3f;
 	float vertexBuffer[] = {
 
 			 //0.5f+0.5f*m_PositionCoordinate,0.5f-0.5f*m_PositionCoordinate,
 			 m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth -m_BorderWidth, 0.0f,
-			 0.6f,0.6f,0.6f,0.3f,
+			 0.8f,0.8f,0.8f,0.3f,
 			 //0.5f-0.45f*m_PositionCoordinate,0.5f-0.5f*m_PositionCoordinate,         
 			 m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth, m_Height*m_Scale+m_BorderWidth -m_BorderWidth, 0.0f,
-			 0.6f,0.6f,0.6f,0.3f,             
+			 0.8f,0.8f,0.8f,0.3f,             
 			 // 0.5f+0.5f*m_PositionCoordinate,0.5f-0.45f*m_PositionCoordinate,         
 			 m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth -(m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth), 0.0f,
-			 0.0f,0.0f,0.6f,0.5f,               
+			 m_AreaColor1,m_AreaColor,m_AreaColor2,m_Alph,              
 			 //0.5f-0.5f*m_PositionCoordinate,0.5f-0.45f*m_PositionCoordinate,
 			 m_BorderWidth, m_Height*m_Scale+m_BorderWidth -(m_Width*m_CornerProportion*m_Scale+1.5f*m_BorderWidth), 0.0f,
-			 0.0f,0.0f,0.6f,0.5f,
+			 m_AreaColor1,m_AreaColor,m_AreaColor2,m_Alph,     
 			 //0.5f+0.5f*m_PositionCoordinate,0.5f+0.45f*m_PositionCoordinate,
 			 m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth -((m_Height-m_Width*m_CornerProportion)*m_Scale+m_BorderWidth), 0.0f,
-			 0.0f,0.0f,0.6f,0.5f,    
+			 m_AreaColor1,m_AreaColor,m_AreaColor2,m_Alph,  
 
 			 //0.5f-0.5f*m_PositionCoordinate,0.5f+0.45f*m_PositionCoordinate,
 			 m_BorderWidth, m_Height*m_Scale+m_BorderWidth -((m_Height-m_Width*m_CornerProportion)*m_Scale+m_BorderWidth), 0.0f,
-			 0.0f,0.0f,0.6f,0.5f,	     
+			 m_AreaColor1,m_AreaColor,m_AreaColor2,m_Alph,        
 			 //0.5f+0.45f*m_PositionCoordinate,0.5f+0.5f*m_PositionCoordinate,  
 			 m_Width*(1-m_CornerProportion)*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth -(m_Height*m_Scale+m_BorderWidth), 0.0f,
-			 0.0f,0.0f,0.6f,0.5f,	    
+			 m_AreaColor1,m_AreaColor,m_AreaColor2,m_Alph,       
 			 //0.5f-0.5f*m_PositionCoordinate,0.5f+0.5f*m_PositionCoordinate,		 
 			 m_BorderWidth, m_Height*m_Scale+m_BorderWidth -(m_Height*m_Scale+m_BorderWidth), 0.0f,
-			 0.0f,0.0f,0.6f,0.5f
+			 m_AreaColor1,m_AreaColor,m_AreaColor2,m_Alph   
 	  
 	};
     short indexBuffer[]  ={0,1,2,3,4,5,6,7};	
-		
+    
+    //vertexBufferForArea = vertexBuffer;
+    //indexBufferForArea = indexBuffer;   
+    vertexBufferForArea = new float[8*7];
+    indexBufferForArea = new short[8];
+    
+	for(int i =0;i<8;i++)
+	{
+		indexBufferForArea[i] = indexBuffer[i];
+		vertexBufferForArea[i*7] = vertexBuffer[i*7];
+		vertexBufferForArea[i*7 +1] = vertexBuffer[i*7 +1];
+		vertexBufferForArea[i*7 +2] = vertexBuffer[i*7 +2];
+		vertexBufferForArea[i*7 +3] = vertexBuffer[i*7 +3];
+		vertexBufferForArea[i*7 +4] = vertexBuffer[i*7 +4];
+		vertexBufferForArea[i*7 +5] = vertexBuffer[i*7 +5];
+		vertexBufferForArea[i*7 +6] = vertexBuffer[i*7 +6];
+	}  
+	Matrix.setIdentityM(mMVPMatrix, 0);
+	Matrix.translateM(mMVPMatrix, 0, m_OffSetX -mWindowWidth/2.0f, m_OffSetY -mWindowHeight/2.0f, 0);	
+	for(int i =0;i<16;i++)
+		mMVPMatrixForArea[i] = mMVPMatrix[i];
+    
+   /* 
 	final FloatBuffer VertexDataBuffer = ByteBuffer
 				.allocateDirect(vertexBuffer.length * 4).order(ByteOrder.nativeOrder())
 				.asFloatBuffer();
@@ -395,23 +450,20 @@ public void InitGLDataForArea()
 
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-	} 
+	}*/
 }
 
- public void DrawLables(float[] modelMatrix)
+ public void DrawCaption(float[] modelMatrix)
  {      
-	  	int i,j;
-	  	float x,y,z;
-	  	 String s;
-		GLES20.glEnable(GLES20.GL_BLEND);
-		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+	 	GLES20.glEnable(GLES20.GL_BLEND);
+		//GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		// TEST: render some strings with the font
-		m_Font.SetMvpMatrix(modelMatrix);
+	  	m_Font.SetMvpMatrix(modelMatrix);
 		//s = "START";
-		m_Font.SetColor( 0.0f, 1.0f, 1.0f, 1.0f );  
-		m_Font.draw( m_TextString ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -80, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -25, 0); 
-		m_Font.RenderFont();
+	  	m_Font.SetColor( 0.0f, 1.0f, 0.0f, 1.0f );  
+	  	m_Font.draw( m_TextString ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_TextString.length()*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20, 0); 
+	  	m_Font.RenderFont();
 		GLES20.glDisable(GLES20.GL_BLEND);
  }
 /***********************************************************************************
@@ -420,10 +472,9 @@ public void InitGLDataForArea()
 Button(Context context){
 	
 	super(context,BUTTON_SQUARE,0.0f,0.0f,1.0f,4.0f); //m_TextRenderList=DEFAULT_CAPTION_DISPLAYLIST;
-	ShaderRelatedInit(m_Context);
+	//ShaderRelatedInit(m_Context);
 	
-	  InitGLDataForBorder();
-	InitGLDataForArea();	  
+  
 }
 /***********************************************************************************
 子函数描述：UIControlUnit(), 初始化
@@ -433,9 +484,12 @@ Button(Context context,int ControlType,float OffSetX,float OffSetY,float Scale,f
 	  super(context,ControlType, OffSetX, OffSetY, Scale, BorderWith);
 	  m_Width=ContrlUnitWidth[ControlType]*m_Scale;
 	  m_Height=ContrlUnitHeight[ControlType]*m_Scale;
+	  m_ControlType =CONTROL_UNIT_BUTTON;
+	  
+	  /*
 	  ShaderRelatedInit(m_Context);
 	  InitGLDataForBorder();
-	InitGLDataForArea();
+	  InitGLDataForArea();*/
 	  
 
 }
@@ -448,11 +502,13 @@ public Button(Context context,int ControlType,float OffSetX,float OffSetY,float 
 	super(context,ControlType, OffSetX, OffSetY, Scale, BorderWith);	  
 	m_Width=Width*m_Scale-2.0f*BorderWith;
 	m_Height=Height*m_Scale-2.0f*BorderWith;	
-	ShaderRelatedInit(m_Context);
+	m_ControlType =CONTROL_UNIT_BUTTON;
+	
+	/*ShaderRelatedInit(m_Context);
 	InitGLDataForBorder();
-	InitGLDataForArea();
+	InitGLDataForArea();*/
 	
-	
+	/*
 	m_Font = new MyFont(m_Context,(m_Context.getAssets()));
 	GLES20.glEnable(GLES20.GL_BLEND);
 	//GLES20.glDisable(GLES20.GL_CULL_FACE);
@@ -460,9 +516,9 @@ public Button(Context context,int ControlType,float OffSetX,float OffSetY,float 
 	// Load the font from file (set size + padding), creates the texture
 	// NOTE: after a successful call to this the font is ready for rendering!
 	m_Font.load( "Roboto-Regular.ttf", (int)(13*FontSize), 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
-	
+	*/
 }
-
+/*
 void ShaderRelatedInit(Context context){
 	
 	
@@ -506,7 +562,7 @@ void ShaderRelatedInit(Context context){
 	GLES20.glGenBuffers(3, vbo, 0);
 	GLES20.glGenBuffers(3, ibo, 0);	
 	
-}
+}*/
 /***********************************************************************************
 子函数描述：~OscilloScope(), 注销
 ************************************************************************************/
@@ -541,8 +597,10 @@ boolean IsOnFocus(){
 
 public void SetDispWiodowSize(int width, int height)
 {
-	mWindowWidth = width;
-	mWindowHeight = height;
+	 mWindowWidth  = width;
+	 mWindowHeight = height;
+	 InitGLDataForBorder();
+	 InitGLDataForArea();	
 }
 /***********************************************************************************
  子函数描述：AddCaption(), 主题标签
@@ -561,13 +619,20 @@ public void AddCaption(String TextString)//,int TextLength,float FontSize,int Fo
 public void  Render(float[] modelMatrix){    
 
 	
-	DrawControlBorder(modelMatrix);
-	DrawControlArea(modelMatrix);
-	DrawLables(modelMatrix);
+	//DrawControlBorder(modelMatrix);
+	//DrawControlArea(modelMatrix);
+	DrawCaption(modelMatrix);
 
  }
 
+public void  RenderFont(float[] modelMatrix){    
 
+	
+	//DrawControlBorder(modelMatrix);
+	//DrawControlArea(modelMatrix);
+	DrawCaption(modelMatrix);
+
+ }
 /***********************************************************************************
  子函数描述：UserKeyInput(),读取用户键盘输入
  ************************************************************************************/

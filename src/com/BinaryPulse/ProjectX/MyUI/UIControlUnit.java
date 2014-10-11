@@ -17,11 +17,22 @@ public abstract class  UIControlUnit{
 	  public static final int   BIGBOARD_POLYGON= 6;
 	  public static final int   BUTTON_CIRCLE   = 7;
 	  public static final int   LABEL_BLANK     = 8;
+	  
+	  
+
+	  public final static int CONTROL_UNIT_BUTTON   = 0;        // enum of control unit: button
+	  public final static int CONTROL_UNIT_MESSAGE  = 1;        // enum of control unit: message box
+	  public final static int CONTROL_UNIT_SLIDEBAR = 2;        // enum of control unit: slide bar
+	  public final static int CONTROL_UNIT_DROPLIST = 3;        // enum of control unit: drop down list
+	  public final static int CONTROL_UNIT_SELBOX   = 4;        // enum of control unit: select box
+	  public final static int CONTROL_UNIT_OSCILLO  = 5;        // enum of control unit: OSCILLOSCOPE	  
+	  
 	  public static final float ContrlUnitWidth[]={80.0f,40.0f,20.0f,45.0f,45.0f,100.0f,100.0f};
 	  public static final float ContrlUnitHeight[] ={5.0f,13.0f,20.0f,12.0f,15.0f,80.0f,80.0f};
 	 
 	  
 	  protected  int     	m_ControlType;
+	  protected  int     	m_BorderStyle;
 	  protected  float   	m_OffSetX,m_OffSetY,m_Scale,m_Width,m_Height,m_PositionCoordinate,m_IntervalCoordinate;
 	  protected	 boolean    m_IsOnfocus;
 	  protected	 boolean    m_IsActive;
@@ -38,14 +49,21 @@ public abstract class  UIControlUnit{
 	  protected	 float   m_FontSize;
 	  protected  Context m_Context;
 	  protected  MyFont  m_Font;
-
+	  
+	    protected float vertexBufferForBorder[];
+	    protected short indexBufferForBorder[];
+	    protected float vertexBufferForArea[];
+	    protected short indexBufferForArea[];
+	    
+		protected float[] mMVPMatrixForBorder = new float[16];	
+		protected float[] mMVPMatrixForArea = new float[16];	
 	  
 	  UIControlUnit(Context context){	
 		  	 m_Context = context;
-			 m_ControlType=BUTTON_SQUARE;
+		  	 m_BorderStyle=BUTTON_SQUARE;
 			 m_OffSetX=m_OffSetY=100.0f;
-			 m_Width=ContrlUnitWidth[m_ControlType];
-		     m_Height=ContrlUnitHeight[m_ControlType];
+			 m_Width=ContrlUnitWidth[m_BorderStyle];
+		     m_Height=ContrlUnitHeight[m_BorderStyle];
 	         m_Scale=1.0f;
 
 			 m_IsOnfocus=false;
@@ -54,17 +72,18 @@ public abstract class  UIControlUnit{
 			 m_CornerProportion=0.1f;
 			 m_PositionCoordinate=0;
 			 m_IntervalCoordinate=0;
+			 m_ControlType =0;
 		 }
 	  
-	     UIControlUnit(Context context,int ControlType,float OffSetX,float OffSetY,float Scale,float BorderWidth)
+	     UIControlUnit(Context context,int BorderStyle,float OffSetX,float OffSetY,float Scale,float BorderWidth)
 	     {
 	    	 m_Context = context; 
-			 m_ControlType=ControlType;
+	    	 m_BorderStyle=BorderStyle;
 		     m_OffSetX=OffSetX;//+100;
 			 m_OffSetY=OffSetY;//+100;
 	         m_Scale=1.0f;
-			 m_Width=ContrlUnitWidth[m_ControlType]*m_Scale;
-		     m_Height=ContrlUnitHeight[m_ControlType]*m_Scale;
+			 m_Width=ContrlUnitWidth[m_BorderStyle]*m_Scale;
+		     m_Height=ContrlUnitHeight[m_BorderStyle]*m_Scale;
 
 
 	         //m_OnEventProcessPointer=NULL;
@@ -78,6 +97,7 @@ public abstract class  UIControlUnit{
 			 m_CornerProportion =0.1f;
 			 m_PositionCoordinate =0;
 			 m_IntervalCoordinate =0;
+			 m_ControlType=0;
 			 }
 
 	     //abstract ~UIControlUnit(){}
@@ -91,6 +111,10 @@ public abstract class  UIControlUnit{
 	     abstract void  UserMouseUp(float wParam, float lParam);
 
 	     abstract void  Render(float[] modelMatrix);
+	     
+	     abstract void  RenderFont(float[] modelMatrix);
+	     
+	     void  SetFont( MyFont Font){m_Font = Font;}
 
 	     abstract boolean IsOnFocus();//{return false;}
 	   

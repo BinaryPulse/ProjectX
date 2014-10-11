@@ -33,6 +33,7 @@ import com.BinaryPulse.ProjectX.MyFont.MyFont;
 import com.BinaryPulse.ProjectX.MyUI.OscilloScope;
 import com.BinaryPulse.ProjectX.MyUI.LedList;
 import com.BinaryPulse.ProjectX.MyUI.Button;
+import com.BinaryPulse.ProjectX.MyUI.UIDialogue;
 import android.util.DisplayMetrics;
 import com.BinaryPulse.ProjectX.AcDriveModeling.SychronousMotor;
 /**
@@ -155,7 +156,12 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
     private static LedList LedList1;  
     private static Button Button1;   
     private static Button Button2;   
-    private static Button Button3;   
+    private static Button Button3;     
+    
+    private static Button Button4;   
+    private static Button Button5;    
+    
+    private static UIDialogue UIDialogue1;
     
     public static  SychronousMotor   gSychronousMotor;
     private static  float m_timer;
@@ -315,7 +321,9 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		OscilloScope_1=new OscilloScope(lessonEightActivity,0,0.0f,50.0f,1.0f,(float)windowWidth*1.0f,(float)windowHeight*0.8f,5.0f,1.0f);
 	    //OscilloScope_1.SetDispWiodowSize(windowWidth,windowHeight);	
 	    OscilloScope_1.SetScopeParameters(windowHeight*0.56f,windowWidth*0.7f, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
-
+	    OscilloScope_1.AddCaption("OscilloScope of ProjectX");
+	    
+	    
 	    Button1=new Button(lessonEightActivity,0,0.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,3.0f,3.0f);
 	   Button1.SetDispWiodowSize(windowWidth,windowHeight);	
 	   Button1.AddCaption("START");
@@ -327,6 +335,28 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	    Button3=new Button(lessonEightActivity,0,500.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,3.0f,3.0f);
 	   Button3.SetDispWiodowSize(windowWidth,windowHeight);	
 	   Button3.AddCaption("SETING");
+	   
+
+	    Button4=new Button(lessonEightActivity,0,750.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,3.0f,3.0f);
+	   Button4.SetDispWiodowSize(windowWidth,windowHeight);	
+	   Button4.AddCaption("XXXX");
+	   
+	    Button5=new Button(lessonEightActivity,0,1000.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,3.0f,3.0f);
+	   Button5.SetDispWiodowSize(windowWidth,windowHeight);	
+	   Button5.AddCaption("TTTT");
+	   
+	   
+	   UIDialogue1 =new UIDialogue(lessonEightActivity);
+	   
+	   UIDialogue1.AddCtrlUnit(Button1);
+	   UIDialogue1.AddCtrlUnit(Button2);
+	   UIDialogue1.AddCtrlUnit(Button3);
+	   UIDialogue1.AddCtrlUnit(Button4);
+	   UIDialogue1.AddCtrlUnit(Button5);	   
+	   UIDialogue1.AddCtrlUnit(OscilloScope_1);
+	   UIDialogue1.EndConstruction();
+	   //UIDialogue1.AddCtrlUnit(OscilloScope_1);
+	   
 	   
 	    gSychronousMotor = new SychronousMotor();
 	    
@@ -425,6 +455,9 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glDisable(GLES20.GL_BLEND);
+		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+		
+		
 		
 		//GLES20.gl
 		gSychronousMotor.CalculateRealTimeData(1);
@@ -442,10 +475,10 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		OscilloScope_1.ReciedveData(m_timer,m_TestData);
 		OscilloScope_1.Render(viewMatrixFont);
 		
-		Button1.Render(viewMatrixFont);
-		Button2.Render(viewMatrixFont);	
-		Button3.Render(viewMatrixFont);	
-		
+		//Button1.Render(viewMatrixFont);
+		//Button2.Render(viewMatrixFont);	
+		//Button3.Render(viewMatrixFont);	
+	
 		Matrix.setLookAtM(viewMatrix, 0, (0.0f-deltaY) *(float)java.lang.Math.cos(deltaX*0.015f),0.0f, (0.0f-deltaY)*(float)java.lang.Math.sin(deltaX*0.015f), 0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f);
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
 		
@@ -455,8 +488,12 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		digits[2] = (int)(m_timer/10)-((int)m_timer/100)*10;
 		digits[1] = (int)(m_timer/100)-((int)m_timer/1000)*10;
 		digits[0] = (int)(m_timer/1000)-((int)m_timer/10000)*10;
-		LedList1.draw( digits,-100,50,-580,0,0.0f,0); 
-		LedList1.RenderLedList();	
+		LedList1.draw( digits,-100,-200,-580,0,0.0f,0); 
+		LedList1.RenderLedList();			
+		
+		UIDialogue1.Render(viewMatrixFont);
+		
+
 
 		// TEST: render the entire font texture
 		//GLES20.glColorMask({0.0, 1.0, 0.0,0.5},0,0)

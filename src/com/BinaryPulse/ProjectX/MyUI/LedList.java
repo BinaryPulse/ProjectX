@@ -72,13 +72,15 @@ public class LedList {
 	private static final String COLOR_UNIFORM = "u_Color";
 	
 	protected int[] vbo = new int[1];
-	protected int[] ibo = new int[1];
+	protected int[] ibo = new int[2];
 	
 	private float[] mVPMatrix= new float[16];		
 	private float[] mMVPMatrix = new float[16];	
 	
 	private float[] vertexBuffer = new float[LED_BATCH_SIZE * VERTICES_PER_SPRITE * VERTEX_SIZE];  // Create Vertex Buffer
 	private short[] indexBuffer =  new short[LED_BATCH_SIZE * INDICES_PER_SPRITE]; 
+	private short[] indexBuffer0 =  new short[LED_BATCH_SIZE * INDICES_PER_SPRITE]; 
+	
 	private float[]  spritevertexBuffer;
 	private int bufferIndex;   
 	private int bufferIndex0;        
@@ -113,9 +115,10 @@ public class LedList {
 				POSITION_ATTRIBUTE, MATRIX_INDEX_ATTRIBUTE});		
 		
 		GLES20.glGenBuffers(1, vbo, 0);
-		GLES20.glGenBuffers(1, ibo, 0);
+		GLES20.glGenBuffers(2, ibo, 0);
 		
 		bufferIndex =0;
+		bufferIndex0 =0;
 		matrixIndex =0;
 		numSprites  =0;
 		m_rot = 0.0f;
@@ -173,6 +176,8 @@ public class LedList {
 
 	
 public void RenderLedList(){
+	
+	float[] color = {0.2f, 0.2f, 0.2f, 1}; 
 	// add the sprite mvp matrix to uMVPMatrices array	
 	final FloatBuffer VertexDataBuffer = ByteBuffer
 			.allocateDirect(vertexBuffer.length * 4).order(ByteOrder.nativeOrder())
@@ -183,8 +188,13 @@ public void RenderLedList(){
 			.allocateDirect(indexBuffer.length * 2).order(ByteOrder.nativeOrder())
 			.asShortBuffer();
 	IndexDataBuffer.put(indexBuffer).position(0);
+	
+	final ShortBuffer IndexDataBuffer0 = ByteBuffer
+			.allocateDirect(indexBuffer0.length * 2).order(ByteOrder.nativeOrder())
+			.asShortBuffer();
+	IndexDataBuffer0.put(indexBuffer0).position(0);	
 
-	if (vbo[0] > 0 && ibo[0] > 0) {
+	if (vbo[0] > 0 && ibo[0] > 0 && ibo[1] > 0) {
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
 		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, VertexDataBuffer.capacity() * 4,
 				VertexDataBuffer, GLES20.GL_DYNAMIC_DRAW);
@@ -193,11 +203,15 @@ public void RenderLedList(){
 		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, IndexDataBuffer.capacity()
 				* 2, IndexDataBuffer, GLES20.GL_DYNAMIC_DRAW);
 
+		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[1]);
+		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, IndexDataBuffer0.capacity()
+				* 2, IndexDataBuffer0, GLES20.GL_DYNAMIC_DRAW);
+		
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 	} 
 	
-	if (vbo[0] > 0 && ibo[0] > 0) {				
+	if (vbo[0] > 0 && ibo[0] > 0 && ibo[1] > 0) {				
 		GLES20.glUseProgram(program);
 		// Set program handles for cube drawing.
 		mvpMatrixUniform = GLES20.glGetUniformLocation(program, MVP_MATRIX_UNIFORM);
@@ -217,6 +231,16 @@ public void RenderLedList(){
 		// Draw
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
 		GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, bufferIndex, GLES20.GL_UNSIGNED_SHORT, 0);
+		
+		
+		ColorHandle          = GLES20.glGetUniformLocation(program, COLOR_UNIFORM);
+		GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
+		GLES20.glEnableVertexAttribArray(ColorHandle);
+		// Draw
+		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[1]);
+		GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, bufferIndex0, GLES20.GL_UNSIGNED_SHORT, 0);
+			
+		
 		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 		GLES20.glUseProgram(0);
@@ -236,7 +260,7 @@ public void draw(int Digit[], float x, float y, float z, float angleDegX, float 
 		int   indextLength;
 		int   mDrawMask;
 		letterX = 0;
-		letterY = 0;
+		letterY = y;
 		
 		int digitsLength = Digit.length;
 		m_Zpos =z;
@@ -260,6 +284,14 @@ public void draw(int Digit[], float x, float y, float z, float angleDegX, float 
 				    }
 					bufferIndex += 32;
 				}
+				else
+				{
+					for(int m =bufferIndex0;m< bufferIndex0 + 32;m++)
+					{
+						indexBuffer0[m] = (short)( j*32 + (m- bufferIndex0)+i * VERTICES_PER_SPRITE );           // Calculate Index 0
+				    }
+					bufferIndex0 += 32;	
+				}
 			 }	  
 			  
 			DrawSprite(letterX, letterY, m_LedUnitWidth, m_LedUnitHeight,  i);				
@@ -275,12 +307,13 @@ public void DrawSprite(float x, float y, float width, float height,  int j){//fl
 		float halfWidth = width ;/// 2.0f;                 // Calculate Half Width
 		float halfHeight = height;// / 2.0f;               // Calculate Half Height
 		float x1 = 0;//x ;//- halfWidth;                       // Calculate Left X
-		float y1 = 0;//y ;//- halfHeight;                      // Calculate Bottom Y
+		float y1 = y;//y ;//- halfHeight;                      // Calculate Bottom Y
 
 		if(m_rot>360.0f+j*30)
 			m_rot = -360.0f;
 		else	
 			m_rot+=3.0f;
+		m_rot =0.0f;
 		// create a model matrix based on x, y and angleDeg
 		float[] tempModelMatrix = new float[16];
 		//float[] tempModelMatrix1 = new float[16];
