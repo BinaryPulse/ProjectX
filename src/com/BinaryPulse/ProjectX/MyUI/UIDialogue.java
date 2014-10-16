@@ -17,6 +17,7 @@ import com.BinaryPulse.ProjectX.common.TextureHelper;
 
 import android.opengl.Matrix;
 import android.util.DisplayMetrics;
+import android.view.MotionEvent;
 
 public class UIDialogue extends UIControlUnit {
 
@@ -100,7 +101,9 @@ public class UIDialogue extends UIControlUnit {
     protected UIControlUnit m_ChildUnitArrayRoot;
     protected UIControlUnit m_ChildUnitArrayTemp;
 
-
+    protected UIControlUnit m_ActiveChildUnit;
+    
+    protected boolean m_IsChildUnitOnFocus;
 /*##############################################################################
            
 		         对象模块功能描述： UIDialogue（人机交互）
@@ -304,6 +307,7 @@ public void Render(float[] modelMatrix){
 	   m_ChildUnitArrayTemp=m_ChildUnitArrayRoot;
 	   for(int i=0; i<m_ChildUnitLength; i++){
 			   m_ChildUnitArrayTemp.RenderFont(modelMatrix);
+			   m_ChildUnitArrayTemp.Render(modelMatrix);
             m_ChildUnitArrayTemp=m_ChildUnitArrayTemp.GetNext();
 	   }	
 		
@@ -323,8 +327,9 @@ public void  RenderFont(float[] modelMatrix){
 void  DrawControlBorder(float[] modelMatrix){//boolean AnimationEnabled ){
 	
 	int realtimeIndex;
-	float[] color = {0.0f,1.0f, 0.0f, 0.0f};
 	
+	
+	float[] color = {0.0f,1.0f, 0.0f, 0.0f};
 	
 	  if(m_IntervalCoordinate<0.48f && m_IntervalCoordinate>=0f)
 
@@ -536,7 +541,97 @@ boolean IsOnFocus(){
 }
 
 
+public void UserMessageProcess(MotionEvent event){
 
+	int i,X;
+	float wParam,lParam;
+if(event != null){
+	wParam = event.getX();
+	lParam = mWindowHeight - event.getY();
+	X = event.getAction();
+	//if(m_IsChildUnitOnFocus){
+
+		switch( X ){
+		case MotionEvent.ACTION_MOVE:
+			  if(m_IsChildUnitOnFocus)
+				  m_ActiveChildUnit.UserMouseMove(wParam ,  lParam);
+			  break;
+		case MotionEvent.ACTION_DOWN:
+			m_ChildUnitArrayTemp=m_ChildUnitArrayRoot;
+			for( i=0; i<m_ChildUnitLength; i++){				
+
+				//m_ChildUnitArrayTemp.UserMouseMove( wParam,  lParam);
+				m_ChildUnitArrayTemp.UserMouseDown( wParam,  lParam);
+
+				if(m_ChildUnitArrayTemp.IsOnFocus()){
+	                m_IsChildUnitOnFocus=true;
+					m_ActiveChildUnit=m_ChildUnitArrayTemp;//m_ChildUnitArray[i];
+					i =m_ChildUnitLength;
+				}
+				else{
+					if(i != m_ChildUnitLength-1)
+					   m_ChildUnitArrayTemp=m_ChildUnitArrayTemp.GetNext();
+					else
+					{
+		                m_IsChildUnitOnFocus=false;
+						
+					}
+				}
+	 
+			}
+			  break;
+		case MotionEvent.ACTION_UP:
+			  if(m_IsChildUnitOnFocus)
+				  m_ActiveChildUnit.UserMouseUp( wParam,  lParam);
+			  /*if(m_ActiveChildUnit.IsOnFocus()==false)	{			
+				   m_ChildUnitArrayTemp=m_ChildUnitArrayRoot;
+				   for( i=0; i<m_ChildUnitLength; i++){
+				        m_ChildUnitArrayTemp.UserMouseMove( wParam,  lParam);
+						if(m_ChildUnitArrayTemp.IsOnFocus()){
+		                    m_IsChildUnitOnFocus=true;
+							m_ActiveChildUnit=m_ChildUnitArrayTemp;//m_ChildUnitArray[i];
+
+						}
+						else
+						    m_ChildUnitArrayTemp=m_ChildUnitArrayTemp.GetNext();
+		 
+				    }
+					if(i==m_ChildUnitLength){						 
+						 m_ChildUnitArrayTemp=m_ChildUnitArrayRoot;						 
+					}
+				}*/
+				break;
+		//case: WM_KEYDOWN:
+			  // m_ActiveChildUnit.KeyInput(int InputKey);
+
+		default:
+			  ;					
+		//}
+				     
+		  //if(!m_ActiveChildUnit.IsOnFocus())
+		  //  m_IsChildUnitOnFocus=false;		 
+		}
+		/*else{
+			if(event.getAction() == MotionEvent.ACTION_DOWN){				
+				m_ChildUnitArrayTemp=m_ChildUnitArrayRoot;
+				for( i=0; i<m_ChildUnitLength; i++){				
+
+					//m_ChildUnitArrayTemp.UserMouseMove( wParam,  lParam);
+					m_ChildUnitArrayTemp.UserMouseDown( wParam,  lParam);
+
+					if(m_ChildUnitArrayTemp.IsOnFocus()){
+		                m_IsChildUnitOnFocus=true;
+						m_ActiveChildUnit=m_ChildUnitArrayTemp;//m_ChildUnitArray[i];
+					}
+					else
+						m_ChildUnitArrayTemp=m_ChildUnitArrayTemp.GetNext();
+		 
+				}
+		     }
+	   }*/
+}	
+}
+	
 /***********************************************************************************
  子函数描述：UserKeyInput(),读取用户键盘输入
  ************************************************************************************/
@@ -564,5 +659,9 @@ void UserMouseMove(float wParam, float lParam){
 void  UserMouseUp(float wParam, float lParam){
 
  }
-
+public void SetDispWiodowSize(int width, int height)
+{
+	 mWindowWidth  = width;
+	 mWindowHeight = height;
+}
 };

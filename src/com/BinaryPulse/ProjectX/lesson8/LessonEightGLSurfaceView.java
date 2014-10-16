@@ -66,8 +66,11 @@ public class LessonEightGLSurfaceView extends GLSurfaceView implements ErrorHand
 	@Override
 	public boolean onTouchEvent(MotionEvent event) 
 	{
+		
+		
 		if (event != null)
-		{			
+		{		
+			renderer.m_Motion = event;
 			float x = event.getX();
 			float y = event.getY();
 			

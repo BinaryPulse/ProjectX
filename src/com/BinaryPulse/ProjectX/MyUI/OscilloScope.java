@@ -416,7 +416,7 @@ public void InitGLDataForArea()
 	float m_AreaColor =0.0f;
 	float m_AreaColor1 =0.0f;
 	float m_AreaColor2 =0.5f;
-	float m_Alph =0.3f;
+	float m_Alph =0.2f;
 	float vertexBuffer[] = {
 
 			 //0.5f+0.5f*m_PositionCoordinate,0.5f-0.5f*m_PositionCoordinate,

@@ -461,7 +461,14 @@ public void InitGLDataForArea()
 		// TEST: render some strings with the font
 	  	m_Font.SetMvpMatrix(modelMatrix);
 		//s = "START";
-	  	m_Font.SetColor( 0.0f, 1.0f, 0.0f, 1.0f );  
+	  	//if(m_IsOnfocus)
+		  m_Font.SetColor( 0.2f, 1.0f, 0.2f, 1.0f );  
+	  	//else
+	  	// m_Font.SetColor( 0.2f, 0.2f, 0.2f, 1.0f );  
+	  	
+	  	if(m_IsActive)
+	  		m_Font.draw( m_TextString ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_TextString.length()*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -25, 0);
+	  	else
 	  	m_Font.draw( m_TextString ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_TextString.length()*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20, 0); 
 	  	m_Font.RenderFont();
 		GLES20.glDisable(GLES20.GL_BLEND);
@@ -588,7 +595,7 @@ void ShaderRelatedInit(Context context){
 子函数描述：IsOnFocus(), 是否获得控制权
 ************************************************************************************/
 @Override
-boolean IsOnFocus(){
+public boolean IsOnFocus(){
     return m_IsOnfocus;
 }
 
@@ -621,7 +628,7 @@ public void  Render(float[] modelMatrix){
 	
 	//DrawControlBorder(modelMatrix);
 	//DrawControlArea(modelMatrix);
-	DrawCaption(modelMatrix);
+	//DrawCaption(modelMatrix);
 
  }
 
@@ -643,22 +650,62 @@ void UserKeyInput(int InputKey){
 /***********************************************************************************
  子函数描述：UserMouseMove(),鼠标移动事件
  ************************************************************************************/
-void UserMouseMove(float wParam, float lParam){
+public void UserMouseMove(float wParam, float lParam){
+	
+   	int tempMouseX = (int)( wParam );
+	int tempMouseY = (int )( lParam ); 
+      
+	//m_MouseX=tempMouseX;
 
+	//if(m_IsActive==false){
+
+         if(tempMouseX-m_OffSetX<m_Width*m_Scale && tempMouseY-m_OffSetY<m_Height*m_Scale && tempMouseX>m_OffSetX && tempMouseY>m_OffSetY){     
+             // m_IsOnfocus=true;
+             // m_IsActive=true;
+         }
+		 else{
+	         m_IsOnfocus=false;
+	         m_IsActive=false;
+		 }
+	//} 
+ 
 }
 
 /***********************************************************************************
  子函数描述：UserMouseDown(),鼠标点击事件
  ************************************************************************************/
- void UserMouseDown(float wParam, float lParam){
+public void UserMouseDown(float wParam, float lParam){
+	
+	
+   	int tempMouseX = (int)( wParam );
+	int tempMouseY = (int )( lParam ); 
+	
+	//if(m_IsActive==false){
 
+        if(tempMouseX-m_OffSetX<m_Width*m_Scale && tempMouseY-m_OffSetY<m_Height*m_Scale && tempMouseX>m_OffSetX && tempMouseY>m_OffSetY){     
+             m_IsOnfocus=true;  
+             m_IsActive=true;
+        }
+		 else{
+	         m_IsOnfocus=false;
+	         m_IsActive=false;
+		 }
+	//}
+	
+
+     
+     
  }
 
 /***********************************************************************************
  子函数描述：UserMouseUp(),鼠标释放事件
  ************************************************************************************/	 
-void  UserMouseUp(float wParam, float lParam){
+public void  UserMouseUp(float wParam, float lParam){
 
-
+	/* if(m_OnEventProcess!=0){
+		  m_OnEventProcess();
+	 }*/
+    m_IsOnfocus=false;
+    m_IsActive=false;	
 }
 };

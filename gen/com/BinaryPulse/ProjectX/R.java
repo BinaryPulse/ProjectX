@@ -100,18 +100,19 @@ public final class R {
         public static final int per_pixel_vertex_shader_for_area_ui=0x7f050018;
         public static final int per_pixel_vertex_shader_for_border=0x7f050019;
         public static final int per_pixel_vertex_shader_for_border_ui=0x7f05001a;
-        public static final int per_pixel_vertex_shader_for_font=0x7f05001b;
-        public static final int per_pixel_vertex_shader_for_led=0x7f05001c;
-        public static final int per_pixel_vertex_shader_for_panel=0x7f05001d;
-        public static final int per_pixel_vertex_shader_no_tex=0x7f05001e;
-        public static final int per_pixel_vertex_shader_no_tex1=0x7f05001f;
-        public static final int per_pixel_vertex_shader_tex_and_light=0x7f050020;
-        public static final int point_fragment_shader=0x7f050021;
-        public static final int point_vertex_shader=0x7f050022;
-        public static final int porsche=0x7f050023;
-        public static final int queenofblade=0x7f050024;
-        public static final int top_body=0x7f050025;
-        public static final int tower=0x7f050026;
+        public static final int per_pixel_vertex_shader_for_droplist=0x7f05001b;
+        public static final int per_pixel_vertex_shader_for_font=0x7f05001c;
+        public static final int per_pixel_vertex_shader_for_led=0x7f05001d;
+        public static final int per_pixel_vertex_shader_for_panel=0x7f05001e;
+        public static final int per_pixel_vertex_shader_no_tex=0x7f05001f;
+        public static final int per_pixel_vertex_shader_no_tex1=0x7f050020;
+        public static final int per_pixel_vertex_shader_tex_and_light=0x7f050021;
+        public static final int point_fragment_shader=0x7f050022;
+        public static final int point_vertex_shader=0x7f050023;
+        public static final int porsche=0x7f050024;
+        public static final int queenofblade=0x7f050025;
+        public static final int top_body=0x7f050026;
+        public static final int tower=0x7f050027;
     }
     public static final class string {
         public static final int action_settings=0x7f070028;

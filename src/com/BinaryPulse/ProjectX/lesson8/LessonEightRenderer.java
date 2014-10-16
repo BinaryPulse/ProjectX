@@ -34,8 +34,11 @@ import com.BinaryPulse.ProjectX.MyUI.OscilloScope;
 import com.BinaryPulse.ProjectX.MyUI.LedList;
 import com.BinaryPulse.ProjectX.MyUI.Button;
 import com.BinaryPulse.ProjectX.MyUI.UIDialogue;
+import com.BinaryPulse.ProjectX.MyUI.DropDownList;
 import android.util.DisplayMetrics;
 import com.BinaryPulse.ProjectX.AcDriveModeling.SychronousMotor;
+
+import android.view.MotionEvent;
 /**
  * This class implements our custom renderer. Note that the GL10 parameter
  * passed in is unused for OpenGL ES 2.0 renderers -- the static class GLES20 is
@@ -147,6 +150,9 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	public volatile float deltaX;
 	public volatile float deltaY;
 	public volatile float deltaZ;
+	
+	public MotionEvent m_Motion;
+	
 	public volatile float[] rotorSpeed;
 	/** The current heightmap object. */
 	private HeightMap heightMap,tower,nacelle,head,topbody,bottombody,wings,eyeofqueen;
@@ -160,6 +166,8 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
     
     private static Button Button4;   
     private static Button Button5;    
+    
+    private static DropDownList DropDownList1; 
     
     private static UIDialogue UIDialogue1;
     
@@ -344,16 +352,26 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	    Button5=new Button(lessonEightActivity,0,1000.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,3.0f,3.0f);
 	   Button5.SetDispWiodowSize(windowWidth,windowHeight);	
 	   Button5.AddCaption("TTTT");
+	
+	   String DropDownStrings[] = {"Speed_[1]","Voltage_[2]","Current_[3]","Flux_[4]","Torque_[5]","Time_[6]"};
+	   DropDownList1 = new DropDownList(lessonEightActivity,0,0.0f,630.0f,1.0f,(float)320.0f,(float)60.0f,3.0f);
+	   DropDownList1.SetDisplayList(3, DropDownStrings);
+	   DropDownList1.SetDispWiodowSize(windowWidth,windowHeight);	
+
+
+	   DropDownList1.AddCaption("TTTT");
 	   
 	   
 	   UIDialogue1 =new UIDialogue(lessonEightActivity);
-	   
+	   UIDialogue1.SetDispWiodowSize(windowWidth,windowHeight);
 	   UIDialogue1.AddCtrlUnit(Button1);
 	   UIDialogue1.AddCtrlUnit(Button2);
 	   UIDialogue1.AddCtrlUnit(Button3);
 	   UIDialogue1.AddCtrlUnit(Button4);
-	   UIDialogue1.AddCtrlUnit(Button5);	   
+	   UIDialogue1.AddCtrlUnit(Button5);	
 	   UIDialogue1.AddCtrlUnit(OscilloScope_1);
+	   UIDialogue1.AddCtrlUnit(DropDownList1);
+	   
 	   UIDialogue1.EndConstruction();
 	   //UIDialogue1.AddCtrlUnit(OscilloScope_1);
 	   
@@ -417,7 +435,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
 		
-		//float m_timer;
+		float m_timer1;
 		//float[] m_TestData;
 		int[] digits =new int[]{1,2,3,4}; 
 	     
@@ -473,24 +491,36 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		    			//float yyy=2000*cos(double(iFrames)/500.0)*sin(double(iFrames)/4.0);    
 		
 		OscilloScope_1.ReciedveData(m_timer,m_TestData);
-		OscilloScope_1.Render(viewMatrixFont);
+		//OscilloScope_1.Render(viewMatrixFont);
 		
 		//Button1.Render(viewMatrixFont);
 		//Button2.Render(viewMatrixFont);	
 		//Button3.Render(viewMatrixFont);	
 	
-		Matrix.setLookAtM(viewMatrix, 0, (0.0f-deltaY) *(float)java.lang.Math.cos(deltaX*0.015f),0.0f, (0.0f-deltaY)*(float)java.lang.Math.sin(deltaX*0.015f), 0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f);
+		//Matrix.setLookAtM(viewMatrix, 0, (0.0f-deltaY) *(float)java.lang.Math.cos(deltaX*0.015f),0.0f, (0.0f-deltaY)*(float)java.lang.Math.sin(deltaX*0.015f), 0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f);
+		Matrix.setLookAtM(viewMatrix, 0, (0.0f-0) *(float)java.lang.Math.cos(0*0.015f),0.0f, (0.0f)*(float)java.lang.Math.sin(0*0.015f), 0.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f);
 		Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
 		
 		LedList1.SetMvpMatrix(mvpMatrix);
 		LedList1.SetColor( 0.0f, 1.0f, 0.0f, 1.0f );  
-		digits[3] = (int)m_timer-((int)m_timer/10)*10;
-		digits[2] = (int)(m_timer/10)-((int)m_timer/100)*10;
-		digits[1] = (int)(m_timer/100)-((int)m_timer/1000)*10;
-		digits[0] = (int)(m_timer/1000)-((int)m_timer/10000)*10;
+		if(m_Motion !=null){
+			m_timer1 =m_Motion.getY();
+		}
+		else 
+			m_timer1 =0;
+		digits[3] = (int)m_timer1-((int)m_timer1/10)*10;
+		digits[2] = (int)(m_timer1/10)-((int)m_timer1/100)*10;
+		digits[1] = (int)(m_timer1/100)-((int)m_timer1/1000)*10;
+		digits[0] = (int)(m_timer1/1000)-((int)m_timer1/10000)*10;
+		/*
+		if(Button1.IsOnFocus() == true)
+		digits[0] = 1;//(int)(m_timer/1000)-((int)m_timer/10000)*10;
+		else
+			digits[0] = 0;	*/
 		LedList1.draw( digits,-100,-200,-580,0,0.0f,0); 
 		LedList1.RenderLedList();			
 		
+		UIDialogue1.UserMessageProcess(m_Motion);
 		UIDialogue1.Render(viewMatrixFont);
 		
 
