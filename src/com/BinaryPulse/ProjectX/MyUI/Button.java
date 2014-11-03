@@ -463,6 +463,7 @@ public void InitGLDataForArea()
 		//s = "START";
 	  	//if(m_IsOnfocus)
 		  m_Font.SetColor( 0.2f, 1.0f, 0.2f, 1.0f );  
+
 	  	//else
 	  	// m_Font.SetColor( 0.2f, 0.2f, 0.2f, 1.0f );  
 	  	

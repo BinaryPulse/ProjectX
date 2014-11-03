@@ -94,7 +94,8 @@ public class MyFont {
 	
 	/** This is a handle to our cube shading program. */
 	private int program;						   // OpenGL Program object
-	private int ColorHandle;						   // Shader color handle	
+	private int ColorHandle;						   // Shader color handle
+	private int BoundaryHandle;						   // Shader color handle
 	private int TextureUniformHandle;                 // Shader texture handle
 
 	
@@ -133,6 +134,9 @@ public class MyFont {
 	private int numSprites;
 	private int matrixIndex;// Number of Sprites Currently in Buffer	
 	private float[] uMVPMatrices = new float[12*16]; 
+	
+	public float[] mBoundary ={1.0f,-1.0f,1.0f,-1.0f};
+	public float[] mColor ={1.0f,1.0f,1.0f,1.0f};
 	//--Constructor--//
 	// D: save program + asset manager, create arrays, and initialize the members
 	public MyFont(Context context,AssetManager assets) {
@@ -184,6 +188,8 @@ public class MyFont {
 		bufferIndex =0;
 		matrixIndex =0;
 		numSprites  =0;
+		
+
 	}
 	
 
@@ -320,6 +326,14 @@ public class MyFont {
 	// R: [none]
 
 	public void SetColor(float red, float green, float blue, float alpha) {
+		
+		
+		mColor[0] = red; 
+		mColor[1] = green; 
+		mColor[2] = blue; 
+		mColor[3] = alpha; 
+		
+		/*
 		GLES20.glUseProgram(program); // specify the program to use
 		
 		// set color TODO: only alpha component works, text is always black #BUG
@@ -339,10 +353,22 @@ public class MyFont {
 		// Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0
 		GLES20.glUniform1i(TextureUniformHandle, 0); 
 		
-
+*/
 		//mVPMatrix = pMatrix;		
 	}
 	
+	public void SetDisplayArea(float x1, float x2, float y1, float y2) {
+
+		
+		// set color TODO: only alpha component works, text is always black #BUG
+		mBoundary[0] = x1; 
+		mBoundary[1] = x2; 
+		mBoundary[2] = y1; 
+		mBoundary[3] = y2; 
+		
+
+		//mVPMatrix = pMatrix;		
+	}	
     public void SetMvpMatrix(float[] mvpMatrix)
     {
     	
@@ -436,6 +462,30 @@ public void RenderFont(){
 		
 		GLES20.glUseProgram(program);
 
+		
+		
+		BoundaryHandle          = GLES20.glGetUniformLocation(program, "u_Boundary");
+		
+		GLES20.glUniform4fv(BoundaryHandle, 1, mBoundary , 0); 
+		GLES20.glEnableVertexAttribArray(BoundaryHandle);		
+		
+	
+		ColorHandle          = GLES20.glGetUniformLocation(program, COLOR_UNIFORM);
+        TextureUniformHandle = GLES20.glGetUniformLocation(program, TEXTURE_UNIFORM);
+        //mMVPMatricesHandle  = GLES20.glGetUniformLocation(program,MVP_MATRIX_UNIFORM);
+		
+		GLES20.glUniform4fv(ColorHandle, 1, mColor , 0); 
+		GLES20.glEnableVertexAttribArray(ColorHandle);
+		
+		GLES20.glActiveTexture(GLES20.GL_TEXTURE0);  // Set the active texture unit to texture unit 0
+		
+		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId); // Bind the texture to this unit
+		
+		// Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0
+		GLES20.glUniform1i(TextureUniformHandle, 0); 		
+		
+		
+		
 		// Set program handles for cube drawing.
 		mvpMatrixUniform = GLES20.glGetUniformLocation(program, MVP_MATRIX_UNIFORM);
 		//GLES20.glUniformMatrix4fv(mvpMatrixUniform, numSprites, false, modelMatrix, 0);

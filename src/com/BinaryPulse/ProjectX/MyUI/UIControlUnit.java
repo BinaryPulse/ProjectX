@@ -117,6 +117,7 @@ public abstract class  UIControlUnit{
 	     void  SetFont( MyFont Font){m_Font = Font;}
 
 	     abstract boolean IsOnFocus();//{return false;}
+	     void  SetFocusFalse(){m_IsOnfocus=false; m_IsActive=false;}
 	   
 	     void SetNext(UIControlUnit  NextUIControlUnit){m_NextUIControlUnit=NextUIControlUnit;}
 

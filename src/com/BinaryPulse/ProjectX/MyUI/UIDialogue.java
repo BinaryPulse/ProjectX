@@ -79,19 +79,32 @@ public class UIDialogue extends UIControlUnit {
     protected int   vertexLengthForBorder; 
     protected short indexBufferForBorder[] =new short[MAX_CONTROL_UNIT_NUM*16];
     protected int   indexLengthForBorder; 
+
+    
+    protected float vertexBufferForBorderX[];
+    protected short indexBufferForBorderX[];
     
     protected int matrixIndexForBorder;
+    //protected int matrixIndexForBorderX;
     
     protected float vertexBufferForArea[] = new float[MAX_CONTROL_UNIT_NUM*8*VERTEX_SIZE_FOR_AREA];
     protected int   vertexLengthForArea; 
     protected short indexBufferForArea[] =new short[MAX_CONTROL_UNIT_NUM*8];
     protected int   indexLengthForArea; 
+    protected float vertexBufferForAreaX[];
+    protected short indexBufferForAreaX[];    
+    
     protected int  matrixIndexForArea;
+    //protected int  matrixIndexForAreaX;
 	
 	protected float[] uMVPMatricesForBorder = new float[MAX_CONTROL_UNIT_NUM*16]; 
 	protected float[] uMVPMatricesForArea = new float[MAX_CONTROL_UNIT_NUM*16]; 
 	protected float[] mMVPMatrix = new float[16];	
-
+	
+	//protected float[] uMVPMatricesForBorderX = new float[16]; 
+	//protected float[] uMVPMatricesForAreaX = new float[16]; 
+	
+	
     protected int mWindowWidth;
     protected int mWindowHeight;
     
@@ -197,8 +210,63 @@ public void AddCtrlUnit(UIControlUnit UIControlUnit){
 
 
 public void EndConstruction(){	      
-
+	int i,m,j;
     
+	for( i =indexLengthForBorder; i< indexLengthForBorder +indexBufferForBorderX.length ;i++)
+	{
+		indexBufferForBorder[i] = (short)i;//(indexLengthForBorder+ m_ChildUnitArrayTemp.indexBufferForBorder[i -indexLengthForBorder]);           // Calculate Index 0
+    }
+	indexLengthForBorder += indexBufferForBorderX.length;		 
+ 
+	for( i =0 ; i<indexBufferForBorderX.length ;i++)
+	{
+		for(j=0;j<VERTEX_SIZE_FOR_BORDER;j++){
+
+			if(j == VERTEX_SIZE_FOR_BORDER -1){
+				vertexBufferForBorder[vertexLengthForBorder +j] = matrixIndexForBorder;
+			}
+			else
+				vertexBufferForBorder[vertexLengthForBorder+j] = vertexBufferForBorderX[(VERTEX_SIZE_FOR_BORDER -1)*i+j]; 
+		}
+		vertexLengthForBorder += VERTEX_SIZE_FOR_BORDER;
+	}	 
+
+	//TODO: make sure numSprites < 24
+	for ( m = 0; m < 16; m++) {
+		uMVPMatricesForBorder[matrixIndexForBorder*16+m] = mMVPMatrixForBorder[m];
+	}		
+	matrixIndexForBorder++;
+	
+	
+	for( i =indexLengthForArea; i< indexLengthForArea +indexBufferForAreaX.length ;i++)
+	{
+		indexBufferForArea[i] =  (short)i;//m_ChildUnitArrayTemp.indexBufferForArea[i-indexLengthForArea];           // Calculate Index 0
+    }
+	indexLengthForArea += indexBufferForAreaX.length;		 
+ 
+	for( i =0 ; i< indexBufferForAreaX.length ;i++)
+	{
+
+		for(j=0;j<VERTEX_SIZE_FOR_AREA;j++){
+			if(j == VERTEX_SIZE_FOR_AREA -1)
+				vertexBufferForArea[vertexLengthForArea +j] = matrixIndexForArea;				
+			else
+				vertexBufferForArea[vertexLengthForArea+j] = vertexBufferForAreaX[(VERTEX_SIZE_FOR_AREA -1)*i+j]; 
+		}	
+		vertexLengthForArea += VERTEX_SIZE_FOR_AREA;
+		
+		
+	}	 
+
+	//TODO: make sure numSprites < 24
+	for ( m = 0; m < 16; m++) {
+		uMVPMatricesForArea[matrixIndexForArea*16+m] = mMVPMatrixForArea[m];
+	}			
+	matrixIndexForArea++;	
+	
+	
+	
+	
 	final FloatBuffer VertexDataBuffer = ByteBuffer
 				.allocateDirect(vertexBufferForBorder.length * 4).order(ByteOrder.nativeOrder())
 				.asFloatBuffer();
@@ -302,17 +370,22 @@ void ShaderRelatedInit(Context context){
 public void Render(float[] modelMatrix){	   
 	
 	
-
+	 DrawControlBorder(modelMatrix);
+	 DrawControlArea(modelMatrix);	  
 	
 	   m_ChildUnitArrayTemp=m_ChildUnitArrayRoot;
 	   for(int i=0; i<m_ChildUnitLength; i++){
 			   m_ChildUnitArrayTemp.RenderFont(modelMatrix);
-			   m_ChildUnitArrayTemp.Render(modelMatrix);
+			   //m_ChildUnitArrayTemp.Render(modelMatrix);
             m_ChildUnitArrayTemp=m_ChildUnitArrayTemp.GetNext();
 	   }	
 		
-		 DrawControlBorder(modelMatrix);
-		 DrawControlArea(modelMatrix);	   
+	   m_ChildUnitArrayTemp=m_ChildUnitArrayRoot;
+	   for(int i=0; i<m_ChildUnitLength; i++){
+			   //m_ChildUnitArrayTemp.RenderFont(modelMatrix);
+			   m_ChildUnitArrayTemp.Render(modelMatrix);
+            m_ChildUnitArrayTemp=m_ChildUnitArrayTemp.GetNext();
+	   }	 
 	   
 }   
 
@@ -386,10 +459,13 @@ void  DrawControlBorder(float[] modelMatrix){//boolean AnimationEnabled ){
 		for(int i=0; i<m_ChildUnitLength; i++){
 			
 			//m_ChildUnitArrayTemp.Render(modelMatrix);
+			if(m_ChildUnitArrayTemp.IsOnFocus())
 			GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, m_ChildUnitArrayTemp.indexBufferForBorder.length, GLES20.GL_UNSIGNED_SHORT, 2*realtimeIndex);
 			realtimeIndex += m_ChildUnitArrayTemp.indexBufferForBorder.length;
 	        m_ChildUnitArrayTemp = m_ChildUnitArrayTemp.GetNext();
 		}
+		
+		GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, indexBufferForBorderX.length, GLES20.GL_UNSIGNED_SHORT, 2*realtimeIndex);
 		/*
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
 		GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 16, GLES20.GL_UNSIGNED_SHORT, 0);
@@ -455,6 +531,7 @@ GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		// Draw
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[1]);
 		realtimeIndex =0;
+		GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, indexBufferForAreaX.length, GLES20.GL_UNSIGNED_SHORT, 2*(indexLengthForArea-indexBufferForAreaX.length));
 		m_ChildUnitArrayTemp=m_ChildUnitArrayRoot;
 		for(int i=0; i<m_ChildUnitLength; i++){
 			
@@ -463,6 +540,7 @@ GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 			realtimeIndex += m_ChildUnitArrayTemp.indexBufferForArea.length;
 	        m_ChildUnitArrayTemp = m_ChildUnitArrayTemp.GetNext();
 		}
+		
 		/*
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[1]);
 		GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 8, GLES20.GL_UNSIGNED_SHORT, 0);
@@ -502,8 +580,12 @@ GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
  }*/
 
  
- public UIDialogue(Context context){    	
-	    super(context,BUTTON_SQUARE,0.0f,0.0f,1.0f,4.0f); //m_TextRenderList=DEFAULT_CAPTION_DISPLAYLIST;	
+ public UIDialogue(Context context,int ControlType,float OffSetX,float OffSetY,float Scale,float Width,float Height,float BorderWith){    	
+	    //super(context,BUTTON_SQUARE,0.0f,0.0f,1.0f,4.0f); //m_TextRenderList=DEFAULT_CAPTION_DISPLAYLIST;	
+		super(context,ControlType, OffSetX, OffSetY, Scale, BorderWith);	  
+		m_Width=Width*m_Scale-2.0f*BorderWith;
+		m_Height=Height*m_Scale-2.0f*BorderWith;	 
+	 
 	    m_ChildUnitLength =0;
 	    for(int i =0;i<CONTROL_UNIT_TORTAL_TYPE;i++)
 	    {
@@ -557,6 +639,15 @@ if(event != null){
 				  m_ActiveChildUnit.UserMouseMove(wParam ,  lParam);
 			  break;
 		case MotionEvent.ACTION_DOWN:
+			if(m_IsChildUnitOnFocus){
+				
+				m_ActiveChildUnit.UserMouseDown( wParam,  lParam);
+				if(m_ActiveChildUnit.IsOnFocus())
+					m_IsChildUnitOnFocus=true;
+				else
+					m_IsChildUnitOnFocus=false;
+			}
+			else{
 			m_ChildUnitArrayTemp=m_ChildUnitArrayRoot;
 			for( i=0; i<m_ChildUnitLength; i++){				
 
@@ -564,7 +655,9 @@ if(event != null){
 				m_ChildUnitArrayTemp.UserMouseDown( wParam,  lParam);
 
 				if(m_ChildUnitArrayTemp.IsOnFocus()){
+
 	                m_IsChildUnitOnFocus=true;
+	                
 					m_ActiveChildUnit=m_ChildUnitArrayTemp;//m_ChildUnitArray[i];
 					i =m_ChildUnitLength;
 				}
@@ -577,7 +670,8 @@ if(event != null){
 						
 					}
 				}
-	 
+	   
+			}
 			}
 			  break;
 		case MotionEvent.ACTION_UP:
@@ -631,7 +725,140 @@ if(event != null){
 	   }*/
 }	
 }
+
+
+
+
+
+public void InitGLDataForBorder()
+{
+	  
+    // initiate vertex buffer for border 	
+	float zaxis = 0.0f;
+	float[] modleMatrix1 =new float[16];
+
 	
+	float vertexBuffer[] = {
+		      0.48f, 0.0f,
+		      0.0f, m_Height*m_Scale+m_BorderWidth - 0.0f,zaxis,	  
+			  0.48f, 0.1f,
+		      m_BorderWidth, m_Height*m_Scale+m_BorderWidth -m_BorderWidth,zaxis,
+
+			  0.8f, 0.0f,
+		      m_Width*m_Scale+2*m_BorderWidth, m_Height*m_Scale+m_BorderWidth - 0.0f ,zaxis,	 
+			  0.8f, 0.1f,
+		      m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth - m_BorderWidth,zaxis,
+
+			  1.0f, 0.0f,
+		      m_Width*m_Scale+2*m_BorderWidth, m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+2*m_BorderWidth) ,zaxis,	  
+			  1.0f, 0.1f,
+		      m_Width*m_Scale+m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+m_BorderWidth),zaxis,
+
+			  0.48f, 0.0f,
+			  m_Width*m_Scale+2*m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+2*m_BorderWidth) ,zaxis,	  
+			  0.48f, 0.1f,
+			  m_Width*m_Scale+m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+m_BorderWidth) ,zaxis, 	 
+
+			  0.8f, 0.0f,
+			  0.0f,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+2*m_BorderWidth),zaxis,	  
+			  0.8f, 0.1f,
+			  m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+m_BorderWidth),zaxis,
+
+			  1.0f, 0.0f,
+			  0.0f,  m_Height*m_Scale+m_BorderWidth - 0.0f,zaxis,	  
+			  1.0f, 0.1f,
+			  m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - m_BorderWidth ,zaxis
+
+	};
+
+    short indexBuffer[]  ={0,1,2,3,4,5,6,7,8,9,10,11};	
+    vertexBufferForBorderX = new float[12*5];
+    indexBufferForBorderX = new short[12];
+    
+	for(int i =0;i<12;i++)
+	{
+		indexBufferForBorderX[i] = indexBuffer[i];
+		vertexBufferForBorderX[i*5] = vertexBuffer[i*5];
+		vertexBufferForBorderX[i*5 +1] = vertexBuffer[i*5 +1];
+		vertexBufferForBorderX[i*5 +2] = vertexBuffer[i*5 +2];
+		vertexBufferForBorderX[i*5 +3] = vertexBuffer[i*5 +3];
+		vertexBufferForBorderX[i*5 +4] = vertexBuffer[i*5 +4];
+	}
+	//indexBufferForBorder[16] = indexBuffer[16];
+    
+	Matrix.setIdentityM(modleMatrix1, 0);
+	Matrix.translateM(modleMatrix1, 0, m_OffSetX -m_BorderWidth-m_Width/2.0f, m_OffSetY-m_BorderWidth -m_Height/2.0f, 0);	
+	for(int i =0;i<16;i++)
+		mMVPMatrixForBorder[i] = modleMatrix1[i];	
+
+}
+
+
+
+public void InitGLDataForArea()
+{
+	float[] modleMatrix1 =new float[16];
+
+	float m_AreaColor =0.4f;
+	float m_AreaColor1 =0.2f;
+	float m_AreaColor2 =0.2f;
+	float m_Alph =0.3f;
+	float vertexBuffer[] = {
+
+			 //0.5f+0.5f*m_PositionCoordinate,0.5f-0.5f*m_PositionCoordinate,
+			 m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth -m_BorderWidth, 0.0f,
+			 0.8f,0.8f,0.8f,0.3f,
+			 //0.5f-0.45f*m_PositionCoordinate,0.5f-0.5f*m_PositionCoordinate,         
+			 m_BorderWidth, m_Height*m_Scale+m_BorderWidth -m_BorderWidth, 0.0f,
+			 0.8f,0.8f,0.8f,0.3f,             
+			 // 0.5f+0.5f*m_PositionCoordinate,0.5f-0.45f*m_PositionCoordinate,         
+			 m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth -(m_Width*0.5f*m_CornerProportion*m_Scale+1.5f*m_BorderWidth), 0.0f,
+			 m_AreaColor1,m_AreaColor,m_AreaColor2,m_Alph,              
+			 //0.5f-0.5f*m_PositionCoordinate,0.5f-0.45f*m_PositionCoordinate,
+			 m_BorderWidth, m_Height*m_Scale+m_BorderWidth -(m_Width*0.5f*m_CornerProportion*m_Scale+1.5f*m_BorderWidth), 0.0f,
+			 m_AreaColor1,m_AreaColor,m_AreaColor2,m_Alph,     
+			 //0.5f+0.5f*m_PositionCoordinate,0.5f+0.45f*m_PositionCoordinate,
+			 m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth -((m_Height-m_Width*m_CornerProportion)*m_Scale+m_BorderWidth), 0.0f,
+			 m_AreaColor1,m_AreaColor,m_AreaColor2,m_Alph,    
+
+			 //0.5f-0.5f*m_PositionCoordinate,0.5f+0.45f*m_PositionCoordinate,
+			 m_BorderWidth, m_Height*m_Scale+m_BorderWidth -((m_Height-m_Width*m_CornerProportion)*m_Scale+m_BorderWidth), 0.0f,
+			 m_AreaColor1,m_AreaColor,m_AreaColor2,m_Alph,         
+			 //0.5f+0.45f*m_PositionCoordinate,0.5f+0.5f*m_PositionCoordinate,  
+			 m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth -(m_Height*m_Scale+m_BorderWidth), 0.0f,
+			 m_AreaColor1,m_AreaColor,m_AreaColor2,m_Alph,      
+			 //0.5f-0.5f*m_PositionCoordinate,0.5f+0.5f*m_PositionCoordinate,		 
+			 m_BorderWidth, m_Height*m_Scale+m_BorderWidth -(m_Height*m_Scale+m_BorderWidth), 0.0f,
+			 m_AreaColor1,m_AreaColor,m_AreaColor2,m_Alph 
+	  
+	};
+    short indexBuffer[]  ={0,1,2,3,4,5,6,7};	
+    
+ 
+    vertexBufferForAreaX = new float[8*7];
+    indexBufferForAreaX = new short[8];
+    
+	for(int i =0;i<8;i++)
+	{
+		indexBufferForAreaX[i] = indexBuffer[i];
+		vertexBufferForAreaX[i*7] = vertexBuffer[i*7];
+		vertexBufferForAreaX[i*7 +1] = vertexBuffer[i*7 +1];
+		vertexBufferForAreaX[i*7 +2] = vertexBuffer[i*7 +2];
+		vertexBufferForAreaX[i*7 +3] = vertexBuffer[i*7 +3];
+		vertexBufferForAreaX[i*7 +4] = vertexBuffer[i*7 +4];
+		vertexBufferForAreaX[i*7 +5] = vertexBuffer[i*7 +5];
+		vertexBufferForAreaX[i*7 +6] = vertexBuffer[i*7 +6];
+	}  
+	Matrix.setIdentityM(modleMatrix1, 0);
+	Matrix.translateM(modleMatrix1, 0, m_OffSetX -m_BorderWidth-m_Width/2.0f, m_OffSetY-m_BorderWidth -m_Height/2.0f, 0);	
+	for(int i =0;i<16;i++)
+		mMVPMatrixForArea[i] = modleMatrix1[i];
+    
+
+}
+
+
+
 /***********************************************************************************
  子函数描述：UserKeyInput(),读取用户键盘输入
  ************************************************************************************/
@@ -663,5 +890,7 @@ public void SetDispWiodowSize(int width, int height)
 {
 	 mWindowWidth  = width;
 	 mWindowHeight = height;
+	  InitGLDataForBorder();
+	  InitGLDataForArea();
 }
 };

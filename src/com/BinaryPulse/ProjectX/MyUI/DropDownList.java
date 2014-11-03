@@ -98,7 +98,11 @@ public class DropDownList extends UIControlUnit {
     protected boolean  m_IsInSelectArea;
     protected boolean  m_IsInSlipArea;
     protected boolean  m_IsOnDrag;
-
+    
+    protected boolean  m_IsOnSlideInSelectedArea;
+    protected float    m_MouseDownOffsetInSelectedArea;
+    protected float m_DragBoxOffSetYRecord;
+    
     protected String m_ListString[];    
 
 /*##############################################################################
@@ -112,6 +116,7 @@ public void InitGLDataForBorder()
 	  
     // initiate vertex buffer for border 	
 	float zaxis = 0.0f;
+	int tempInt = m_DropListDisplayNum;
 	float[] modleMatrix1 =new float[16];
 	float vertexBuffer[] = {
       0.48f, 0.0f,
@@ -125,19 +130,19 @@ public void InitGLDataForBorder()
       m_Width*m_Scale+m_BorderWidth, m_Height*m_Scale+m_BorderWidth - m_BorderWidth,zaxis,
 
 	  1.0f, 0.0f,
-      m_Width*m_Scale+2*m_BorderWidth, m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+2*m_BorderWidth) ,zaxis,	  
+      m_Width*m_Scale+2*m_BorderWidth, m_Height*m_Scale+m_BorderWidth - ((tempInt+1)*m_Height*m_Scale+2*m_BorderWidth) ,zaxis,	  
 	  1.0f, 0.1f,
-      m_Width*m_Scale+m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+m_BorderWidth),zaxis,
+      m_Width*m_Scale+m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - ((tempInt+1)*m_Height*m_Scale+m_BorderWidth),zaxis,
 
 	  0.48f, 0.0f,
-	  m_Width*m_Scale+2*m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+2*m_BorderWidth) ,zaxis,	  
+	  m_Width*m_Scale+2*m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - ((tempInt+1)*m_Height*m_Scale+2*m_BorderWidth) ,zaxis,	  
 	  0.48f, 0.1f,
-	  m_Width*m_Scale+m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+m_BorderWidth) ,zaxis, 	 
+	  m_Width*m_Scale+m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - ((tempInt+1)*m_Height*m_Scale+m_BorderWidth) ,zaxis, 	 
 
 	  0.8f, 0.0f,
-	  0.0f,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+2*m_BorderWidth),zaxis,	  
+	  0.0f,  m_Height*m_Scale+m_BorderWidth - ((tempInt+1)*m_Height*m_Scale+2*m_BorderWidth),zaxis,	  
 	  0.8f, 0.1f,
-	  m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - (m_Height*m_Scale+m_BorderWidth),zaxis,
+	  m_BorderWidth,  m_Height*m_Scale+m_BorderWidth - ((tempInt+1)*m_Height*m_Scale+m_BorderWidth),zaxis,
 
 	  1.0f, 0.0f,
 	  0.0f,  m_Height*m_Scale+m_BorderWidth - 0.0f,zaxis,	  
@@ -261,13 +266,13 @@ public void InitGLDataForArea()
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
 			
 			int tempInt=m_OnfocusItemNum-m_FirstItemNum;
-			if(tempInt <=m_DropListDisplayNum-1 && tempInt >=0){
-				GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 52, GLES20.GL_UNSIGNED_SHORT, 0);
-			}
-			else
-			{
-				GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 47, GLES20.GL_UNSIGNED_SHORT, 0);
-			}
+			//if(tempInt <=m_DropListDisplayNum-1 && tempInt >=0){
+				GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 50, GLES20.GL_UNSIGNED_SHORT, 0);
+			//}
+			//else
+			//{
+			//	GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 47, GLES20.GL_UNSIGNED_SHORT, 0);
+			//}
 			
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);			
@@ -280,7 +285,25 @@ public void InitGLDataForArea()
  {
 
 	float     tempHeight=(m_DropListDisplayNum)*m_Height;
-	int      tempInt=m_OnfocusItemNum-m_FirstItemNum;
+
+	
+	float tempNum = (-m_DragBoxOffSetY+m_DragLineOffSetY)/(m_DragLineLength-m_DragBoxHeight)*m_HideListNum ;//*m_DropDownListPerHeight; 
+	float tempfloat1, tempfloat2;
+	if(m_SelectedItemNum - tempNum >0.0f && m_SelectedItemNum - tempNum <= m_HideListNum+1) 
+	{
+		tempfloat1 = ((float)m_SelectedItemNum -(tempNum+1.0f))*m_DropDownListPerHeight;
+		tempfloat2 = tempfloat1 +m_DropDownListPerHeight;
+		
+		tempfloat1 = tempfloat1<0.0f?0.0f:tempfloat1;
+		tempfloat2 = tempfloat2<0.0f?0.0f:tempfloat2;
+		
+		tempfloat1 = tempfloat1>m_DropListDisplayNum*m_DropDownListPerHeight?m_DropListDisplayNum*m_DropDownListPerHeight:tempfloat1;
+		tempfloat2 = tempfloat2>m_DropListDisplayNum*m_DropDownListPerHeight?m_DropListDisplayNum*m_DropDownListPerHeight:tempfloat2;
+	}
+	else
+	{
+		tempfloat2 =tempfloat1 =-1.0f;		
+	}
 	
 	float 	vertexBuffer[] = {
 			// background for dropdown
@@ -288,15 +311,15 @@ public void InitGLDataForArea()
 			  /* m_DropDownListOffSetX+m_BorderWidth, m_DropDownListOffSetY-m_DropDownListPerHeight*(0) ,0.0f,
 			   0, 0, 0, 1.0f,*/
 			   m_DropDownListOffSetX+m_BorderWidth, m_DropDownListOffSetY-m_DropDownListPerHeight*(0) ,0.0f,
-			   0, 0, 0, 1.0f,
+			   0, 0, 0.6f, 1.0f,
 		       m_DropDownListOffSetX+m_BorderWidth, m_DropDownListOffSetY-m_DropDownListPerHeight*(m_DropListDisplayNum) ,0.0f,
-		       0, 0, 0, 1.0f,
+			   0, 0, 0.6f, 1.0f,
 		       m_DropDownListOffSetX+m_Width+m_BorderWidth, m_DropDownListOffSetY-m_DropDownListPerHeight*(0) ,0.0f,
-		       0, 0, 0, 1.0f,
+			   0, 0, 0.6f, 1.0f,
 		       m_DropDownListOffSetX+m_Width+m_BorderWidth, m_DropDownListOffSetY-m_DropDownListPerHeight*(m_DropListDisplayNum) ,0.0f,
-		       0, 0, 0, 1.0f,			
+			   0, 0, 0.6f, 1.0f,		
 		       m_DropDownListOffSetX+m_Width+m_BorderWidth, m_DropDownListOffSetY-m_DropDownListPerHeight*(m_DropListDisplayNum) ,0.0f,
-		       0, 0, 0, 1.0f,		
+			   0, 0, 0.6f, 1.0f,	
 			 // 分割线 vertical
 			 m_DragLineOffSetX-0.25f*m_BorderWidth, m_Height ,0.0f,      
 			 0,  1,  0,  0.6f,
@@ -369,7 +392,7 @@ public void InitGLDataForArea()
 			  
 			  
 			//Drag Line
-			m_DragLineOffSetX+m_DragAreaWidth*0.45f, m_DragLineOffSetY ,0.0f,   
+	/*		m_DragLineOffSetX+m_DragAreaWidth*0.45f, m_DragLineOffSetY ,0.0f,   
 			0, 1, 0, 0.5f,
 			m_DragLineOffSetX+m_DragAreaWidth*0.45f, m_DragLineOffSetY ,0.0f,   
 			0, 1, 0, 0.5f,
@@ -380,23 +403,47 @@ public void InitGLDataForArea()
 			m_DragLineOffSetX+m_DragAreaWidth*0.55f, m_DragLineOffSetY-m_DragLineLength,0.0f,
 			0, 1, 0, 0.5f,
 			m_DragLineOffSetX+m_DragAreaWidth*0.55f, m_DragLineOffSetY-m_DragLineLength,0.0f,
-			0, 1, 0, 0.5f,
+			0, 1, 0, 0.5f,*/
 			//Drag Box
+     
 			m_DragLineOffSetX, m_DragBoxOffSetY ,0.0f,      
-			0, 1, 0, 0.5f,
+			1.0f,1.0f, 1.0f, 0.6f,
 			m_DragLineOffSetX, m_DragBoxOffSetY ,0.0f,      
-			0, 1, 0, 0.5f,
-			m_DragLineOffSetX, m_DragBoxOffSetY-m_DragBoxHeight ,0.0f,
-			0, 1, 0, 0.5f,
+			1.0f,1.0f, 1.0f, 0.6f,
 			m_DragLineOffSetX+m_DragBoxLength, m_DragBoxOffSetY ,0.0f,
-			0, 1, 0, 0.5f,
+			1.0f,1.0f, 1.0f, 0.6f,		
+			m_DragLineOffSetX, m_DragBoxOffSetY-0.3f*m_DragBoxHeight ,0.0f,
+			   0,  0.6f, 0.6f, 0.6f,
+			m_DragLineOffSetX+m_DragBoxLength, m_DragBoxOffSetY-0.3f*m_DragBoxHeight,0.0f,
+			   0,  0.6f, 0.6f, 0.6f,				
+			m_DragLineOffSetX, m_DragBoxOffSetY-m_DragBoxHeight ,0.0f,
+			   0,  0.6f, 0.6f, 0.6f,
 			m_DragLineOffSetX+m_DragBoxLength, m_DragBoxOffSetY-m_DragBoxHeight,0.0f,
-			0, 1, 0, 0.5f,
+			   0,  0.6f, 0.6f, 0.6f,
 			m_DragLineOffSetX+m_DragBoxLength, m_DragBoxOffSetY-m_DragBoxHeight,0.0f,
-			0, 1, 0, 0.5f,		     
-		       
-			//Focus or Selected Area     
+			   0,  0.6f, 0.6f, 0.6f, 
+			//Focus or Selected Area    
+			
+			   m_DropDownListOffSetX+m_BorderWidth,m_DropDownListOffSetY-tempfloat1 ,0.0f,
+				1.0f,1.0f, 1.0f, 0.6f,
+			   m_DropDownListOffSetX+m_BorderWidth, m_DropDownListOffSetY-tempfloat1 ,0.0f,
+				1.0f,1.0f, 1.0f, 0.6f,
+		       m_DropDownListOffSetX+m_DropDownListWidth+m_BorderWidth, m_DropDownListOffSetY-tempfloat1 ,0.0f,
+				1.0f,1.0f, 1.0f, 0.6f,
+			   
+			   m_DropDownListOffSetX+m_BorderWidth, m_DropDownListOffSetY-(0.7f*tempfloat1+0.3f*tempfloat2) ,0.0f,
+			   0,  0.6f, 0.6f, 0.6f,
 
+		       m_DropDownListOffSetX+m_DropDownListWidth+m_BorderWidth, m_DropDownListOffSetY-(0.7f*tempfloat1+0.3f*tempfloat2) ,0.0f,
+			   0,  0.6f, 0.6f, 0.6f,	   
+			   
+			   
+		       m_DropDownListOffSetX+m_BorderWidth,m_DropDownListOffSetY-tempfloat2 ,0.0f,
+			   0,  0.6f, 0.6f, 0.6f,
+			   
+		       m_DropDownListOffSetX+m_DropDownListWidth+m_BorderWidth, m_DropDownListOffSetY-tempfloat2 ,0.0f,
+			   0,  0.6f, 0.6f, 0.6f,	
+			/*
 		   m_DropDownListOffSetX+m_BorderWidth, m_DropDownListOffSetY-m_DropDownListPerHeight*(tempInt) ,0.0f,
 		   0, 1, 0, 0.5f,
 		   m_DropDownListOffSetX+m_BorderWidth, m_DropDownListOffSetY-m_DropDownListPerHeight*(tempInt) ,0.0f,
@@ -406,14 +453,14 @@ public void InitGLDataForArea()
 	       m_DropDownListOffSetX+m_DropDownListWidth+m_BorderWidth, m_DropDownListOffSetY-m_DropDownListPerHeight*(tempInt) ,0.0f,
 		   0, 1, 0, 0.5f,
 	       m_DropDownListOffSetX+m_DropDownListWidth+m_BorderWidth, m_DropDownListOffSetY-m_DropDownListPerHeight*(tempInt+1) ,0.0f,
-	       0, 1, 0, 0.5f
+	       0, 1, 0, 0.5f*/
 
 	};
 
     //short indexBuffer[]  ={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27};
 
-    short indexBuffer[] = new short[52];
-    for(int i =0;i<52;i++)
+    short indexBuffer[] = new short[50];
+    for(int i =0;i<50;i++)
     {
     	indexBuffer[i] =(short)i;
     }
@@ -446,36 +493,34 @@ public void InitGLDataForArea()
  
 
 public void DrawLables(float[] modelMatrix)
- {      
+ {     
+	
+	 float[] mFontMatrix = new float[16];	
  	GLES20.glEnable(GLES20.GL_BLEND);
 	//GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 	GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 	// TEST: render some strings with the font
-  	m_Font.SetMvpMatrix(modelMatrix);
-	//s = "START";
-  	//m_Font.SetColor( 1.0f, 0.0f, 0.0f, 1.0f );  
-  	//m_Font.draw( m_TextString ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_TextString.length()*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20, 0); 
-  	//m_Font.draw( m_ListString[m_SelectedItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_ListString[m_SelectedItemNum-1].length()*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20, 0);
-  	
+ 	
+	  m_Font.SetDisplayArea( 1.0f, -1.0f, (2*m_OffSetY-mWindowHeight)/mWindowHeight, (2*m_OffSetY-2*m_DropListDisplayNum*m_DropDownListPerHeight-mWindowHeight)/mWindowHeight );  
+
+	m_Font.SetMvpMatrix(modelMatrix);
+	GLES20.glEnable(GLES20.GL_DEPTH_TEST);	
+
 	  for(int i=0;i<m_DropListDisplayNum;i++){
 	    
-	       if(m_OnfocusItemNum - m_FirstItemNum != i){
+	       //if(m_OnfocusItemNum - m_FirstItemNum != i){
 	    	   m_Font.SetColor(0.1f, 0.9f, 0.1f,0.9f);	 
-	    	   m_Font.draw( m_ListString[i+m_FirstItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -9*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20 -(i+1)*m_DropDownListPerHeight, 0);
-	       }
+	    	   //m_Font.draw( m_ListString[i+m_FirstItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -9*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20 -(i+1)*m_DropDownListPerHeight, 0);
+	    	   //(-m_DragBoxOffSetY+m_DragLineOffSetY)/(m_DragLineLength-m_DragBoxHeight)
+	    	   m_Font.draw( m_ListString[i+m_FirstItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -9*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20 +((-m_DragBoxOffSetY+m_DragLineOffSetY)/(m_DragLineLength-m_DragBoxHeight)*m_HideListNum -i-m_FirstItemNum)*m_DropDownListPerHeight, 0);
+	       //}
 	  }	  
+	  if(m_FirstItemNum>=1 && m_FirstItemNum<m_HideListNum+1)
+		  m_Font.draw( m_ListString[m_DropListDisplayNum+m_FirstItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -9*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20 +((-m_DragBoxOffSetY+m_DragLineOffSetY)/(m_DragLineLength-m_DragBoxHeight)*m_HideListNum -m_DropListDisplayNum-m_FirstItemNum)*m_DropDownListPerHeight, 0);
 	  m_Font.RenderFont();
-	 
-	  for(int i=0;i<m_DropListDisplayNum;i++){
-		    
-	       if(m_OnfocusItemNum - m_FirstItemNum == i){
-			   m_Font.SetColor(0.0f,0.0f,1.0f,1.0f);  
-	    	   m_Font.draw( m_ListString[i+m_FirstItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -9*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20 -(i+1)*m_DropDownListPerHeight, 0);
-	       }
-	  }	  
-	  m_Font.RenderFont();
-	  
- 	
+
+	  m_Font.SetDisplayArea( 1.0f, -1.0f, 1.0f,-1.0f);  
+	GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 	GLES20.glDisable(GLES20.GL_BLEND);
  }
 
@@ -537,6 +582,8 @@ DropDownList(Context context,int ControlType,float OffSetX,float OffSetY,float S
 	m_DragBoxHeight=m_DragAreaWidth;
     m_DragBoxOffSetY=m_DragLineOffSetY;
 	//m_IsOnfocus=0;	
+    
+    m_IsOnSlideInSelectedArea =false;
 	ShaderRelatedInit(m_Context);
 	
 
@@ -546,7 +593,7 @@ DropDownList(Context context,int ControlType,float OffSetX,float OffSetY,float S
 public void SetDisplayList(int DisplayNum,String [] ListString){
 	   
 		m_DropListDisplayNum=DisplayNum;
-		m_DropListTotalNum=2*m_DropListDisplayNum;
+		m_DropListTotalNum=ListString.length;//2*m_DropListDisplayNum;
 		m_ListString = ListString;
 		m_HideListNum=m_DropListTotalNum-m_DropListDisplayNum;
 		m_DropDownListPerHeight=m_Height;
@@ -649,6 +696,7 @@ public void  RenderFont(float[] modelMatrix){
   	m_Font.SetMvpMatrix(modelMatrix);
 	//s = "START";
   	m_Font.SetColor( 0.0f, 1.0f, 0.0f, 1.0f );  
+  	 m_Font.SetDisplayArea( 1.0f, -1.0f, 1.0f, -1.0f);//
   	//m_Font.draw( m_TextString ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_TextString.length()*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20, 0); 
   	m_Font.draw( m_ListString[m_SelectedItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_ListString[m_SelectedItemNum-1].length()*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20, 0);
   	m_Font.draw( "v" ,m_OffSetX -(mWindowWidth-m_BorderWidth)/2.0f + 3*m_BorderWidth+m_DragLineOffSetX, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -15 - 0.2f*m_DropDownListPerHeight, 0);
@@ -688,36 +736,58 @@ public void UserMouseMove(float wParam, float lParam){
 	 else*/{
 		tempMouseX=tempMouseX-(int)m_OffSetX;
 		tempMouseY=-tempMouseY+(int)m_OffSetY;
-		/*if(tempMouseX-m_DropDownListOffSetX<m_DropDownListWidth && tempMouseY<m_DropDownListPerHeight*m_DropListDisplayNum && tempMouseX>m_DropDownListOffSetX && tempMouseY> -m_Height){
-   			m_IsInSelectArea=true;
- 			m_IsInSlipArea=false;
-			if(m_DropDownListPerHeight!=0)
- 			     m_FocusItemIncreasedNum=(int)(tempMouseY)/((int)m_DropDownListPerHeight);
-			m_OnfocusItemNum=m_FocusItemIncreasedNum+m_FirstItemNum;     					   
-         }
-		 else */if (tempMouseY>= -m_Height && tempMouseY<=m_DragLineLength  && tempMouseX-m_DragLineOffSetX<m_DragAreaWidth  && tempMouseX>m_DragLineOffSetX){
-			m_IsInSlipArea=true;
-     		m_IsInSelectArea=false;
-     		if(m_IsOnDrag==true){	     			   	
-     			 m_DragBoxOffSetY =-(tempMouseY-m_MouseOffSetY+0.5f*m_DragBoxHeight);	     			   	           
-     			 if(m_DragBoxOffSetY>m_DragLineOffSetY)	     			   	     
-     			     m_DragBoxOffSetY=m_DragLineOffSetY	;     
+	    if (tempMouseY>= -m_Height && tempMouseY<=m_DragLineLength  && tempMouseX-m_OffSetX<m_Width  && tempMouseX>0){			
+			if( tempMouseX-m_DragLineOffSetX<m_DragAreaWidth  && tempMouseX>m_DragLineOffSetX){
+			  //m_IsInSlipArea=true;
+     		  //m_IsInSelectArea=false;			
+     		   if(m_IsOnDrag==true){	     			   	
+     			   m_DragBoxOffSetY =-(tempMouseY-m_MouseOffSetY+0.5f*m_DragBoxHeight);	     			   	           
+     			   if(m_DragBoxOffSetY>m_DragLineOffSetY)	     			   	     
+     				   m_DragBoxOffSetY=m_DragLineOffSetY	;     
 
-   	             if(m_DragBoxOffSetY<-m_DragLineLength+m_DragLineOffSetY+m_DragBoxHeight)
-   	                 m_DragBoxOffSetY=-m_DragLineLength+m_DragLineOffSetY+m_DragBoxHeight;
+   	               if(m_DragBoxOffSetY<-m_DragLineLength+m_DragLineOffSetY+m_DragBoxHeight)
+   	             		m_DragBoxOffSetY=-m_DragLineLength+m_DragLineOffSetY+m_DragBoxHeight;
 
-     			 if(m_DragLineLength != m_DragBoxHeight) 
-		             tempInt=(int)((-m_DragBoxOffSetY+m_DragLineOffSetY)/(m_DragLineLength-m_DragBoxHeight)*(m_HideListNum+1))+1;
-				 else
+   	               if(m_DragLineLength != m_DragBoxHeight) 
+		              tempInt=(int)((-m_DragBoxOffSetY+m_DragLineOffSetY)/(m_DragLineLength-m_DragBoxHeight)*(m_HideListNum))+1;
+   	               else
+                      tempInt=1;
+
+   	               if(tempInt < m_DropListTotalNum-m_DropListDisplayNum+1)	        
+	                 m_FirstItemNum=tempInt;
+   	               else
+	                 m_FirstItemNum=m_DropListTotalNum-m_DropListDisplayNum+1;			   	
+     		   }
+		   }
+		   else{
+			  if(m_IsOnSlideInSelectedArea ==true){
+    			   m_DragBoxOffSetY = m_DragBoxOffSetYRecord+ (tempMouseY-m_MouseDownOffsetInSelectedArea);	     			   	           
+    			   if(m_DragBoxOffSetY>m_DragLineOffSetY)	     			   	     
+    				   m_DragBoxOffSetY=m_DragLineOffSetY	;     
+
+  	               if(m_DragBoxOffSetY<-m_DragLineLength+m_DragLineOffSetY+m_DragBoxHeight)
+  	             		m_DragBoxOffSetY=-m_DragLineLength+m_DragLineOffSetY+m_DragBoxHeight;
+
+  	               if(m_DragLineLength != m_DragBoxHeight) 
+		              tempInt=(int)((-m_DragBoxOffSetY+m_DragLineOffSetY)/(m_DragLineLength-m_DragBoxHeight)*(m_HideListNum))+1;
+  	               else
                      tempInt=1;
 
-     		     if(tempInt < m_DropListTotalNum-m_DropListDisplayNum+1)	        
+  	               if(tempInt < m_DropListTotalNum-m_DropListDisplayNum+1)	        
 	                 m_FirstItemNum=tempInt;
-			     else
-	                 m_FirstItemNum=m_DropListTotalNum-m_DropListDisplayNum+1;			   	
-     		 }
+  	               else
+	                 m_FirstItemNum=m_DropListTotalNum-m_DropListDisplayNum+1;						  
+				  
+				  
+			  }
+			  
+		   }
+
      			   	
-		 }	   	
+		 }	  
+		   else{
+			   m_IsOnSlideInSelectedArea =false;
+		   }
      	/* else{
     		  m_IsInSlipArea=false;
      		  m_IsInSelectArea=false;	     			   	
@@ -760,6 +830,7 @@ public void UserMouseDown(float wParam, float lParam){
 				tempMouseY=-tempMouseY+(int)m_OffSetY;
 				if(tempMouseX-m_DropDownListOffSetX<m_DropDownListWidth && tempMouseY<m_DropDownListPerHeight*m_DropListDisplayNum && tempMouseX>m_DropDownListOffSetX && tempMouseY> 0){
 		   			m_IsInSelectArea=true;
+		   			m_IsOnSlideInSelectedArea =true;
 		 			m_IsInSlipArea=false;
 					if(m_DropDownListPerHeight!=0)
 		 			     m_FocusItemIncreasedNum=(int)(tempMouseY)/((int)m_DropDownListPerHeight);
@@ -768,6 +839,7 @@ public void UserMouseDown(float wParam, float lParam){
 				 else if (tempMouseY>= 0 && tempMouseY<=m_DragLineLength && tempMouseX-m_DragLineOffSetX<m_DragAreaWidth  && tempMouseX>m_DragLineOffSetX){
 					m_IsInSlipArea=true;
 		     		m_IsInSelectArea=false;
+		     		m_IsOnSlideInSelectedArea =false;
 		     		/*if(m_IsOnDrag==true){	     			   	
 		     			 m_DragBoxOffSetY =-(tempMouseY+m_MouseOffSetY-0.5f*m_DragBoxHeight);	     			   	           
 		     			 if(m_DragBoxOffSetY>m_DragLineOffSetY)	     			   	     
@@ -790,7 +862,8 @@ public void UserMouseDown(float wParam, float lParam){
 				 }	   	
 		     	 else{
 		    		  m_IsInSlipArea=false;
-		     		  m_IsInSelectArea=false;	     			   	
+		     		  m_IsInSelectArea=false;	
+		     		 m_IsOnSlideInSelectedArea =false;
 		   		 }
 		   } 
 			
@@ -809,11 +882,13 @@ public void UserMouseDown(float wParam, float lParam){
 		 }
 		 else*/ 
 		 if(m_IsInSelectArea==true){
-		 
-		     m_SelectedItemNum=m_OnfocusItemNum;
+		 /*
+		     m_SelectedItemNum=(int)((-m_DragBoxOffSetY/(m_DragLineLength-m_DragBoxHeight)*m_DropDownListPerHeight*m_HideListNum+tempMouseY)/m_DropDownListPerHeight +1);    // m_OnfocusItemNum;
 			 m_IsOnfocus=false;
-		     m_IsActive=false;
-		 
+		     m_IsActive=false;*/
+			 m_MouseDownOffsetInSelectedArea = tempMouseY;
+			 m_DragBoxOffSetYRecord =m_DragBoxOffSetY;
+			 
 		 }
 		 else if(m_IsInSlipArea==true){
 
@@ -835,7 +910,7 @@ public void UserMouseDown(float wParam, float lParam){
 		   	          m_DragBoxOffSetY=-m_DragLineLength +m_DragLineOffSetY+m_DragBoxHeight;
 		     			   	    
 		     	  if(m_DragLineLength != m_DragBoxHeight) 
-				      tempInt=(int)((-m_DragBoxOffSetY+m_DragLineOffSetY)/(m_DragLineLength-m_DragBoxHeight)*(m_HideListNum+1))+1;
+				      tempInt=(int)((-m_DragBoxOffSetY+m_DragLineOffSetY)/(m_DragLineLength-m_DragBoxHeight)*(m_HideListNum))+1;
 				  else
 	                  tempInt=1;
 
@@ -863,8 +938,24 @@ public void UserMouseDown(float wParam, float lParam){
  子函数描述：UserMouseUp(),鼠标释放事件
  ************************************************************************************/	 
  public void  UserMouseUp(float wParam, float lParam){
+	   	int tempMouseY = ( short )( lParam ); 
+		tempMouseY=-tempMouseY+(int)m_OffSetY;
+		
+		if(tempMouseY -m_MouseDownOffsetInSelectedArea<1.0f && tempMouseY -m_MouseDownOffsetInSelectedArea >-1.0f)
+		{
+			m_IsOnSlideInSelectedArea =false;
+		
+			if(m_IsInSelectArea==true){		
+				m_SelectedItemNum=(int)((-m_DragBoxOffSetY/(m_DragLineLength-m_DragBoxHeight)*m_DropDownListPerHeight*m_HideListNum+tempMouseY)/m_DropDownListPerHeight +1);    // m_OnfocusItemNum;
+				m_SelectedItemNum = m_SelectedItemNum>m_DropListTotalNum?m_DropListTotalNum:m_SelectedItemNum;
+				m_SelectedItemNum = m_SelectedItemNum<1?1:m_SelectedItemNum;
+				m_IsOnfocus=false;
+				m_IsActive=false;
 
-	m_IsOnDrag=false;
-}
+			}
+	   }
+	     //m_IsOnSlideInSelectedArea =false;
+        m_IsOnDrag=false;
+ }
 
 };
