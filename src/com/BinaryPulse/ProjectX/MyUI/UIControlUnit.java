@@ -36,7 +36,9 @@ public abstract class  UIControlUnit{
 	  protected  float   	m_OffSetX,m_OffSetY,m_Scale,m_Width,m_Height,m_PositionCoordinate,m_IntervalCoordinate;
 	  protected	 boolean    m_IsOnfocus;
 	  protected	 boolean    m_IsActive;
+	  protected	 boolean    m_IsClicked;
 
+	  
 	  protected	 int     m_TextureObject1;
 	  protected	 int     m_TextureObject2;
 	  protected	 float 	 m_BorderWidth; 
@@ -47,6 +49,7 @@ public abstract class  UIControlUnit{
 	  protected	 String  m_TextString;
 	  protected	 int     m_FontLength;
 	  protected	 float   m_FontSize;
+	  protected	 float   m_FontSizeScaleFactor;
 	  protected  Context m_Context;
 	  protected  MyFont  m_Font;
 	  
@@ -93,6 +96,7 @@ public abstract class  UIControlUnit{
 			 //m_KeyBoardTriggered=false;
 			 m_IsOnfocus=false;
 			 m_IsActive=false;
+			 m_IsClicked =false;
 			 m_BorderWidth=BorderWidth;
 			 m_CornerProportion =0.1f;
 			 m_PositionCoordinate =0;
@@ -104,11 +108,11 @@ public abstract class  UIControlUnit{
 
 	     abstract void  UserKeyInput(int InputKey);
 
-	     abstract void  UserMouseMove(float wParam, float lParam);
+	     abstract void  UserMouseMove(int pointerId,float wParam, float lParam);
 
-	     abstract void  UserMouseDown(float wParam, float lParam);
+	     abstract void  UserMouseDown(int pointerId,float wParam, float lParam);
 		 
-	     abstract void  UserMouseUp(float wParam, float lParam);
+	     abstract void  UserMouseUp(int pointerId,float wParam, float lParam);
 
 	     abstract void  Render(float[] modelMatrix);
 	     
@@ -117,6 +121,11 @@ public abstract class  UIControlUnit{
 	     void  SetFont( MyFont Font){m_Font = Font;}
 
 	     abstract boolean IsOnFocus();//{return false;}
+	     
+	     public boolean IsClicked(){return m_IsClicked;}
+	     
+	     public void ClearClickedFlag(){m_IsClicked =false;}
+	     
 	     void  SetFocusFalse(){m_IsOnfocus=false; m_IsActive=false;}
 	   
 	     void SetNext(UIControlUnit  NextUIControlUnit){m_NextUIControlUnit=NextUIControlUnit;}

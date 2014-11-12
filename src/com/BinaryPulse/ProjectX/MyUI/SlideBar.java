@@ -467,7 +467,7 @@ void UserKeyInput(int InputKey){
 /***********************************************************************************
  子函数描述：UserMouseMove(),鼠标移动事件
  ************************************************************************************/
-public void UserMouseMove(float wParam, float lParam){
+public void UserMouseMove(int pointerId,float wParam, float lParam){
 	
    	int tempMouseX = ( short )( wParam );
 	int tempMouseY = ( short )( lParam ); 
@@ -493,7 +493,7 @@ public void UserMouseMove(float wParam, float lParam){
 /***********************************************************************************
  子函数描述：UserMouseDown(),鼠标点击事件
  ************************************************************************************/
-public void UserMouseDown(float wParam, float lParam){
+public void UserMouseDown(int pointerId,float wParam, float lParam){
 
 		int tempMouseX = ( short )( wParam );
 	   	int tempMouseY = ( short )( lParam ); 
@@ -525,7 +525,7 @@ public void UserMouseDown(float wParam, float lParam){
 /***********************************************************************************
  子函数描述：UserMouseUp(),鼠标释放事件
  ************************************************************************************/	 
- public void  UserMouseUp(float wParam, float lParam){
+ public void  UserMouseUp(int pointerId,float wParam, float lParam){
 		m_IsOnfocus=false;
 		m_IsActive=false;
         m_IsOnDrag=false;

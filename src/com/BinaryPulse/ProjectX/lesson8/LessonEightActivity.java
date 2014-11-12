@@ -13,8 +13,9 @@ import android.view.View;
 import android.opengl.GLSurfaceView;
 import android.content.pm.ActivityInfo;
 public class LessonEightActivity extends Activity {	
-	private LessonEightGLSurfaceView glSurfaceView;
-	private LessonEightRenderer renderer;
+	private static LessonEightGLSurfaceView glSurfaceView;
+	private static LessonEightRenderer renderer;
+	
 	//private SystemUiHider mSystemUiHider;
 	//private View decorView;
 
@@ -27,6 +28,7 @@ public class LessonEightActivity extends Activity {
 	    requestWindowFeature(Window.FEATURE_NO_TITLE);
 	    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 	   
+	    
 		glSurfaceView = new LessonEightGLSurfaceView(this);	
 /*
 		glSurfaceView.setSystemUiVisibility(LessonEightGLSurfaceView.SYSTEM_UI_FLAG_HIDE_NAVIGATION //|LessonEightGLSurfaceView.SYSTEM_UI_FLAG_FULLSCREEN);//
@@ -50,7 +52,7 @@ public class LessonEightActivity extends Activity {
 			renderer = new LessonEightRenderer(this, glSurfaceView);
 			glSurfaceView.setRenderer(renderer, displayMetrics.density);
 			
-			
+			//if(getRequestedOrientation()!=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);   }
 /*			
 			glSurfaceView.setOnSystemUiVisibilityChangeListener(new LessonEightGLSurfaceView.OnSystemUiVisibilityChangeListener(){
 				@Override
@@ -90,7 +92,9 @@ public class LessonEightActivity extends Activity {
 			// This is where you could create an OpenGL ES 1.x compatible
 			// renderer if you wanted to support both ES 1 and ES 2.
 			return;
-		}		
+		}	
+		
+		
 	}
 
 	@Override
@@ -99,7 +103,7 @@ public class LessonEightActivity extends Activity {
 		// onResume().
 		super.onResume();
 		glSurfaceView.onResume();
-		//if(getRequestedOrientation()!=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);   }  
+		if(getRequestedOrientation()!=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);   }  
   
 	}
 

@@ -73,17 +73,31 @@ public class OscilloScope extends UIControlUnit {
 
 	protected static int m_ReleaseMouseX;
 	protected static int m_ReleaseMouseY;
+	
+	protected static int m_ActiveMouseX1;
+	protected static int m_ActiveMouseY1;
 
+	protected static int m_ReleaseMouseX1;
+	protected static int m_ReleaseMouseY1;
+	
 	protected static float m_UserSelectedStartX;
 	protected static float m_UserSelectedEndX;
 	protected static float[] m_UserSelectedStartY;//[];
 	protected static float[] m_UserSelectedEndY;//[];
 
+	
+	protected static float m_UserSelectedStartX1;
+	protected static float m_UserSelectedEndX1;
+	protected static float[] m_UserSelectedStartY1;//[];
+	protected static float[] m_UserSelectedEndY1;//[];
+	
+	
 	protected static float m_DataSampleTimeInterval;
 
 	protected boolean m_IsResetAxisX;
 	protected boolean m_IsResetAxisY;
 	protected boolean m_IsResetAxisXY;
+	  protected	 boolean    m_IsOnDrag;
 
 	protected static boolean m_AutomaticDisplay; 
 	protected static boolean m_StartRecieve;
@@ -141,6 +155,8 @@ public class OscilloScope extends UIControlUnit {
     protected static float m_timer;
     protected static float m_EffectDataStartIndex[];
     protected static float m_TestData[] = new float[4];
+    
+    protected boolean m_CmdRunState;
 
 /*##############################################################################
            
@@ -557,6 +573,49 @@ public void InitGLDataForArea()
 		}
 
 }
+ 
+ /***********************************************************************************
+ 子函数描述：DrawBackPanel(), 绘制示波器背景（说明文字、单位以及绘制网格刻度）
+ ************************************************************************************/
+  void DrawBandArea(float[] modelMatrix){//boolean AnimationEnabled ){
+ 		
+ 		float[] color = {0.0f,0.3f, 0.3f, 0.3f};		
+ 		
+ 		Matrix.setIdentityM(mMVPMatrix, 0);
+ 		Matrix.translateM(mMVPMatrix, 0, m_OffSetX, m_OffSetY, 0);	
+ 		Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);
+ 		
+
+ 		  
+ 		if (vbo[0] > 0 && ibo[0] > 0) {		
+ 			//GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+ 			GLES20.glUseProgram(program[0]);
+ 			ColorHandle          = GLES20.glGetUniformLocation(program[0], COLOR_UNIFORM);	        
+ 			GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
+ 			GLES20.glEnableVertexAttribArray(ColorHandle);
+ 		
+ 			// Set program handles for cube drawing.
+ 			mvpMatrixUniform = GLES20.glGetUniformLocation(program[0], MVP_MATRIX_UNIFORM);
+ 			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mMVPMatrix, 0);
+ 			positionAttribute = GLES20.glGetAttribLocation(program[0], POSITION_ATTRIBUTE);
+ 			
+ 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
+ 			// Bind Attributes
+ 			GLES20.glVertexAttribPointer(positionAttribute, 3, GLES20.GL_FLOAT, false,3*4, 0);
+ 			GLES20.glEnableVertexAttribArray(positionAttribute);
+ 		
+ 			GLES20.glLineWidth(3.0f);
+ 			// Draw
+ 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
+ 			GLES20.glDrawElements(GLES20.GL_LINE_LOOP, (5), GLES20.GL_UNSIGNED_SHORT, 0);
+
+ 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+ 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);			
+ 			GLES20.glUseProgram(0);
+ 		}
+
+ }
+ 
  public void InitGLDataForBackPanel()
  {
  	  
@@ -775,24 +834,30 @@ if(m_RefreshMode ==0){
 			   if(m_RecievedData[i][j]<m_OriginValueY[i])
 				   tempY=m_GraphOffsetY;//+m_GraphHeight;
 			   if(m_RecievedTime[j]<(m_OriginValueX-m_DivValueX) && tempX < m_GraphOffsetX){
-
-			       tempX=m_GraphOffsetX;
-			       tempY=m_GraphOffsetY;
-				   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6]= tempX;
-				   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1]= tempY;
-				   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2]= 0;
-				   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6 );
-				   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1);
-				   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2);
-				   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3]= tempX;
-				   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4]= tempY;
-				   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5]= 0;
-				   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3 );
-				   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4);
-				   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6+(j-m_DisplayDataStartTimeIndex)*6+5);
-				   m_EffectDataStartIndex[i] +=2;	      
-				   continue;
-
+				   
+				   tempX =m_GraphOffsetX+(m_RecievedTime[j+1]-m_OriginValueX)*m_TimeDrawCof; 
+				   if(tempX < m_GraphOffsetX) {
+					   tempX=m_GraphOffsetX;
+					   tempY=m_GraphOffsetY;
+					   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6]= tempX;
+					   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1]= tempY;
+					   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2]= 0;
+					   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6 );
+					   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1);
+					   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2);
+					   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3]= tempX;
+					   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4]= tempY;
+					   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5]= 0;
+					   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3 );
+					   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4);
+					   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6+(j-m_DisplayDataStartTimeIndex)*6+5);
+					   m_EffectDataStartIndex[i] +=2;	      
+					   continue;
+				   }
+				   else{
+					   tempX = m_GraphOffsetX;   
+					   
+				   }
 			   }
 			   else if(tempX < m_GraphOffsetX && j<m_DisplayDataEndTimeIndex){
 
@@ -846,6 +911,10 @@ if(m_RefreshMode ==0){
 					   y = tempY;
 			       }
 			   }
+			   
+			   if(x>=m_GraphOffsetX+m_GraphWidth)
+				   x=m_GraphOffsetX+m_GraphWidth;
+			   
 			   z = 0;
 			   
 			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3]= x;
@@ -1044,7 +1113,7 @@ public void RefreshDisplay(){
 	    
         m_DisplayDataEndTimeIndex=m_LatestTimeIndex;
 
-		if(m_RefreshMode==1){				
+		if(m_RefreshMode==1 ){				
            if(m_MaxRecievedTime!=m_MinRecievedTime)
 				m_DisplayDataTimeLength=(m_MaxRecievedTime-m_MinRecievedTime);
            m_OriginValueX =m_MinRecievedTime;	
@@ -1075,13 +1144,15 @@ public void RefreshDisplay(){
 		}
 		//m_OriginValueX is determined by User 
 		//m_DisplayDataTimeLength  is determined by User
-		m_DisplayDataEndTimeIndex=(int)((m_OriginValueX+m_DisplayDataTimeLength)/m_DataSampleTimeInterval);
-        m_DisplayDataStartTimeIndex=(int)(m_OriginValueX/m_DataSampleTimeInterval);
+		m_DisplayDataEndTimeIndex=m_LatestTimeIndex;//(int)((m_OriginValueX+m_DisplayDataTimeLength)/m_DataSampleTimeInterval);
+        m_DisplayDataStartTimeIndex=0;//(int)(m_OriginValueX/m_DataSampleTimeInterval);
 		m_TimeDrawCof=m_GraphWidth/m_DisplayDataTimeLength;
 		if(m_DisplayDataStartTimeIndex<0)
 			m_DisplayDataStartTimeIndex=0;
 		if(m_DisplayDataEndTimeIndex<0)
 			m_DisplayDataEndTimeIndex=0;	  
+		if(m_DisplayDataEndTimeIndex>=m_LatestTimeIndex)
+			m_DisplayDataEndTimeIndex=m_LatestTimeIndex;	
 		m_DivValueX=m_DisplayDataTimeLength/m_DivNumX;	    
 	}
 	
@@ -1093,6 +1164,12 @@ public void RefreshDisplay(){
 public void ReciedveData(float Time, float[] Data){
 
     int i,j;
+    
+    if(m_CmdRunState ==false)
+    {
+    	return;
+    }
+    
 	if(m_StartRecieve==false){
 		m_LatestTimeIndex=0;
 		m_MinRecievedTime=m_MaxRecievedTime=m_RecievedTime[m_LatestTimeIndex]=m_RecievedTimeToRealTimeScale*Time;
@@ -1166,7 +1243,9 @@ OscilloScope(Context context,int ControlType,float OffSetX,float OffSetY,float S
 
 public OscilloScope(Context context,int ControlType,float OffSetX,float OffSetY,float Scale,float Width,float Height,float BorderWith,float FontSize)
 {
-	super(context,ControlType, OffSetX, OffSetY, Scale, BorderWith);	  
+	super(context,ControlType, OffSetX, OffSetY, Scale, BorderWith);	
+	
+
 	m_Width=Width*m_Scale-2.0f*BorderWith;
 	m_Height=Height*m_Scale-2.0f*BorderWith;
 	m_ControlType =CONTROL_UNIT_OSCILLO;	
@@ -1180,7 +1259,7 @@ public OscilloScope(Context context,int ControlType,float OffSetX,float OffSetY,
 	// Load the font from file (set size + padding), creates the texture
 	// NOTE: after a successful call to this the font is ready for rendering!
 	m_FontGraph.load( "Roboto-Regular.ttf", (int)(16*FontSize), 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
-	
+	m_FontSizeScaleFactor = FontSize;
 }
 
 void ShaderRelatedInit(Context context){
@@ -1284,6 +1363,12 @@ float GetEndIndex(){
 public void SetScopeParameters(float GraphHeight, float GraphWidth, int CurveNum){//, String[] CurveLabelString, int[] Color,float DataSampleTimeInterval,int DataSize,int DivNumX, int DivNumY, boolean GridOn){
 		        
 	  int i;
+	  
+
+	  m_OffSetX = m_OffSetX -(mWindowWidth-m_Width)*0.5f;
+	  m_OffSetY = m_OffSetY -(mWindowHeight-m_Height)*0.5f;
+	  
+	  
 	  m_GraphHeight=GraphHeight;
 	  m_GraphWidth=GraphWidth;
 	  m_CurveNum=CurveNum;
@@ -1297,7 +1382,7 @@ public void SetScopeParameters(float GraphHeight, float GraphWidth, int CurveNum
 	  m_LabelStringX= "";//CurveLabelString[CurveNum];//"t(ms)";
 
 	  m_DataSampleTimeInterval=1;//DataSampleTimeInterval;
-      m_DivNumX=8;//DivNumX; 
+      m_DivNumX=4;//DivNumX; 
       m_DivNumY=8;//DivNumY; 
 
 	  m_GridOn=true;//GridOn;
@@ -1338,7 +1423,9 @@ public void SetScopeParameters(float GraphHeight, float GraphWidth, int CurveNum
 	  //m_UserSelectedEndX;
 	  m_UserSelectedStartY = new float[CurveNum];
 	  m_UserSelectedEndY = new float[CurveNum];
-
+	  m_UserSelectedStartY1 = new float[CurveNum];
+	  m_UserSelectedEndY1 = new float[CurveNum];
+	  
 	  for(i=0;i<m_CurveNum;i++){ 	 
 	     	//m_RecievedTime[i]=0;
 			//m_RecievedData=new float(CurveNum ,DataSize);//[][];
@@ -1348,8 +1435,10 @@ public void SetScopeParameters(float GraphHeight, float GraphWidth, int CurveNum
 			m_MaxRecievedData[i]=0;
 			m_MinRecievedData[i]=0;
 			m_UserSelectedStartY[i]=0;
+			m_UserSelectedStartY1[i]=0;
 			m_RecievedData[i]=new float[5000];//new float[DataSize];
 			m_UserSelectedEndY[i]=0; 
+			m_UserSelectedEndY1[i]=0; 
 			m_DivValueY[i]=0;
 			//m_Color[i]=0x
 		    // *(m_RecievedData+i*DataSize)=new float(DataSize);//[][];
@@ -1367,6 +1456,9 @@ public void SetScopeParameters(float GraphHeight, float GraphWidth, int CurveNum
 	  m_DataColor = new float[CurveNum][4];
 	  m_timer =0.0f;
 
+	  
+	  m_CmdRunState =true;
+	  m_IsOnDrag    =false;
 	  InitGLDataForBorder();
 	  InitGLDataForArea();
 	 InitGLDataForBackPanel();
@@ -1388,6 +1480,17 @@ public void AddCaption(String TextString)
 
 }
 
+public void Stop()
+{
+	 m_CmdRunState  = false;
+	 m_AutomaticDisplay =false;
+}
+
+public void Start()
+{
+	 m_CmdRunState  = true;
+	 m_AutomaticDisplay= true;
+}
 /***********************************************************************************
  子函数描述：DrawScaleRullerX(),绘制框选的X轴区间
  ************************************************************************************/
@@ -1488,6 +1591,7 @@ public void  Render(float[] modelMatrix){
 	DrawBackPanel(modelMatrix);
 	 RefreshDisplay();
 	 DrawData(modelMatrix);	
+	 DrawBandArea(modelMatrix);
 	//DrawControlBorder(modelMatrix);
 	//DrawControlArea(modelMatrix);
 	
@@ -1505,7 +1609,34 @@ public void  RenderFont(float[] modelMatrix){
   	m_Font.SetMvpMatrix(modelMatrix);
 	//s = "START";
   	m_Font.SetColor( 1.0f, 0.0f, 0.0f, 1.0f );  
-  	m_Font.draw( m_TextString ,m_OffSetX -(m_BorderWidth)/2.0f  -m_TextString.length()*0.5f*20, m_OffSetY -(-m_Height*m_Scale-m_BorderWidth)/2.0f -50, 0); 
+  	m_Font.draw( m_TextString ,m_OffSetX -(m_BorderWidth)/2.0f  -m_TextString.length()*0.5f*20*m_FontSizeScaleFactor, m_OffSetY -(-m_Height*m_Scale-m_BorderWidth)/2.0f -50*m_FontSizeScaleFactor, 0); 
+   	
+	
+    DecimalFormat format = new DecimalFormat("#.00");
+    String s = format.format((float)(m_ActiveMouseX)); //转换成字符串
+  	m_Font.draw( s ,m_OffSetX -(m_BorderWidth)/2.0f  -s.length()*0.5f*20*m_FontSizeScaleFactor, m_OffSetY -(-m_Height*m_Scale-m_BorderWidth)/2.0f -50*m_FontSizeScaleFactor-20, 0); 
+    
+	s = format.format((float)(m_ReleaseMouseX)); //转换成字符串
+  	m_Font.draw( s ,m_OffSetX -(m_BorderWidth)/2.0f  -s.length()*0.5f*20*m_FontSizeScaleFactor, m_OffSetY -(-m_Height*m_Scale-m_BorderWidth)/2.0f -50*m_FontSizeScaleFactor-40, 0); 
+    	
+  	s = format.format((float)(m_ActiveMouseX1)); //转换成字符串
+  	m_Font.draw( s ,m_OffSetX -(m_BorderWidth)/2.0f  -s.length()*0.5f*20*m_FontSizeScaleFactor, m_OffSetY -(-m_Height*m_Scale-m_BorderWidth)/2.0f -50*m_FontSizeScaleFactor-60, 0); 
+    
+	s = format.format((float)(m_ReleaseMouseX1)); //转换成字符串
+  	m_Font.draw( s ,m_OffSetX -(m_BorderWidth)/2.0f  -s.length()*0.5f*20*m_FontSizeScaleFactor, m_OffSetY -(-m_Height*m_Scale-m_BorderWidth)/2.0f -50*m_FontSizeScaleFactor-80, 0); 
+    
+  	s = format.format((float)(m_ActiveMouseY)); //转换成字符串
+  	m_Font.draw( s ,m_OffSetX -(m_BorderWidth)/2.0f  -s.length()*0.5f*20*m_FontSizeScaleFactor-300, m_OffSetY -(-m_Height*m_Scale-m_BorderWidth)/2.0f -50*m_FontSizeScaleFactor-20, 0); 
+    
+	s = format.format((float)(m_ReleaseMouseY)); //转换成字符串
+  	m_Font.draw( s ,m_OffSetX -(m_BorderWidth)/2.0f  -s.length()*0.5f*20*m_FontSizeScaleFactor-300, m_OffSetY -(-m_Height*m_Scale-m_BorderWidth)/2.0f -50*m_FontSizeScaleFactor-40, 0); 
+    	
+  	s = format.format((float)(m_ActiveMouseY1)); //转换成字符串
+  	m_Font.draw( s ,m_OffSetX -(m_BorderWidth)/2.0f  -s.length()*0.5f*20*m_FontSizeScaleFactor-300, m_OffSetY -(-m_Height*m_Scale-m_BorderWidth)/2.0f -50*m_FontSizeScaleFactor-60, 0); 
+    
+	s = format.format((float)(m_ReleaseMouseY1)); //转换成字符串
+  	m_Font.draw( s ,m_OffSetX -(m_BorderWidth)/2.0f  -s.length()*0.5f*20*m_FontSizeScaleFactor-300, m_OffSetY -(-m_Height*m_Scale-m_BorderWidth)/2.0f -50*m_FontSizeScaleFactor-80, 0); 
+    	
   	m_Font.RenderFont();
 	GLES20.glDisable(GLES20.GL_BLEND);
 
@@ -1520,64 +1651,213 @@ void UserKeyInput(int InputKey){
 /***********************************************************************************
  子函数描述：UserMouseMove(),鼠标移动事件
  ************************************************************************************/
-void UserMouseMove(float wParam, float lParam){
+void UserMouseMove(int pointerId,float wParam, float lParam){
+   /* m_ReleaseMouseX = ( short )( lParam );
+    m_ReleaseMouseY = ( short )( lParam );
+	*/
+    float OffSetX = m_OffSetX +(mWindowWidth-m_Width)*0.5f + 0.5f*(m_Width-m_GraphWidth);
+    float OffSetY = m_OffSetY +(mWindowHeight-m_Height)*0.5f +0.5f*(m_Height-m_GraphHeight);
+    
+	 if(pointerId ==0){  	
+	    
+		if(m_IsOnDrag){ 
+			m_ReleaseMouseX = ( short )( wParam );
+			m_ReleaseMouseY = ( short )( lParam );	
+			
+			
+		}
+		else{
+			
+		    m_ReleaseMouseX = ( short )( wParam );
+			m_ReleaseMouseY = ( short )( lParam );		
+			
+			m_OriginValueX = m_OriginValueX-(((float)m_ReleaseMouseX - (float)m_ActiveMouseX))/m_TimeDrawCof;;
+		    m_MinRecievedTime=m_OriginValueX;
+			m_MaxRecievedTime=m_MinRecievedTime+m_DisplayDataTimeLength;		
+			 
+			for(int i=0;i<m_CurveNum;i++){ 
+	
+				m_OriginValueY[i] = m_OriginValueY[i] - (((float)m_ReleaseMouseY - (float)m_ActiveMouseY))/m_DataDrawCof[i];
+				
+			}				
+				
+			 m_ActiveMouseX =m_ReleaseMouseX;
+		     m_ActiveMouseY = m_ReleaseMouseY ;			
+		     //RefreshDisplay();
+		}
+	 }
+	 else{
+		 
+		if(m_IsOnDrag){ 	 
+			m_ReleaseMouseX1 = ( short )( wParam );
+			m_ReleaseMouseY1 = ( short )( lParam );		
+		}
+		else{
+		     m_ReleaseMouseX1=m_ActiveMouseX1 = ( short )( wParam );
+			 m_ReleaseMouseY1=m_ActiveMouseY1 = ( short )( lParam );		
+		}			
+	 }
+	
+	 
+		if(m_IsOnDrag){ 
+		 
+			float scaleX =  0.0001f+Math.abs( ( (float)m_ReleaseMouseX1 - (float)m_ReleaseMouseX )/( (float)m_ActiveMouseX1-  (float)m_ActiveMouseX+0.00001f)  );
+			
+			m_OriginValueX = (float)m_UserSelectedStartX1 - (float)m_UserSelectedEndX1/scaleX;
+			m_DisplayDataTimeLength =  (float)m_UserSelectedEndX/scaleX;
+		     m_MinRecievedTime=m_OriginValueX;
+			 m_MaxRecievedTime=m_MinRecievedTime+m_DisplayDataTimeLength;		
+			 
+			 
+				for(int i=0;i<m_CurveNum;i++){ 
+					
+					float scaleY =  0.0001f+Math.abs( ( (float)m_ReleaseMouseY1 - (float)m_ReleaseMouseY )/( (float)m_ActiveMouseY1-  (float)m_ActiveMouseY+0.00001f)  );
+					
+					m_OriginValueY[i] = m_UserSelectedStartY1[i] - m_UserSelectedEndY1[i]/scaleY;
+					m_DisplayDataRange[i] =  m_UserSelectedEndY[i]/scaleY;
+					m_MinRecievedData[i]=m_OriginValueY[i];
+					m_MaxRecievedData[i]=m_MinRecievedData[i]+m_DisplayDataRange[i];					
+				}
+			 
+				RefreshDisplay();
+			 
+		}
+	 
 /*
-    m_ReleaseMouseX = ( short )LOWORD( lParam );
-    m_ReleaseMouseY = ( short )HIWORD( lParam );
+    m_ReleaseMouseX = ( short )( lParam );
+    m_ReleaseMouseY = ( short )( lParam );
 	if(!m_IsActive){      
 		if(m_ReleaseMouseX-m_GraphOffsetX-m_OffSetX<m_GraphWidth  && m_ReleaseMouseY-m_GraphOffsetY-m_OffSetY< m_GraphHeight  && m_ReleaseMouseX-m_OffSetX > m_GraphOffsetX && m_ReleaseMouseY-m_OffSetY > m_GraphOffsetY){
-             m_IsOnfocus=1;
+             m_IsOnfocus=true;
  		}
 		else
-			 m_IsOnfocus=0;
-	}*/
+			 m_IsOnfocus=false;
+	}
+	*/
 }
 
 /***********************************************************************************
  子函数描述：UserMouseDown(),鼠标点击事件
  ************************************************************************************/
- void UserMouseDown(float wParam, float lParam){
+ void UserMouseDown(int pointerId,float wParam, float lParam){
 
-/*	     m_ReleaseMouseX=m_ActiveMouseX = ( short )( lParam );
-		 m_ReleaseMouseY=m_ActiveMouseY = ( short )( lParam );
-         m_IsActive=true;		   
-		 m_UserSelectedStartX = (m_ActiveMouseX-m_GraphOffsetX-m_OffSetX)/m_TimeDrawCof+m_OriginValueX;
+	     float OffSetX = m_OffSetX +(mWindowWidth-m_Width)*0.5f + 0.5f*(m_Width-m_GraphWidth);
+	     float OffSetY = m_OffSetY +(mWindowHeight-m_Height)*0.5f +0.5f*(m_Height-m_GraphHeight);
+	
+	 if(pointerId ==0){    
+	     m_ReleaseMouseX=m_ActiveMouseX = ( short )( wParam );
+		 m_ReleaseMouseY=m_ActiveMouseY = ( short )( lParam );		 
+		 
+		 
+			if(!m_IsActive){      
+				if(m_ReleaseMouseX-(OffSetX)<m_GraphWidth  && m_ReleaseMouseY-(OffSetY)< m_GraphHeight  && m_ReleaseMouseX-(OffSetX)> 0 && m_ReleaseMouseY-(OffSetY)>0){
+		             m_IsOnfocus=true;
+		             m_IsActive =true;
+		 		}
+				else{
+					 m_IsOnfocus=false;
+					 m_IsActive =false;
+				}
+			}		 
+			else{
+				
+				
+	            /*
+				m_UserSelectedStartX = (m_ActiveMouseX-(OffSetX))/m_TimeDrawCof+m_OriginValueX;
 
-		 for(int i=0;i<m_CurveNum;i++){ 
+				for(int i=0;i<m_CurveNum;i++){ 
 
-		      m_UserSelectedStartY[i] = (m_GraphHeight-m_ActiveMouseY+m_GraphOffsetY+m_OffSetY)/m_DataDrawCof[i]+m_OriginValueY[i];
-		 }
+					m_UserSelectedStartY[i] = (m_ActiveMouseY-(OffSetY))/m_DataDrawCof[i]+m_OriginValueY[i];
+				}*/
+			}	
+	 }
+	 else
+	 {
+			if(m_IsActive){      
+				if(m_ReleaseMouseX-(OffSetX)<m_GraphWidth  && m_ReleaseMouseY-(OffSetY)< m_GraphHeight  && m_ReleaseMouseX-(OffSetX)> 0 && m_ReleaseMouseY-(OffSetY)>0){
+		             m_IsOnDrag=true;
+				     m_ReleaseMouseX1=m_ActiveMouseX1 = ( short )( wParam );
+					 m_ReleaseMouseY1=m_ActiveMouseY1 = ( short )( lParam );	
+					 
+					 m_UserSelectedStartX = m_OriginValueX;
+					 m_UserSelectedEndX   = m_DisplayDataTimeLength;
+					for(int i=0;i<m_CurveNum;i++){ 
+					   m_UserSelectedStartY[i] = m_OriginValueY[i];
+					   m_UserSelectedEndY[i]   = m_DisplayDataRange[i];
+					   
+					   m_UserSelectedStartY1[i] = (0.5f*(m_ActiveMouseY + m_ActiveMouseY1)-(OffSetY))/m_DataDrawCof[i]+m_OriginValueY[i];
+					   m_UserSelectedEndY1[i] = (0.5f*(m_ActiveMouseY + m_ActiveMouseY1)-(OffSetY))/m_DataDrawCof[i];
+					}
+					
+					m_UserSelectedStartX1 = (0.5f*(m_ActiveMouseX + m_ActiveMouseX1)-(OffSetX))/m_TimeDrawCof+m_OriginValueX; 
+					m_UserSelectedEndX1 = (0.5f*(m_ActiveMouseX + m_ActiveMouseX1)-(OffSetX))/m_TimeDrawCof;
+					
+					
+		 		}
+				else{
+					m_IsOnDrag=false;
 
-*/
+				}
+
+				 
+				/*	m_UserSelectedStartX1 = (m_ActiveMouseX1-(OffSetX))/m_TimeDrawCof+m_OriginValueX;
+
+					for(int i=0;i<m_CurveNum;i++){ 
+
+						m_UserSelectedStartY1[i] = (m_ActiveMouseY1-(OffSetY))/m_DataDrawCof[i]+m_OriginValueY[i];
+					}	*/ 			
+				
+			}
+		 
+
+	 }
  }
 
 /***********************************************************************************
  子函数描述：UserMouseUp(),鼠标释放事件
  ************************************************************************************/	 
-void  UserMouseUp(float wParam, float lParam){
+void  UserMouseUp(int pointerId,float wParam, float lParam){
+	
+	
+	 if(pointerId ==0){  
+		 m_IsOnfocus=false;
+		 m_IsActive =false;
+		m_IsOnDrag=false;
 
-/*	m_ReleaseMouseX = ( short )LOWORD( lParam );
-	m_ReleaseMouseY = ( short )HIWORD( lParam );		  
+	 }
+	 else
+	 {
+		 m_IsOnDrag=false;
+	 }
+
+	/*
+    float OffSetX = m_OffSetX +(mWindowWidth-m_Width)*0.5f + 0.5f*(m_Width-m_GraphWidth);
+    float OffSetY = m_OffSetY +(mWindowHeight-m_Height)*0.5f +0.5f*(m_Height-m_GraphHeight);	
+	if(m_IsActive){
+	 m_IsOnfocus=false;
+	 m_IsActive =false;
+     m_ReleaseMouseX = ( short )( wParam );
+	 m_ReleaseMouseY = ( short )( lParam );	  
     //tempRescale= abs(m_UserSelectedEndY-m_UserSelectedSatrtY)/m_DisplayDataRange[0];
 
 	if(m_IsResetAxisY || m_IsResetAxisXY){
 
 		 for(int i=0;i<m_CurveNum;i++){ 
 
-			  m_UserSelectedEndY[i] = (m_GraphHeight-m_ReleaseMouseY+m_GraphOffsetY+m_OffSetY)/m_DataDrawCof[i]+m_OriginValueY[i];
-			  m_DisplayDataRange[i] = abs(m_UserSelectedEndY[i]-m_UserSelectedStartY[i] );
+			  m_UserSelectedEndY[i] = (m_ReleaseMouseY-OffSetY)/m_DataDrawCof[i]+m_OriginValueY[i];
+			  m_DisplayDataRange[i] = Math.abs(m_UserSelectedEndY[i]-m_UserSelectedStartY[i] );
 
-			  if(m_DisplayDataRange[i]< 0.001)
-				   m_DisplayDataRange[i]=0.001;
+			  if(m_DisplayDataRange[i]< 0.001f)
+				   m_DisplayDataRange[i]=0.001f;
 
 			  if(m_UserSelectedEndY[i] > m_UserSelectedStartY[i]){
 				    //m_MaxRecievedData[i]=m_UserSelectedEndY[i];
 					m_MinRecievedData[i]= m_UserSelectedStartY[i];
-					if(m_DisplayDataRange[i]>= 0.001)
+					if(m_DisplayDataRange[i]>= 0.001f)
 						m_MaxRecievedData[i]=m_UserSelectedEndY[i];
 
 					else
-						 m_MaxRecievedData[i]= m_MinRecievedData[i]+0.001;
+						 m_MaxRecievedData[i]= m_MinRecievedData[i]+0.001f;
 
 			   }
 			   else{
@@ -1586,7 +1866,7 @@ void  UserMouseUp(float wParam, float lParam){
 					if(m_DisplayDataRange[i]>= 0.001)
 						m_MaxRecievedData[i]=m_UserSelectedStartY[i];
 					else
-						m_MaxRecievedData[i]= m_MinRecievedData[i]+0.001;
+						m_MaxRecievedData[i]= m_MinRecievedData[i]+0.001f;
 			   }
 				 m_OriginValueY[i]=m_UserSelectedStartY[i];
 		    }          
@@ -1594,32 +1874,34 @@ void  UserMouseUp(float wParam, float lParam){
 	   }
 
        if(m_IsResetAxisX || m_IsResetAxisXY){ 
-			 m_UserSelectedEndX = (m_ReleaseMouseX-m_GraphOffsetX-m_OffSetX)/m_TimeDrawCof+m_OriginValueX;
-             m_DisplayDataTimeLength= abs(m_UserSelectedEndX-m_UserSelectedStartX);			  
+			 m_UserSelectedEndX = (m_ReleaseMouseX-OffSetX)/m_TimeDrawCof+m_OriginValueX;
+             m_DisplayDataTimeLength= (int)(Math.abs(m_UserSelectedEndX-m_UserSelectedStartX));
+             m_DisplayDataTimeLength = m_DisplayDataTimeLength>= 2*m_DataSampleTimeInterval?m_DisplayDataTimeLength: 2*m_DataSampleTimeInterval;
 			 if(m_DisplayDataTimeLength< m_DataSampleTimeInterval)
 				 m_DisplayDataTimeLength=m_DataSampleTimeInterval;
 
 			 if(m_UserSelectedEndX > m_UserSelectedStartX){
 				 m_MinRecievedTime= m_UserSelectedStartX;
-                 if(m_DisplayDataTimeLength>= m_DataSampleTimeInterval)
-				       m_MaxRecievedTime=m_UserSelectedEndX;
-				 else
+                 //if(m_DisplayDataTimeLength>= 2*m_DataSampleTimeInterval)
+				 //      m_MaxRecievedTime=m_UserSelectedEndX;
+				 //else
 					   m_MaxRecievedTime=m_MinRecievedTime+m_DisplayDataTimeLength;
 			  }
 			  else{
-                    // m_MaxRecievedTime= m_UserSelectedStartX;
-				    m_MinRecievedTime=m_UserSelectedEndX;
-					if(m_DisplayDataTimeLength>= m_DataSampleTimeInterval)
-				          m_MaxRecievedTime=m_UserSelectedStartX;
-					else
-						 m_MaxRecievedTime=m_MinRecievedTime+m_DisplayDataTimeLength;
+				     m_MinRecievedTime=m_UserSelectedStartX;
+				     m_DisplayDataTimeLength =2*m_DataSampleTimeInterval;
+					 m_MaxRecievedTime=m_MinRecievedTime+2*m_DataSampleTimeInterval;				  
 			  }
 			  m_OriginValueX = m_MinRecievedTime;
 		}
 		RefreshDisplay();
         m_IsOnfocus=false;
 		m_IsActive=false;
-		  */
+		  
+}*/
+
 }
+
+
 
 };

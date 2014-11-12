@@ -468,9 +468,9 @@ public void InitGLDataForArea()
 	  	// m_Font.SetColor( 0.2f, 0.2f, 0.2f, 1.0f );  
 	  	
 	  	if(m_IsActive)
-	  		m_Font.draw( m_TextString ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_TextString.length()*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -25, 0);
+	  		m_Font.draw( m_TextString ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_TextString.length()*0.5f*25*m_FontSizeScaleFactor, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -25*m_FontSizeScaleFactor, 0);
 	  	else
-	  	m_Font.draw( m_TextString ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_TextString.length()*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20, 0); 
+	  	m_Font.draw( m_TextString ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_TextString.length()*0.5f*25*m_FontSizeScaleFactor, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20*m_FontSizeScaleFactor, 0); 
 	  	m_Font.RenderFont();
 		GLES20.glDisable(GLES20.GL_BLEND);
  }
@@ -511,7 +511,7 @@ public Button(Context context,int ControlType,float OffSetX,float OffSetY,float 
 	m_Width=Width*m_Scale-2.0f*BorderWith;
 	m_Height=Height*m_Scale-2.0f*BorderWith;	
 	m_ControlType =CONTROL_UNIT_BUTTON;
-	
+	m_FontSizeScaleFactor = FontSize;
 	/*ShaderRelatedInit(m_Context);
 	InitGLDataForBorder();
 	InitGLDataForArea();*/
@@ -651,7 +651,7 @@ void UserKeyInput(int InputKey){
 /***********************************************************************************
  子函数描述：UserMouseMove(),鼠标移动事件
  ************************************************************************************/
-public void UserMouseMove(float wParam, float lParam){
+public void UserMouseMove(int pointerId, float wParam, float lParam){
 	
    	int tempMouseX = (int)( wParam );
 	int tempMouseY = (int )( lParam ); 
@@ -675,7 +675,7 @@ public void UserMouseMove(float wParam, float lParam){
 /***********************************************************************************
  子函数描述：UserMouseDown(),鼠标点击事件
  ************************************************************************************/
-public void UserMouseDown(float wParam, float lParam){
+public void UserMouseDown(int pointerId,float wParam, float lParam){
 	
 	
    	int tempMouseX = (int)( wParam );
@@ -701,11 +701,15 @@ public void UserMouseDown(float wParam, float lParam){
 /***********************************************************************************
  子函数描述：UserMouseUp(),鼠标释放事件
  ************************************************************************************/	 
-public void  UserMouseUp(float wParam, float lParam){
+public void  UserMouseUp(int pointerId,float wParam, float lParam){
 
 	/* if(m_OnEventProcess!=0){
 		  m_OnEventProcess();
 	 }*/
+	if(m_IsActive ==true)
+	{
+		m_IsClicked =true;
+	}
     m_IsOnfocus=false;
     m_IsActive=false;	
 }

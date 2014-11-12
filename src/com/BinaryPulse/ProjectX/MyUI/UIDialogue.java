@@ -491,8 +491,13 @@ void  DrawControlBorder(float[] modelMatrix){//boolean AnimationEnabled ){
 ************************************************************************************/
 void DrawControlArea(float[] modelMatrix){
 	
-	int realtimeIndex;
-	//float[] color = {0.0f,0.3f, 0.3f, 0.3f};		
+	int realtimeIndex,realtimeIndexOnfuocs,IndexLengthOnfuocs;
+	float[] color_unfocus = {0.0f,0.0f, 0.0f, 0.0f};
+	float[] color_focus = {0.2f,0.2f, 0.2f, 0.0f};	
+
+	realtimeIndexOnfuocs =0;
+	IndexLengthOnfuocs  =0;
+	
 GLES20.glEnable(GLES20.GL_BLEND);
 //GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
@@ -507,6 +512,11 @@ GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		GLES20.glEnableVertexAttribArray(ColorHandle);
 		 */
 		// Set program handles for cube drawing.
+		
+		ColorHandle          = GLES20.glGetUniformLocation(program[0], COLOR_UNIFORM);	        
+		GLES20.glUniform4fv(ColorHandle, 1, color_unfocus , 0); 
+		GLES20.glEnableVertexAttribArray(ColorHandle);		
+		
 		mvpMatrixUniform = GLES20.glGetUniformLocation(program[1], MVP_MATRIX_UNIFORM);
 		GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, modelMatrix, 0);
 		
@@ -536,11 +546,22 @@ GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		for(int i=0; i<m_ChildUnitLength; i++){
 			
 			//m_ChildUnitArrayTemp.Render(modelMatrix);
-			GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, m_ChildUnitArrayTemp.indexBufferForArea.length, GLES20.GL_UNSIGNED_SHORT, 2*realtimeIndex);
+		    if(m_ChildUnitArrayTemp.IsOnFocus())
+		    {
+		    	IndexLengthOnfuocs = m_ChildUnitArrayTemp.indexBufferForArea.length;
+		    	realtimeIndexOnfuocs    = realtimeIndex;
+		    }
+		    else
+		    	GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, m_ChildUnitArrayTemp.indexBufferForArea.length, GLES20.GL_UNSIGNED_SHORT, 2*realtimeIndex);
 			realtimeIndex += m_ChildUnitArrayTemp.indexBufferForArea.length;
 	        m_ChildUnitArrayTemp = m_ChildUnitArrayTemp.GetNext();
 		}
-		
+
+		if(realtimeIndex>0){
+			GLES20.glUniform4fv(ColorHandle, 1, color_focus , 0); 
+			GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP,IndexLengthOnfuocs, GLES20.GL_UNSIGNED_SHORT, 2*realtimeIndexOnfuocs);
+
+		}
 		/*
 		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[1]);
 		GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 8, GLES20.GL_UNSIGNED_SHORT, 0);
@@ -580,7 +601,7 @@ GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
  }*/
 
  
- public UIDialogue(Context context,int ControlType,float OffSetX,float OffSetY,float Scale,float Width,float Height,float BorderWith){    	
+ public UIDialogue(Context context,int ControlType,float OffSetX,float OffSetY,float Scale,float Width,float Height,float BorderWith,float FontSize){    	
 	    //super(context,BUTTON_SQUARE,0.0f,0.0f,1.0f,4.0f); //m_TextRenderList=DEFAULT_CAPTION_DISPLAYLIST;	
 		super(context,ControlType, OffSetX, OffSetY, Scale, BorderWith);	  
 		m_Width=Width*m_Scale-2.0f*BorderWith;
@@ -604,7 +625,7 @@ GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 			GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 			// Load the font from file (set size + padding), creates the texture
 			// NOTE: after a successful call to this the font is ready for rendering!
-			m_Font.load( "Roboto-Regular.ttf", (int)(32), 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
+			m_Font.load( "Roboto-Regular.ttf", (int)(32*FontSize), 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
 					  
 		  //InitGLDataForBorder();
 		  //InitGLDataForArea();
@@ -625,23 +646,51 @@ boolean IsOnFocus(){
 
 public void UserMessageProcess(MotionEvent event){
 
-	int i,X;
-	float wParam,lParam;
+	int i,X,pointerId,pointerIndex,pointCount;
+	float wParam,lParam,wParam1,lParam1;
 if(event != null){
-	wParam = event.getX();
-	lParam = mWindowHeight - event.getY();
-	X = event.getAction();
-	//if(m_IsChildUnitOnFocus){
+	//wParam = event.getX();
+	//lParam = mWindowHeight - event.getY();
+	X = event.getAction()&MotionEvent.ACTION_MASK;
+	pointerIndex =  (event.getAction()&MotionEvent.ACTION_POINTER_INDEX_MASK)>>MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+	pointerId =event.getPointerId(pointerIndex);
+	pointCount =event.getPointerCount();
+	wParam = event.getX(pointerIndex);
+	lParam = mWindowHeight - event.getY(pointerIndex); 
+	if(pointCount>=2){		
+		wParam1 = event.getX(1);
+		lParam1 = mWindowHeight - event.getY(1); 		
+	}
+	else{
+		wParam1 = 0;
+		lParam1 = 0; 	
+	}
+	    //if(m_IsChildUnitOnFocus){
 
 		switch( X ){
+		case MotionEvent.ACTION_POINTER_DOWN:
+			if(m_IsChildUnitOnFocus){
+				m_ActiveChildUnit.UserMouseDown(pointerId,wParam ,  lParam);
+			}
+		    break;
+	/*	case MotionEvent.ACTION_POINTER_UP:
+			if(m_IsChildUnitOnFocus){
+					m_ActiveChildUnit.UserMouseUp(pointerId, wParam ,  lParam);
+
+			}
+		    break;	*/	    
 		case MotionEvent.ACTION_MOVE:
-			  if(m_IsChildUnitOnFocus)
-				  m_ActiveChildUnit.UserMouseMove(wParam ,  lParam);
+			  if(m_IsChildUnitOnFocus){
+				  m_ActiveChildUnit.UserMouseMove(pointerId,wParam ,  lParam);
+				  if(pointCount>=2){					
+					  m_ActiveChildUnit.UserMouseMove(1,wParam1 ,  lParam1);					
+				  }
+			  }
 			  break;
 		case MotionEvent.ACTION_DOWN:
 			if(m_IsChildUnitOnFocus){
 				
-				m_ActiveChildUnit.UserMouseDown( wParam,  lParam);
+				m_ActiveChildUnit.UserMouseDown(pointerId, wParam,  lParam);
 				if(m_ActiveChildUnit.IsOnFocus())
 					m_IsChildUnitOnFocus=true;
 				else
@@ -652,7 +701,7 @@ if(event != null){
 			for( i=0; i<m_ChildUnitLength; i++){				
 
 				//m_ChildUnitArrayTemp.UserMouseMove( wParam,  lParam);
-				m_ChildUnitArrayTemp.UserMouseDown( wParam,  lParam);
+				m_ChildUnitArrayTemp.UserMouseDown(pointerId, wParam,  lParam);
 
 				if(m_ChildUnitArrayTemp.IsOnFocus()){
 
@@ -674,9 +723,18 @@ if(event != null){
 			}
 			}
 			  break;
+			  
+
+		case MotionEvent.ACTION_POINTER_UP:
+			  if(m_IsChildUnitOnFocus){
+				m_ActiveChildUnit.UserMouseUp(pointerId, wParam,  lParam);					 
+			  }  
+			  break;
 		case MotionEvent.ACTION_UP:
-			  if(m_IsChildUnitOnFocus)
-				  m_ActiveChildUnit.UserMouseUp( wParam,  lParam);
+			  if(m_IsChildUnitOnFocus){			  
+
+				  m_ActiveChildUnit.UserMouseUp(pointerId, wParam,  lParam);
+		      } 		  
 			  /*if(m_ActiveChildUnit.IsOnFocus()==false)	{			
 				   m_ChildUnitArrayTemp=m_ChildUnitArrayRoot;
 				   for( i=0; i<m_ChildUnitLength; i++){
@@ -799,9 +857,9 @@ public void InitGLDataForArea()
 {
 	float[] modleMatrix1 =new float[16];
 
-	float m_AreaColor =0.4f;
-	float m_AreaColor1 =0.2f;
-	float m_AreaColor2 =0.2f;
+	float m_AreaColor =0.0f;
+	float m_AreaColor1 =0.0f;
+	float m_AreaColor2 =0.0f;
 	float m_Alph =0.3f;
 	float vertexBuffer[] = {
 
@@ -869,21 +927,21 @@ void UserKeyInput(int InputKey){
 /***********************************************************************************
  子函数描述：UserMouseMove(),鼠标移动事件
  ************************************************************************************/
-void UserMouseMove(float wParam, float lParam){
+void UserMouseMove(int pointerId,float wParam, float lParam){
 
 }
 
 /***********************************************************************************
  子函数描述：UserMouseDown(),鼠标点击事件
  ************************************************************************************/
- void UserMouseDown(float wParam, float lParam){
+ void UserMouseDown(int pointerId,float wParam, float lParam){
 
  }
 
 /***********************************************************************************
  子函数描述：UserMouseUp(),鼠标释放事件
  ************************************************************************************/	 
-void  UserMouseUp(float wParam, float lParam){
+void  UserMouseUp(int pointerId,float wParam, float lParam){
 
  }
 public void SetDispWiodowSize(int width, int height)

@@ -20,74 +20,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".lesson1.LessonOneActivity"
-            android:label="@string/lesson_one" />
-        <activity
-            android:name=".lesson2.LessonTwoActivity"
-            android:label="@string/lesson_two" />
-        <activity
-            android:name=".lesson3.LessonThreeActivity"
-            android:label="@string/lesson_three" />
-        <activity
-            android:name=".lesson4.LessonFourActivity"
-            android:label="@string/lesson_four" />
-        <activity
-            android:name=".lesson5.LessonFiveActivity"
-            android:label="@string/lesson_five" />
-        <activity
-            android:name=".lesson6.LessonSixActivity"
-            android:label="@string/lesson_six" />
-        <activity
-            android:name=".lesson7.LessonSevenActivity"
-            android:label="@string/lesson_seven" />
-        <activity
-            android:name=".lesson8.LessonEightActivity"
-            android:label="@string/lesson_eight" />        
-           <service
-            android:name=".livewallpaper.LessonThreeWallpaperService"
-            android:label="@string/lesson_three_wallpaper_1"
-            android:permission="android.permission.BIND_WALLPAPER" >
-            <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.service.wallpaper"
-                android:resource="@xml/wallpaper" />
-        </service>
-        <service
-            android:name=".rbgrnlivewallpaper.LessonThreeWallpaperService"
-            android:label="@string/lesson_three_wallpaper_2"
-            android:permission="android.permission.BIND_WALLPAPER" >
-            <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.service.wallpaper"
-                android:resource="@xml/wallpaper" />
-        </service>
-        <service
-            android:name=".switchinglivewallpaper.LessonThreeWallpaperService"
-            android:label="@string/lesson_three_wallpaper_3"
-            android:permission="android.permission.BIND_WALLPAPER" >
-            <intent-filter>
-                <action android:name="android.service.wallpaper.WallpaperService" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.service.wallpaper"
-                android:resource="@xml/switching_wallpaper" />
-        </service>
-        <activity
-            android:name=".switchinglivewallpaper.WallpaperSettings"
-            android:exported="true"
-            android:label="@string/lesson_three_wallpaper_3"
-            android:permission="android.permission.BIND_WALLPAPER"
-            android:theme="@style/WallpaperSettingsLight" >
-        </activity>
-        
+    
     </application>
 
 </manifest>

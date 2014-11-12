@@ -267,7 +267,7 @@ public void InitGLDataForArea()
 			
 			int tempInt=m_OnfocusItemNum-m_FirstItemNum;
 			//if(tempInt <=m_DropListDisplayNum-1 && tempInt >=0){
-				GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 50, GLES20.GL_UNSIGNED_SHORT, 0);
+				GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 32, GLES20.GL_UNSIGNED_SHORT, 0);
 			//}
 			//else
 			//{
@@ -335,19 +335,19 @@ public void InitGLDataForArea()
 		     0,  1,  0,  0.6f,
 		     
 		  // 分割线  horizontal
-			  m_BorderWidth, m_BorderWidth ,0.0f, 
+			  m_BorderWidth, 0 ,0.0f, 
 			  0,  1,  0,  0.6f,
-			  m_BorderWidth, m_BorderWidth ,0.0f, 
+			  m_BorderWidth, 0 ,0.0f, 
 			  0,  1,  0,  0.6f,
-			  m_BorderWidth, -m_BorderWidth,0.0f,
+			  m_BorderWidth, -0.5f*m_BorderWidth,0.0f,
 			  0,  1,  0,  0.6f,
-			  m_BorderWidth+m_Width, m_BorderWidth ,0.0f, 
+			  m_BorderWidth+m_Width, 0 ,0.0f, 
 			  0,  1,  0,  0.6f,
-			  m_BorderWidth+m_Width, -m_BorderWidth,0.0f, 
+			  m_BorderWidth+m_Width, -0.5f*m_BorderWidth,0.0f, 
 			  0,  1,  0,  0.6f,
-			  m_BorderWidth+m_Width, -m_BorderWidth,0.0f, 
+			  m_BorderWidth+m_Width, -0.5f*m_BorderWidth,0.0f, 
 			  0,  1,  0,  0.6f,
-
+              /*
 			  // 包络线  horizontal
 			  m_BorderWidth, -m_DragLineLength ,0.0f, 
 			  0,  1,  0,  0.6f,
@@ -388,7 +388,7 @@ public void InitGLDataForArea()
 			     m_BorderWidth+m_Width+0.5f*m_BorderWidth, -tempHeight-m_BorderWidth ,0.0f,	
 			     0,  1,  0,  0.6f,
 			     m_BorderWidth+m_Width+0.5f*m_BorderWidth, -tempHeight-m_BorderWidth ,0.0f,	
-			     0,  1,  0,  0.6f,
+			     0,  1,  0,  0.6f,*/
 			  
 			  
 			//Drag Line
@@ -459,8 +459,8 @@ public void InitGLDataForArea()
 
     //short indexBuffer[]  ={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27};
 
-    short indexBuffer[] = new short[50];
-    for(int i =0;i<50;i++)
+    short indexBuffer[] = new short[32];
+    for(int i =0;i<32;i++)
     {
     	indexBuffer[i] =(short)i;
     }
@@ -512,11 +512,11 @@ public void DrawLables(float[] modelMatrix)
 	    	   m_Font.SetColor(0.1f, 0.9f, 0.1f,0.9f);	 
 	    	   //m_Font.draw( m_ListString[i+m_FirstItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -9*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20 -(i+1)*m_DropDownListPerHeight, 0);
 	    	   //(-m_DragBoxOffSetY+m_DragLineOffSetY)/(m_DragLineLength-m_DragBoxHeight)
-	    	   m_Font.draw( m_ListString[i+m_FirstItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -9*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20 +((-m_DragBoxOffSetY+m_DragLineOffSetY)/(m_DragLineLength-m_DragBoxHeight)*m_HideListNum -i-m_FirstItemNum)*m_DropDownListPerHeight, 0);
+	    	   m_Font.draw( m_ListString[i+m_FirstItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -9*0.5f*25*m_FontSizeScaleFactor, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20*m_FontSizeScaleFactor +((-m_DragBoxOffSetY+m_DragLineOffSetY)/(m_DragLineLength-m_DragBoxHeight)*m_HideListNum -i-m_FirstItemNum)*m_DropDownListPerHeight, 0);
 	       //}
 	  }	  
 	  if(m_FirstItemNum>=1 && m_FirstItemNum<m_HideListNum+1)
-		  m_Font.draw( m_ListString[m_DropListDisplayNum+m_FirstItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -9*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20 +((-m_DragBoxOffSetY+m_DragLineOffSetY)/(m_DragLineLength-m_DragBoxHeight)*m_HideListNum -m_DropListDisplayNum-m_FirstItemNum)*m_DropDownListPerHeight, 0);
+		  m_Font.draw( m_ListString[m_DropListDisplayNum+m_FirstItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -9*0.5f*25*m_FontSizeScaleFactor, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20*m_FontSizeScaleFactor +((-m_DragBoxOffSetY+m_DragLineOffSetY)/(m_DragLineLength-m_DragBoxHeight)*m_HideListNum -m_DropListDisplayNum-m_FirstItemNum)*m_DropDownListPerHeight, 0);
 	  m_Font.RenderFont();
 
 	  m_Font.SetDisplayArea( 1.0f, -1.0f, 1.0f,-1.0f);  
@@ -553,7 +553,7 @@ DropDownList(Context context,int ControlType,float OffSetX,float OffSetY,float S
 子函数描述：UIControlUnit(), 初始化
 ************************************************************************************/
 
- public DropDownList(Context context,int ControlType,float OffSetX,float OffSetY,float Scale,float Width,float Height,float BorderWith)
+ public DropDownList(Context context,int ControlType,float OffSetX,float OffSetY,float Scale,float Width,float Height,float BorderWith, float  FontSize)
 {
 	super(context,ControlType, OffSetX, OffSetY, Scale, BorderWith);	  
 	m_Width=Width*m_Scale-2.0f*BorderWith;
@@ -582,7 +582,7 @@ DropDownList(Context context,int ControlType,float OffSetX,float OffSetY,float S
 	m_DragBoxHeight=m_DragAreaWidth;
     m_DragBoxOffSetY=m_DragLineOffSetY;
 	//m_IsOnfocus=0;	
-    
+	m_FontSizeScaleFactor = FontSize;
     m_IsOnSlideInSelectedArea =false;
 	ShaderRelatedInit(m_Context);
 	
@@ -698,9 +698,9 @@ public void  RenderFont(float[] modelMatrix){
   	m_Font.SetColor( 0.0f, 1.0f, 0.0f, 1.0f );  
   	 m_Font.SetDisplayArea( 1.0f, -1.0f, 1.0f, -1.0f);//
   	//m_Font.draw( m_TextString ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_TextString.length()*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20, 0); 
-  	m_Font.draw( m_ListString[m_SelectedItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_ListString[m_SelectedItemNum-1].length()*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20, 0);
-  	m_Font.draw( "v" ,m_OffSetX -(mWindowWidth-m_BorderWidth)/2.0f + 3*m_BorderWidth+m_DragLineOffSetX, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -15 - 0.2f*m_DropDownListPerHeight, 0);
-  	m_Font.draw("v",m_OffSetX -(mWindowWidth-m_BorderWidth)/2.0f + 3*m_BorderWidth+m_DragLineOffSetX, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -15 +0.1f*m_DropDownListPerHeight, 0);
+  	m_Font.draw( m_ListString[m_SelectedItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_ListString[m_SelectedItemNum-1].length()*0.5f*25*m_FontSizeScaleFactor, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20*m_FontSizeScaleFactor, 0);
+  	m_Font.draw( "v" ,m_OffSetX -(mWindowWidth-m_BorderWidth)/2.0f + 3*m_BorderWidth+m_DragLineOffSetX, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -15*m_FontSizeScaleFactor - 0.2f*m_DropDownListPerHeight, 0);
+  	m_Font.draw("v",m_OffSetX -(mWindowWidth-m_BorderWidth)/2.0f + 3*m_BorderWidth+m_DragLineOffSetX, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -15*m_FontSizeScaleFactor +0.1f*m_DropDownListPerHeight, 0);
 	  // m_DisplayFontList->print(m_OffSetX+3*m_BorderWidth+m_DragLineOffSetX, GetSystemMetrics(SM_CYSCREEN)-m_OffSetY - 0.2*m_DropDownListPerHeight,"v",1);
 	  // m_DisplayFontList->print(m_OffSetX+3*m_BorderWidth+m_DragLineOffSetX, GetSystemMetrics(SM_CYSCREEN)-m_OffSetY + 0.1*m_DropDownListPerHeight,"v",1);
 
@@ -719,7 +719,7 @@ void UserKeyInput(int InputKey){
 /***********************************************************************************
  子函数描述：UserMouseMove(),鼠标移动事件
  ************************************************************************************/
-public void UserMouseMove(float wParam, float lParam){
+public void UserMouseMove(int pointerId,float wParam, float lParam){
 	
    	int tempMouseX = ( short )( wParam );
 	int tempMouseY = ( short )( lParam ); 
@@ -798,7 +798,7 @@ public void UserMouseMove(float wParam, float lParam){
 /***********************************************************************************
  子函数描述：UserMouseDown(),鼠标点击事件
  ************************************************************************************/
-public void UserMouseDown(float wParam, float lParam){
+public void UserMouseDown(int pointerId, float wParam, float lParam){
 
 		int tempMouseX = ( short )( wParam );
 	   	int tempMouseY = ( short )( lParam ); 
@@ -937,7 +937,7 @@ public void UserMouseDown(float wParam, float lParam){
 /***********************************************************************************
  子函数描述：UserMouseUp(),鼠标释放事件
  ************************************************************************************/	 
- public void  UserMouseUp(float wParam, float lParam){
+ public void  UserMouseUp(int pointerId,float wParam, float lParam){
 	   	int tempMouseY = ( short )( lParam ); 
 		tempMouseY=-tempMouseY+(int)m_OffSetY;
 		

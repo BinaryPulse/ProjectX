@@ -50,23 +50,14 @@ public final class R {
         public static final int wings=0x7f020016;
     }
     public static final class id {
-        public static final int Image=0x7f0b0007;
-        public static final int SubTitle=0x7f0b0009;
-        public static final int Title=0x7f0b0008;
-        public static final int action_settings=0x7f0b000a;
-        public static final int button_decrease_num_cubes=0x7f0b0001;
-        public static final int button_increase_num_cubes=0x7f0b0002;
-        public static final int button_set_mag_filter=0x7f0b0006;
-        public static final int button_set_min_filter=0x7f0b0005;
-        public static final int button_switch_VBOs=0x7f0b0003;
-        public static final int button_switch_stride=0x7f0b0004;
-        public static final int gl_surface_view=0x7f0b0000;
+        public static final int Image=0x7f0b0000;
+        public static final int SubTitle=0x7f0b0002;
+        public static final int Title=0x7f0b0001;
+        public static final int action_settings=0x7f0b0003;
     }
     public static final class layout {
         public static final int activity_main=0x7f030000;
-        public static final int lesson_seven=0x7f030001;
-        public static final int lesson_six=0x7f030002;
-        public static final int toc_item=0x7f030003;
+        public static final int toc_item=0x7f030001;
     }
     public static final class menu {
         public static final int display_message=0x7f0a0000;

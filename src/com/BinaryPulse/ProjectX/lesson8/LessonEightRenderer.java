@@ -183,17 +183,31 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
     private DisplayMetrics dm;
     private int windowWidth;
     private int windowHeight;
+    
+    
+    private float UniformScaleX;
+    private float UniformScaleY;
+    
+    private static boolean UIinitiated = false;
 	/**
 	 * Initialize the model data.
 	 */
 	public LessonEightRenderer(final LessonEightActivity lessonEightActivity, ErrorHandler errorHandler) {
+		
+		DisplayMetrics dm1;
+		int windowWidth1,windowHeight1;
+		
 		this.lessonEightActivity = lessonEightActivity;
 		this.errorHandler = errorHandler;
 		
+	    	
 	}
 	
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
+		
+		
+
 		heightMap = new HeightMap();
 		tower= new HeightMap();
 		nacelle = new HeightMap(); 
@@ -317,7 +331,14 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		windowWidth = dm.widthPixels;
 		windowHeight = dm.heightPixels;		
 		
-		
+		 if(windowWidth>windowHeight){
+			 UniformScaleX = (float)windowWidth/1240.0f;
+			 UniformScaleY = (float)windowHeight/720.0f;	
+		 }
+		 else{
+			 UniformScaleX = (float)windowWidth/720.0f;
+			 UniformScaleY = (float)windowHeight/1240.0f;				 
+		 }	
 		// Create the GLText
 		
 		// Set the background frame color
@@ -331,48 +352,53 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		glText.load( "Roboto-Regular.ttf", 38, 0, 0);  // Create Font (Height: 14 Pixels / X+Y Padding 2 Pixels)
 		// enable texture + alpha blending
         */
-		OscilloScope_1=new OscilloScope(lessonEightActivity,0,150.0f,50.0f,1.0f,(float)windowWidth*0.7f,(float)windowHeight*0.8f,5.0f,1.0f);
-	    //OscilloScope_1.SetDispWiodowSize(windowWidth,windowHeight);	
+		 
+	if(true)//)	
+	{	
+		UIinitiated =true;	
+		
+		OscilloScope_1=new OscilloScope(lessonEightActivity,0,10+350.0f*UniformScaleX,120.0f*UniformScaleY,1.0f,(float)windowWidth*0.7f,(float)windowHeight*0.8f,5.0f,1.0f*UniformScaleX);
+	    OscilloScope_1.SetDispWiodowSize(windowWidth,windowHeight);	
 	    OscilloScope_1.SetScopeParameters(windowHeight*0.50f,windowWidth*0.50f, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
 	    OscilloScope_1.AddCaption("OscilloScope of ProjectX");
 	    
 	    
-	    Button1=new Button(lessonEightActivity,0,10.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,3.0f,3.0f);
+	    Button1=new Button(lessonEightActivity,0,10+10.0f*UniformScaleX,40.0f*UniformScaleY,1.0f,(float)200.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
 	   Button1.SetDispWiodowSize(windowWidth,windowHeight);	
 	   Button1.AddCaption("START");
 	   	    
-	    Button2=new Button(lessonEightActivity,0,240.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,3.0f,3.0f);
+	    Button2=new Button(lessonEightActivity,0,10+240.0f*UniformScaleX,40.0f*UniformScaleY,1.0f,(float)200.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
 	   Button2.SetDispWiodowSize(windowWidth,windowHeight);	
 	   Button2.AddCaption("STOP");
 	   
-	    Button3=new Button(lessonEightActivity,0,480.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,3.0f,3.0f);
+	    Button3=new Button(lessonEightActivity,0,10+480.0f*UniformScaleX,40.0f*UniformScaleY,1.0f,(float)200.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
 	   Button3.SetDispWiodowSize(windowWidth,windowHeight);	
 	   Button3.AddCaption("SETING");
 	   
 
-	    Button4=new Button(lessonEightActivity,0,720.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,3.0f,3.0f);
+	    Button4=new Button(lessonEightActivity,0,10+720.0f*UniformScaleX,40.0f*UniformScaleY,1.0f,(float)200.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
 	   Button4.SetDispWiodowSize(windowWidth,windowHeight);	
 	   Button4.AddCaption("XXXX");
 	   
-	    Button5=new Button(lessonEightActivity,0,960.0f,40.0f,1.0f,(float)200.0f,(float)60.0f,3.0f,3.0f);
+	    Button5=new Button(lessonEightActivity,0,10+960.0f*UniformScaleX,40.0f*UniformScaleY,1.0f,(float)200.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
 	   Button5.SetDispWiodowSize(windowWidth,windowHeight);	
 	   Button5.AddCaption("TTTT");
 	
 	   String DropDownStrings[] = {"Speed_[1]","Voltage_[2]","Current_[3]","Flux_[4]","Torque_[5]","Time_[6]","7","8","9","10"};
-	   DropDownList1 = new DropDownList(lessonEightActivity,0,10.0f,580.0f,1.0f,(float)320.0f,(float)60.0f,3.0f);
+	   DropDownList1 = new DropDownList(lessonEightActivity,0,10+15.0f*UniformScaleX,580.0f*UniformScaleY,1.0f,(float)300.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
 	   DropDownList1.SetDisplayList(5, DropDownStrings);
 	   DropDownList1.SetDispWiodowSize(windowWidth,windowHeight);	
 	   DropDownList1.AddCaption("TTTT");
 	   
-	   DropDownList2 = new DropDownList(lessonEightActivity,0,10.0f,480.0f,1.0f,(float)320.0f,(float)60.0f,3.0f);
+	   DropDownList2 = new DropDownList(lessonEightActivity,0,10+15.0f*UniformScaleX,480.0f*UniformScaleY,1.0f,(float)300.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
 	   DropDownList2.SetDisplayList(5, DropDownStrings);
 	   DropDownList2.SetDispWiodowSize(windowWidth,windowHeight);	
 
-	   DropDownList3 = new DropDownList(lessonEightActivity,0,10.0f,380.0f,1.0f,(float)320.0f,(float)60.0f,3.0f);
+	   DropDownList3 = new DropDownList(lessonEightActivity,0,10+15.0f*UniformScaleX,380.0f*UniformScaleY,1.0f,(float)300.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
 	   DropDownList3.SetDisplayList(5, DropDownStrings);
 	   DropDownList3.SetDispWiodowSize(windowWidth,windowHeight);	
 
-	   DropDownList4 = new DropDownList(lessonEightActivity,0,10.0f,280.0f,1.0f,(float)320.0f,(float)60.0f,3.0f);
+	   DropDownList4 = new DropDownList(lessonEightActivity,0,10+15.0f*UniformScaleX,280.0f*UniformScaleY,1.0f,(float)300.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
 	   DropDownList4.SetDisplayList(5, DropDownStrings);
 	   DropDownList4.SetDispWiodowSize(windowWidth,windowHeight);	
 
@@ -380,7 +406,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	   
 	   
 	   
-	   SlideBar1 = new SlideBar(lessonEightActivity,0,10.0f,180.0f,1.0f,(float)320.0f,(float)60.0f,1.0f);
+	   SlideBar1 = new SlideBar(lessonEightActivity,0,10+15.0f*UniformScaleX,180.0f*UniformScaleY,1.0f,(float)300.0f*UniformScaleX,(float)60.0f*UniformScaleY,1.0f);
 
 	   SlideBar1.SetDispWiodowSize(windowWidth,windowHeight);	
 
@@ -389,7 +415,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 	   
 	   
 	   
-	   UIDialogue1 =new UIDialogue(lessonEightActivity,0,0.0f,0.0f,1.0f,(float)1180.0f,(float)680.0f,3.0f);
+	   UIDialogue1 =new UIDialogue(lessonEightActivity,0,0.0f,0.0f,1.0f,(float)windowWidth*0.98f,(float)windowHeight*0.98f,3.0f,1.0f*UniformScaleX);
 	   UIDialogue1.SetDispWiodowSize(windowWidth,windowHeight);
 	   UIDialogue1.AddCtrlUnit(Button1);
 	   UIDialogue1.AddCtrlUnit(Button2);
@@ -427,7 +453,9 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		
 		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mAndroidDataHandle);		
 		GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);	*/	
-       
+     
+	}	
+		
 	}
 
 	@Override
@@ -461,6 +489,14 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 				-height/2,
 				height/2, 0f, 1f);		
 		
+	/*	 if(width>height){
+			 UniformScaleX = width/1280;
+			 UniformScaleY = height/720;	
+		 }
+		 else{
+			 UniformScaleX = height/720;
+			 UniformScaleY = width/1280;				 
+		 }*/
 	}
 
 	@Override
@@ -520,7 +556,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		// for(int i=0;i<4;i++)
 			// m_TestData[i] =2000*(i+1)*(float)Math.cos(m_timer/500.0f)*(float)Math.sin((i+1)*m_timer/40.0f+i*5.0f);
 		    			//float yyy=2000*cos(double(iFrames)/500.0)*sin(double(iFrames)/4.0);    
-		
+		//if(m_timer<500.0f)
 		OscilloScope_1.ReciedveData(m_timer,m_TestData);
 		//OscilloScope_1.Render(viewMatrixFont);
 		
