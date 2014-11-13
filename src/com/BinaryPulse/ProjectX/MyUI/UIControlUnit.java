@@ -114,9 +114,9 @@ public abstract class  UIControlUnit{
 		 
 	     abstract void  UserMouseUp(int pointerId,float wParam, float lParam);
 
-	     abstract void  Render(float[] modelMatrix);
+	     abstract void  Render(float[] modelMatrix,float[] Boundary);
 	     
-	     abstract void  RenderFont(float[] modelMatrix);
+	     abstract void  RenderFont(float[] modelMatrix,float[] Boundary);
 	     
 	     void  SetFont( MyFont Font){m_Font = Font;}
 

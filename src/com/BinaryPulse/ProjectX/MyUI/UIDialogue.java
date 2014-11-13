@@ -40,6 +40,7 @@ public class UIDialogue extends UIControlUnit {
 	
 	/** This is a handle to our cube shading program. */
 	protected int program[];						   // OpenGL Program object
+	protected int BoundaryHandle;
 	protected int ColorHandle;						   // Shader color handle	
 	protected int TextureUniformHandle;                 // Shader texture handle
 	protected int TextureMoveUniformHandle;
@@ -70,6 +71,7 @@ public class UIDialogue extends UIControlUnit {
 	private static final String TEXTURE_UNIFORM = "u_Texture";
 	private static final String COLOR_UNIFORM = "u_Color";
 	private static final String TEXTUREMOV_UNIFORM = "u_Texmove";
+	
 	
 	protected int[] vbo = new int[CONTROL_UNIT_TORTAL_TYPE];
 	protected int[] ibo = new int[CONTROL_UNIT_TORTAL_TYPE];
@@ -110,6 +112,8 @@ public class UIDialogue extends UIControlUnit {
     
     protected static float m_timer;
     
+	public float[] mBoundary ={1.0f,-1.0f,1.0f,-1.0f};
+    
     protected int m_ChildUnitLength;
     protected UIControlUnit m_ChildUnitArrayRoot;
     protected UIControlUnit m_ChildUnitArrayTemp;
@@ -117,6 +121,8 @@ public class UIDialogue extends UIControlUnit {
     protected UIControlUnit m_ActiveChildUnit;
     
     protected boolean m_IsChildUnitOnFocus;
+    
+
 /*##############################################################################
            
 		         对象模块功能描述： UIDialogue（人机交互）
@@ -367,15 +373,17 @@ void ShaderRelatedInit(Context context){
 
 
 
-public void Render(float[] modelMatrix){	   
-	
+public void Render(float[] modelMatrix,float[] Boundary){	   
+
+	mBoundary =Boundary ;
 	
 	 DrawControlBorder(modelMatrix);
 	 DrawControlArea(modelMatrix);	  
 	
 	   m_ChildUnitArrayTemp=m_ChildUnitArrayRoot;
 	   for(int i=0; i<m_ChildUnitLength; i++){
-			   m_ChildUnitArrayTemp.RenderFont(modelMatrix);
+		  /// m_Font.SetDisplayArea( 1.0f, -1.0f, 1.0f-timer1/250.0f,-1.0f+timer1/250.0f);
+ 		   m_ChildUnitArrayTemp.RenderFont(modelMatrix,Boundary);
 			   //m_ChildUnitArrayTemp.Render(modelMatrix);
             m_ChildUnitArrayTemp=m_ChildUnitArrayTemp.GetNext();
 	   }	
@@ -383,13 +391,28 @@ public void Render(float[] modelMatrix){
 	   m_ChildUnitArrayTemp=m_ChildUnitArrayRoot;
 	   for(int i=0; i<m_ChildUnitLength; i++){
 			   //m_ChildUnitArrayTemp.RenderFont(modelMatrix);
-			   m_ChildUnitArrayTemp.Render(modelMatrix);
+
+			m_ChildUnitArrayTemp.Render(modelMatrix,Boundary);
+		   
             m_ChildUnitArrayTemp=m_ChildUnitArrayTemp.GetNext();
 	   }	 
 	   
 }   
 
-public void  RenderFont(float[] modelMatrix){    
+public void SetDisplayArea(float x1, float x2, float y1, float y2) {
+
+	
+	// set color TODO: only alpha component works, text is always black #BUG
+	mBoundary[0] = x1; 
+	mBoundary[1] = x2; 
+	mBoundary[2] = y1; 
+	mBoundary[3] = y2; 
+	
+
+	//mVPMatrix = pMatrix;		
+}	
+
+public void  RenderFont(float[] modelMatrix,float[] Boundary){    
 
 	
 	//DrawControlBorder(modelMatrix);
@@ -416,6 +439,11 @@ void  DrawControlBorder(float[] modelMatrix){//boolean AnimationEnabled ){
 		ColorHandle          = GLES20.glGetUniformLocation(program[0], COLOR_UNIFORM);
         TextureUniformHandle = GLES20.glGetUniformLocation(program[0], TEXTURE_UNIFORM);
         TextureMoveUniformHandle = GLES20.glGetUniformLocation(program[0], TEXTUREMOV_UNIFORM);
+      
+        
+		BoundaryHandle          = GLES20.glGetUniformLocation(program[0], "u_Boundary");		
+		GLES20.glUniform4fv(BoundaryHandle, 1, mBoundary , 0); 
+		GLES20.glEnableVertexAttribArray(BoundaryHandle);	   
         
 		GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
 		GLES20.glEnableVertexAttribArray(ColorHandle);
@@ -491,9 +519,9 @@ void  DrawControlBorder(float[] modelMatrix){//boolean AnimationEnabled ){
 ************************************************************************************/
 void DrawControlArea(float[] modelMatrix){
 	
-	int realtimeIndex,realtimeIndexOnfuocs,IndexLengthOnfuocs;
+	int realtimeIndex,realtimeIndexOnfuocs,IndexLengthOnfuocs,tempi;
 	float[] color_unfocus = {0.0f,0.0f, 0.0f, 0.0f};
-	float[] color_focus = {0.2f,0.2f, 0.2f, 0.0f};	
+	float[] color_focus = {0.0f,0.3f, 0.0f, 0.0f};	
 
 	realtimeIndexOnfuocs =0;
 	IndexLengthOnfuocs  =0;
@@ -512,8 +540,11 @@ GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		GLES20.glEnableVertexAttribArray(ColorHandle);
 		 */
 		// Set program handles for cube drawing.
+		BoundaryHandle          = GLES20.glGetUniformLocation(program[1], "u_Boundary");		
+		GLES20.glUniform4fv(BoundaryHandle, 1, mBoundary , 0); 
+		GLES20.glEnableVertexAttribArray(BoundaryHandle);	
 		
-		ColorHandle          = GLES20.glGetUniformLocation(program[0], COLOR_UNIFORM);	        
+		ColorHandle          = GLES20.glGetUniformLocation(program[1], COLOR_UNIFORM);	        
 		GLES20.glUniform4fv(ColorHandle, 1, color_unfocus , 0); 
 		GLES20.glEnableVertexAttribArray(ColorHandle);		
 		
@@ -543,6 +574,7 @@ GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		realtimeIndex =0;
 		GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, indexBufferForAreaX.length, GLES20.GL_UNSIGNED_SHORT, 2*(indexLengthForArea-indexBufferForAreaX.length));
 		m_ChildUnitArrayTemp=m_ChildUnitArrayRoot;
+		tempi =0;
 		for(int i=0; i<m_ChildUnitLength; i++){
 			
 			//m_ChildUnitArrayTemp.Render(modelMatrix);
@@ -550,6 +582,7 @@ GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		    {
 		    	IndexLengthOnfuocs = m_ChildUnitArrayTemp.indexBufferForArea.length;
 		    	realtimeIndexOnfuocs    = realtimeIndex;
+		    	tempi =i;
 		    }
 		    else
 		    	GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, m_ChildUnitArrayTemp.indexBufferForArea.length, GLES20.GL_UNSIGNED_SHORT, 2*realtimeIndex);
@@ -558,7 +591,10 @@ GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		}
 
 		if(realtimeIndex>0){
-			GLES20.glUniform4fv(ColorHandle, 1, color_focus , 0); 
+			if(tempi==5)
+				GLES20.glUniform4fv(ColorHandle, 1, color_unfocus , 0); 
+			else
+				GLES20.glUniform4fv(ColorHandle, 1, color_focus , 0); 
 			GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP,IndexLengthOnfuocs, GLES20.GL_UNSIGNED_SHORT, 2*realtimeIndexOnfuocs);
 
 		}

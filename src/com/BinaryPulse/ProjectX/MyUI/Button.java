@@ -453,7 +453,7 @@ public void InitGLDataForArea()
 	}*/
 }
 
- public void DrawCaption(float[] modelMatrix)
+ public void DrawCaption(float[] modelMatrix,float[] Boundary)
  {      
 	 	GLES20.glEnable(GLES20.GL_BLEND);
 		//GLES20.glDisable(GLES20.GL_DEPTH_TEST);
@@ -462,6 +462,7 @@ public void InitGLDataForArea()
 	  	m_Font.SetMvpMatrix(modelMatrix);
 		//s = "START";
 	  	//if(m_IsOnfocus)
+		m_Font.SetDisplayArea(Boundary);  
 		  m_Font.SetColor( 0.2f, 1.0f, 0.2f, 1.0f );  
 
 	  	//else
@@ -624,7 +625,7 @@ public void AddCaption(String TextString)//,int TextLength,float FontSize,int Fo
 /***********************************************************************************
  子函数描述：Render(),绘制整个示波器模块
  ************************************************************************************/
-public void  Render(float[] modelMatrix){    
+public void  Render(float[] modelMatrix,float[] Boundary){    
 
 	
 	//DrawControlBorder(modelMatrix);
@@ -633,12 +634,12 @@ public void  Render(float[] modelMatrix){
 
  }
 
-public void  RenderFont(float[] modelMatrix){    
+public void  RenderFont(float[] modelMatrix,float[] Boundary){    
 
 	
 	//DrawControlBorder(modelMatrix);
 	//DrawControlArea(modelMatrix);
-	DrawCaption(modelMatrix);
+	DrawCaption(modelMatrix, Boundary);
 
  }
 /***********************************************************************************

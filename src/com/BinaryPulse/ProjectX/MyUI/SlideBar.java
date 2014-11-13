@@ -46,7 +46,7 @@ public class SlideBar extends UIControlUnit {
 	protected int positionAttribute;
 	protected int texcordAttribute;
 	protected int colorAttribute;	
-
+	protected int BoundaryHandle;
 	/** Identifiers for our uniforms and attributes inside the shaders. */	
 	private static final String MVP_MATRIX_UNIFORM = "u_MVPMatrix";
 	//private static final String MV_MATRIX_UNIFORM = "u_MVMatrix";
@@ -55,6 +55,7 @@ public class SlideBar extends UIControlUnit {
 	private static final String POSITION_ATTRIBUTE = "a_Position";
 	private static final String COLOR_ATTRIBUTE = "a_Color";
 
+	public float[] mBoundary ={1.0f,-1.0f,1.0f,-1.0f};
 	
 	protected int[] vbo = new int[1];
 	protected int[] ibo = new int[1];
@@ -213,7 +214,7 @@ public void InitGLDataForArea()
 /***********************************************************************************
 子函数描述：DrawBackPanel(), 绘制示波器背景（说明文字、单位以及绘制网格刻度）
 ************************************************************************************/
- void DrawBackPanel(float[] modelMatrix){//boolean AnimationEnabled ){
+ void DrawBackPanel(float[] modelMatrix,float[] Boundary){//boolean AnimationEnabled ){
 		
 		Matrix.setIdentityM(mMVPMatrix, 0);
 		Matrix.translateM(mMVPMatrix, 0,  m_OffSetX -mWindowWidth/2.0f, m_OffSetY -mWindowHeight/2.0f, 0);	
@@ -239,6 +240,11 @@ public void InitGLDataForArea()
 			GLES20.glVertexAttribPointer(colorAttribute, 4, GLES20.GL_FLOAT, false,7*4, 3*4);
 			GLES20.glEnableVertexAttribArray(colorAttribute);	
 
+			mBoundary              = Boundary;
+			BoundaryHandle          = GLES20.glGetUniformLocation(program[0], "u_Boundary");		
+			GLES20.glUniform4fv(BoundaryHandle, 1, mBoundary , 0); 
+			GLES20.glEnableVertexAttribArray(BoundaryHandle);	   			
+			
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
 			
 			GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP,8, GLES20.GL_UNSIGNED_SHORT, 0);
@@ -432,24 +438,37 @@ public void AddCaption(String TextString)
 
 }
 
+public void SetDisplayArea(float x1, float x2, float y1, float y2) {
+
+	
+	// set color TODO: only alpha component works, text is always black #BUG
+	mBoundary[0] = x1; 
+	mBoundary[1] = x2; 
+	mBoundary[2] = y1; 
+	mBoundary[3] = y2; 
+	
+
+	//mVPMatrix = pMatrix;		
+}	
+
 /***********************************************************************************
  子函数描述：Render(),绘制整个示波器模块
  ************************************************************************************/
-public void  Render(float[] modelMatrix){  
+public void  Render(float[] modelMatrix,float[] Boundary){  
 
 	InitGLDataForBackPanel(); // this must be done after WindowWidth  WindowHeight been Set
-	DrawBackPanel(modelMatrix);
+	DrawBackPanel(modelMatrix,Boundary);
 
  }
 
-public void  RenderFont(float[] modelMatrix){    
+public void  RenderFont(float[] modelMatrix,float[] Boundary){    
 
  	GLES20.glEnable(GLES20.GL_BLEND);
 	//GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 	GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 	m_Font.SetMvpMatrix(modelMatrix);
 
-	m_Font.SetDisplayArea( 1.0f, -1.0f, 1.0f,-1.0f);  
+	m_Font.SetDisplayArea(Boundary);  
 	//m_Font.draw( m_TextString,m_OffSetX+m_Width, m_OffSetY, 0);
 	m_Font.draw(m_TextString ,m_OffSetX -(mWindowWidth-m_BorderWidth)/2.0f +m_DragBoxOffSetX, m_OffSetY -(mWindowHeight-m_BorderWidth)/2.0f +m_Height*m_Scale, 0);
     m_Font.RenderFont();	

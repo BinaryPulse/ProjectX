@@ -126,7 +126,7 @@ public class OscilloScope extends UIControlUnit {
 	protected int positionAttribute;
 	protected int texcordAttribute;
 	protected int colorAttribute;	
-
+	private int BoundaryHandle;						   // Shader color handle
 	/** Identifiers for our uniforms and attributes inside the shaders. */	
 	private static final String MVP_MATRIX_UNIFORM = "u_MVPMatrix";
 	//private static final String MV_MATRIX_UNIFORM = "u_MVMatrix";
@@ -139,6 +139,9 @@ public class OscilloScope extends UIControlUnit {
 	private static final String TEXTURE_UNIFORM = "u_Texture";
 	private static final String COLOR_UNIFORM = "u_Color";
 	private static final String TEXTUREMOV_UNIFORM = "u_Texmove";
+
+	
+	public float[] mBoundary ={1.0f,-1.0f,1.0f,-1.0f};
 	
 	protected int[] vbo = new int[2];
 	protected int[] ibo = new int[2];
@@ -536,7 +539,11 @@ public void InitGLDataForArea()
 			ColorHandle          = GLES20.glGetUniformLocation(program[0], COLOR_UNIFORM);	        
 			GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
 			GLES20.glEnableVertexAttribArray(ColorHandle);
-		
+			
+			BoundaryHandle          = GLES20.glGetUniformLocation(program[0], "u_Boundary");		
+			GLES20.glUniform4fv(BoundaryHandle, 1, mBoundary , 0); 
+			GLES20.glEnableVertexAttribArray(BoundaryHandle);	
+			
 			// Set program handles for cube drawing.
 			mvpMatrixUniform = GLES20.glGetUniformLocation(program[0], MVP_MATRIX_UNIFORM);
 			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mMVPMatrix, 0);
@@ -593,7 +600,11 @@ public void InitGLDataForArea()
  			ColorHandle          = GLES20.glGetUniformLocation(program[0], COLOR_UNIFORM);	        
  			GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
  			GLES20.glEnableVertexAttribArray(ColorHandle);
- 		
+ 
+			BoundaryHandle          = GLES20.glGetUniformLocation(program[0], "u_Boundary");		
+			GLES20.glUniform4fv(BoundaryHandle, 1, mBoundary , 0); 
+			GLES20.glEnableVertexAttribArray(BoundaryHandle);				
+ 			
  			// Set program handles for cube drawing.
  			mvpMatrixUniform = GLES20.glGetUniformLocation(program[0], MVP_MATRIX_UNIFORM);
  			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mMVPMatrix, 0);
@@ -768,7 +779,7 @@ public void InitGLDataForArea()
 		GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		// TEST: render some strings with the font
 		m_FontGraph.SetMvpMatrix(modelMatrix);
-		
+		m_FontGraph.SetDisplayArea(mBoundary);  
         DecimalFormat format = new DecimalFormat("#.00");
 		
 		for(i =0;i<m_CurveNum;i++){
@@ -998,6 +1009,11 @@ if (vbo[1] > 0 && ibo[1] > 0) {
 	//GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 	GLES20.glUseProgram(program[0]);
 	ColorHandle          = GLES20.glGetUniformLocation(program[0], COLOR_UNIFORM);
+	
+	BoundaryHandle          = GLES20.glGetUniformLocation(program[0], "u_Boundary");		
+	GLES20.glUniform4fv(BoundaryHandle, 1, mBoundary , 0); 
+	GLES20.glEnableVertexAttribArray(BoundaryHandle);		
+	
 	// Set program handles for cube drawing.
 	mvpMatrixUniform = GLES20.glGetUniformLocation(program[0], MVP_MATRIX_UNIFORM);
 	GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mMVPMatrix, 0);
@@ -1577,7 +1593,7 @@ void DrawScaleRullerXY(){
 /***********************************************************************************
  子函数描述：Render(),绘制整个示波器模块
  ************************************************************************************/
-public void  Render(float[] modelMatrix){    
+public void  Render(float[] modelMatrix,float[] Boundary){    
 
 	/* m_timer+= 1.0f;
 	
@@ -1586,7 +1602,7 @@ public void  Render(float[] modelMatrix){
 	    			//float yyy=2000*cos(double(iFrames)/500.0)*sin(double(iFrames)/4.0);            
 	 //ReciedveData(m_TestData[0],m_TestData);  
 	 ReciedveData(m_timer,m_TestData);  */
-	
+	mBoundary =Boundary;
 	DrawLables(modelMatrix);
 	DrawBackPanel(modelMatrix);
 	 RefreshDisplay();
@@ -1600,7 +1616,7 @@ public void  Render(float[] modelMatrix){
 
  }
 
-public void  RenderFont(float[] modelMatrix){    
+public void  RenderFont(float[] modelMatrix,float[] Boundary){    
 
  	GLES20.glEnable(GLES20.GL_BLEND);
 	//GLES20.glDisable(GLES20.GL_DEPTH_TEST);
@@ -1608,10 +1624,11 @@ public void  RenderFont(float[] modelMatrix){
 	// TEST: render some strings with the font
   	m_Font.SetMvpMatrix(modelMatrix);
 	//s = "START";
+	m_Font.SetDisplayArea(Boundary);  
   	m_Font.SetColor( 1.0f, 0.0f, 0.0f, 1.0f );  
   	m_Font.draw( m_TextString ,m_OffSetX -(m_BorderWidth)/2.0f  -m_TextString.length()*0.5f*20*m_FontSizeScaleFactor, m_OffSetY -(-m_Height*m_Scale-m_BorderWidth)/2.0f -50*m_FontSizeScaleFactor, 0); 
    	
-	
+	/*
     DecimalFormat format = new DecimalFormat("#.00");
     String s = format.format((float)(m_ActiveMouseX)); //转换成字符串
   	m_Font.draw( s ,m_OffSetX -(m_BorderWidth)/2.0f  -s.length()*0.5f*20*m_FontSizeScaleFactor, m_OffSetY -(-m_Height*m_Scale-m_BorderWidth)/2.0f -50*m_FontSizeScaleFactor-20, 0); 
@@ -1636,7 +1653,7 @@ public void  RenderFont(float[] modelMatrix){
     
 	s = format.format((float)(m_ReleaseMouseY1)); //转换成字符串
   	m_Font.draw( s ,m_OffSetX -(m_BorderWidth)/2.0f  -s.length()*0.5f*20*m_FontSizeScaleFactor-300, m_OffSetY -(-m_Height*m_Scale-m_BorderWidth)/2.0f -50*m_FontSizeScaleFactor-80, 0); 
-    	
+   */ 	
   	m_Font.RenderFont();
 	GLES20.glDisable(GLES20.GL_BLEND);
 

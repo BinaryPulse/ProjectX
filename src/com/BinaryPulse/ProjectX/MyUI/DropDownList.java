@@ -46,7 +46,8 @@ public class DropDownList extends UIControlUnit {
 	protected int positionAttribute;
 	protected int texcordAttribute;
 	protected int colorAttribute;	
-
+	private int BoundaryHandle;		
+	
 	/** Identifiers for our uniforms and attributes inside the shaders. */	
 	private static final String MVP_MATRIX_UNIFORM = "u_MVPMatrix";
 	//private static final String MV_MATRIX_UNIFORM = "u_MVMatrix";
@@ -59,6 +60,8 @@ public class DropDownList extends UIControlUnit {
 	private static final String TEXTURE_UNIFORM = "u_Texture";
 	private static final String COLOR_UNIFORM = "u_Color";
 	private static final String TEXTUREMOV_UNIFORM = "u_Texmove";
+	
+	public float[] mBoundary ={1.0f,-1.0f,1.0f,-1.0f};	
 	
 	protected int[] vbo = new int[1];
 	protected int[] ibo = new int[1];
@@ -249,6 +252,11 @@ public void InitGLDataForArea()
 			GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);	 //(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 			GLES20.glUseProgram(program[0]);
 	
+			
+			BoundaryHandle          = GLES20.glGetUniformLocation(program[0], "u_Boundary");		
+			GLES20.glUniform4fv(BoundaryHandle, 1, mBoundary , 0); 
+			GLES20.glEnableVertexAttribArray(BoundaryHandle);	
+			
 			// Set program handles for cube drawing.
 			mvpMatrixUniform = GLES20.glGetUniformLocation(program[0], MVP_MATRIX_UNIFORM);
 			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mMVPMatrix, 0);
@@ -679,7 +687,9 @@ public void AddCaption(String TextString)
 /***********************************************************************************
  子函数描述：Render(),绘制整个示波器模块
  ************************************************************************************/
-public void  Render(float[] modelMatrix){    
+public void  Render(float[] modelMatrix,float[] Boundary){    
+	
+	mBoundary =Boundary;
 	if(m_IsActive){ 
 	InitGLDataForBackPanel(); // this must be done after WindowWidth  WindowHeight been Set
 	DrawBackPanel(modelMatrix);
@@ -687,16 +697,19 @@ public void  Render(float[] modelMatrix){
 	}
  }
 
-public void  RenderFont(float[] modelMatrix){    
+public void  RenderFont(float[] modelMatrix,float[] Boundary){    
 
  	GLES20.glEnable(GLES20.GL_BLEND);
 	//GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 	GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 	// TEST: render some strings with the font
   	m_Font.SetMvpMatrix(modelMatrix);
+	m_Font.SetDisplayArea(Boundary);  
 	//s = "START";
-  	m_Font.SetColor( 0.0f, 1.0f, 0.0f, 1.0f );  
-  	 m_Font.SetDisplayArea( 1.0f, -1.0f, 1.0f, -1.0f);//
+	
+	m_Font.SetDisplayArea(Boundary);  
+    m_Font.SetColor( 0.0f, 1.0f, 0.0f, 1.0f );  
+  	// m_Font.SetDisplayArea( 1.0f, -1.0f, 1.0f, -1.0f);//
   	//m_Font.draw( m_TextString ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_TextString.length()*0.5f*25, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20, 0); 
   	m_Font.draw( m_ListString[m_SelectedItemNum-1] ,m_OffSetX -(mWindowWidth-m_Width*m_Scale-m_BorderWidth)/2.0f -m_ListString[m_SelectedItemNum-1].length()*0.5f*25*m_FontSizeScaleFactor, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -20*m_FontSizeScaleFactor, 0);
   	m_Font.draw( "v" ,m_OffSetX -(mWindowWidth-m_BorderWidth)/2.0f + 3*m_BorderWidth+m_DragLineOffSetX, m_OffSetY -(mWindowHeight-m_Height*m_Scale-m_BorderWidth)/2.0f -15*m_FontSizeScaleFactor - 0.2f*m_DropDownListPerHeight, 0);

@@ -189,6 +189,9 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
     private float UniformScaleY;
     
     private static boolean UIinitiated = false;
+    
+    protected static float timer;
+	public float[] UIBoundary ={1.0f,-1.0f,1.0f,-1.0f};
 	/**
 	 * Initialize the model data.
 	 */
@@ -506,6 +509,27 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		//float[] m_TestData;
 		int[] digits =new int[]{1,2,3,4}; 
 	     
+		float timer1;
+		if(timer>1500)
+		{
+			timer =0;
+		}
+		else
+		{
+			timer = timer + 10f;
+		}
+		timer1 =timer;
+		if(timer1 >250.0f)
+		{
+			timer1 =250.0f;
+		}
+			
+		UIBoundary[0]=1.0f;
+		UIBoundary[0]=-1.0f;
+		UIBoundary[0]=1.0f-timer1/250.0f;
+		UIBoundary[0]=-1.0f+timer1/250.0f;
+		
+		
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
 		
@@ -588,7 +612,7 @@ public class LessonEightRenderer implements GLSurfaceView.Renderer {
 		LedList1.RenderLedList();			
 		
 		UIDialogue1.UserMessageProcess(m_Motion);
-		UIDialogue1.Render(viewMatrixFont);
+		UIDialogue1.Render(viewMatrixFont,UIBoundary);
 		
 
 

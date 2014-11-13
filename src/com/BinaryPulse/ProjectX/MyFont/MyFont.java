@@ -368,6 +368,14 @@ public class MyFont {
 		
 
 		//mVPMatrix = pMatrix;		
+	}
+	
+	public void SetDisplayArea(float[] Boundary) {
+
+		
+		// set color TODO: only alpha component works, text is always black #BUG
+		mBoundary =Boundary;
+
 	}	
     public void SetMvpMatrix(float[] mvpMatrix)
     {
@@ -460,15 +468,11 @@ public void RenderFont(){
 	
 	if (vbo[0] > 0 && ibo[0] > 0) {		
 		
-		GLES20.glUseProgram(program);
-
+		GLES20.glUseProgram(program);		
 		
-		
-		BoundaryHandle          = GLES20.glGetUniformLocation(program, "u_Boundary");
-		
+		BoundaryHandle          = GLES20.glGetUniformLocation(program, "u_Boundary");		
 		GLES20.glUniform4fv(BoundaryHandle, 1, mBoundary , 0); 
-		GLES20.glEnableVertexAttribArray(BoundaryHandle);		
-		
+		GLES20.glEnableVertexAttribArray(BoundaryHandle);				
 	
 		ColorHandle          = GLES20.glGetUniformLocation(program, COLOR_UNIFORM);
         TextureUniformHandle = GLES20.glGetUniformLocation(program, TEXTURE_UNIFORM);

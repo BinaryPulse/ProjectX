@@ -189,6 +189,9 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
     private float UniformScaleY;
     
     private static boolean UIinitiated = false;
+    protected static float timer;
+	public float[] UIBoundary ={1.0f,-1.0f,1.0f,-1.0f};
+	public boolean UIBoundaryShow =false;
 	/**
 	 * Initialize the model data.
 	 */
@@ -505,7 +508,40 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		float m_timer1;
 		//float[] m_TestData;
 		int[] digits =new int[]{1,2,3,4}; 
-	     
+		float timer1,timer2;
+		float[] Boundary ={1.0f,-1.0f,1.0f,-1.0f};
+		
+
+		if(timer>2500)
+		{
+			timer =0;
+		}
+		else
+		{
+			timer = timer + 20f;
+			
+		}		
+
+		timer1 =timer;
+		
+		if(timer >1250.0f && timer<1500.0f)
+		{
+			timer1 =1500.0f -timer;
+		}
+		
+
+		
+		if((timer >=250.0f && timer <=1250.0f) )
+		{
+			timer1 =250;
+		}
+		if( timer>=1500.0f )
+			timer1 =0;
+		
+		UIBoundary[0]=1.0f;
+		UIBoundary[1]=-1.0f;
+		UIBoundary[2]=1.0f-timer1/250.0f;
+		UIBoundary[3]=-1.0f+timer1/250.0f;
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
 		
@@ -592,19 +628,33 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		if(Button1.IsClicked())
 		{
 			OscilloScope_1.Start();
+			//UIDialogue1.Render(viewMatrixFont,UIBoundary);
 			Button1.ClearClickedFlag();
+			UIBoundaryShow =true;
 		}
+
 			
 		if(Button2.IsClicked())
 		{
 			OscilloScope_1.Stop();
+		
 			Button2.ClearClickedFlag();
+			UIBoundaryShow =false;
 		}
 		
-		UIDialogue1.Render(viewMatrixFont);
+		if(UIBoundaryShow ==true){
+			
+			UIDialogue1.Render(viewMatrixFont,UIBoundary);
+		}
+		else
+		{
+			UIDialogue1.Render(viewMatrixFont,Boundary);
+		}
 		
-
-
+		//UIDialogue1.Render(viewMatrixFont);
+		
+		
+		
 		// TEST: render the entire font texture
 		//GLES20.glColorMask({0.0, 1.0, 0.0,0.5},0,0)
 		//glText.drawTexture( width/2, height/2, mVPMatrix);            // Draw the Entire Texture
