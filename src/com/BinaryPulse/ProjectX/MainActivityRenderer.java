@@ -36,6 +36,7 @@ import com.BinaryPulse.ProjectX.MyUI.Button;
 import com.BinaryPulse.ProjectX.MyUI.UIDialogue;
 import com.BinaryPulse.ProjectX.MyUI.DropDownList;
 import com.BinaryPulse.ProjectX.MyUI.SlideBar;
+import com.BinaryPulse.ProjectX.MyUI.FlashLight;
 import android.util.DisplayMetrics;
 import com.BinaryPulse.ProjectX.AcDriveModeling.SychronousMotor;
 
@@ -173,6 +174,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
     private static DropDownList DropDownList3; 
     private static DropDownList DropDownList4; 
     private static SlideBar SlideBar1; 
+    private static FlashLight FlashLight1; 
     
     private static UIDialogue UIDialogue1;
     
@@ -417,6 +419,14 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 	   SlideBar1.AddCaption("123");
 	   
 	   
+	   FlashLight1 = new FlashLight(MainActivity,0,0,0,1.0f,(float)300.0f*UniformScaleX,(float)60.0f*UniformScaleY,0.5f);
+
+	   FlashLight1.SetDispWiodowSize(windowWidth,windowHeight);	
+
+
+	   FlashLight1.AddCaption("123");
+	   
+	   
 	   
 	   UIDialogue1 =new UIDialogue(MainActivity,0,0.0f,0.0f,1.0f,(float)windowWidth*0.98f,(float)windowHeight*0.98f,3.0f,1.0f*UniformScaleX);
 	   UIDialogue1.SetDispWiodowSize(windowWidth,windowHeight);
@@ -510,7 +520,8 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		int[] digits =new int[]{1,2,3,4}; 
 		float timer1,timer2;
 		float[] Boundary ={1.0f,-1.0f,1.0f,-1.0f};
-		
+		float[] viewMatrixFontX = new float[16];
+
 
 		if(timer>2500)
 		{
@@ -542,6 +553,13 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		UIBoundary[1]=-1.0f;
 		UIBoundary[2]=1.0f-timer1/250.0f;
 		UIBoundary[3]=-1.0f+timer1/250.0f;
+		
+		Matrix.orthoM(viewMatrixFontX, 0,
+				-windowWidth/2,
+				windowWidth/2,
+				-windowHeight/(2*timer1/250.0f+0.0001f),
+				windowHeight/(2*timer1/250.0f+0.0001f), 0f, 1f);			
+		
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
 		
@@ -643,13 +661,25 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		}
 		
 		if(UIBoundaryShow ==true){
-			
-			UIDialogue1.Render(viewMatrixFont,UIBoundary);
+		
+			if(timer1/250.0f>=0.01f){
+			UIDialogue1.Render(viewMatrixFontX,Boundary);
+			FlashLight1.SetDynamicShowTrue();
+			}
+			else
+				FlashLight1.Render(viewMatrixFont, Boundary);
+			;//FlashLight1.SetDynamicShowTrue();
+			//if(timer1/250.0f==0.1f) 
+			//   FlashLight1.SetDynamicShowTrue();
+			//if(timer1/250.0f<=0.1f && timer1/250.0f>=0.01f ){
+			//FlashLight1.Render(viewMatrixFont, UIBoundary);
+			//}
 		}
 		else
 		{
 			UIDialogue1.Render(viewMatrixFont,Boundary);
 		}
+		
 		
 		//UIDialogue1.Render(viewMatrixFont);
 		

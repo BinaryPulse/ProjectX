@@ -4,7 +4,7 @@ varying vec4 v_Boundary;
 uniform vec4 u_Boundary;  
 void main()     // The entry point for our fragment shader.
 {  
-if(v_Boundary.y >u_Boundary.z || v_Boundary.y <u_Boundary.w)
+if(v_Boundary.y >u_Boundary.z || v_Boundary.y <u_Boundary.w ||v_Boundary.x >u_Boundary.x || v_Boundary.x <u_Boundary.y)
 {
   discard;
 }                       

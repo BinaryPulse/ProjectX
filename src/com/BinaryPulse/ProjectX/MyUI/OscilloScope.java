@@ -145,7 +145,20 @@ public class OscilloScope extends UIControlUnit {
 	
 	protected int[] vbo = new int[2];
 	protected int[] ibo = new int[2];
+
+	protected int[] vbo_data = new int[5];
+	protected int[] ibo_data = new int[5];
+	protected int[] vbo_data_realtime = new int[1];
+	protected int[] ibo_data_realtime= new int[1] ;	
 	
+	protected int   m_PerSectionDataLength;
+	protected int   m_DynamicSectionIndex;
+	protected int   m_RealtimeSectionIndex;
+	protected int   m_RealTimeDataLength;
+	protected int m_SectionNum;
+	
+	protected float[] m_RecievedSectionData;
+	protected short[] m_RecievedSectionDataIndex;
 	//private float[] mVPMatrix;		
 	protected float[] mMVPMatrix = new float[16];	
 	protected float[] mcolor;
@@ -167,66 +180,6 @@ public class OscilloScope extends UIControlUnit {
 
 ###############################################################################*/
 
-/***********************************************************************************
-子函数描述：DrawControlBorder(bool AnimationEnabled), 绘制示波器边框
-************************************************************************************/
-/*void  DrawControlBorder(float[] modelMatrix){//boolean AnimationEnabled ){
-	
-	float[] color = {0.0f,1.0f, 1.0f, 0.0f};
-	
-	Matrix.setIdentityM(mMVPMatrix, 0);
-	Matrix.translateM(mMVPMatrix, 0, -(m_Width)/2.0f- m_BorderWidth +m_OffSetX, -m_Height/2.0f-m_BorderWidth +m_OffSetY, 0);	
-	Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);
-	
-	  if(m_IntervalCoordinate<0.48f && m_IntervalCoordinate>=0f)
-
-	       m_IntervalCoordinate+=0.0025f;
-     else
-          m_IntervalCoordinate=0.0f;  
-	  
-	if (vbo[0] > 0 && ibo[0] > 0) {		
-		
-		GLES20.glUseProgram(program[0]);
-		ColorHandle          = GLES20.glGetUniformLocation(program[0], COLOR_UNIFORM);
-        TextureUniformHandle = GLES20.glGetUniformLocation(program[0], TEXTURE_UNIFORM);
-        TextureMoveUniformHandle = GLES20.glGetUniformLocation(program[0], TEXTUREMOV_UNIFORM);
-        
-		GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
-		GLES20.glEnableVertexAttribArray(ColorHandle);
-		
-		GLES20.glUniform1f(TextureMoveUniformHandle, m_IntervalCoordinate);//(, 1, mcolor , 0); 
-		GLES20.glEnableVertexAttribArray(TextureMoveUniformHandle);	
-		
- 	    GLES20.glActiveTexture(GLES20.GL_TEXTURE0);  // Set the active texture unit to texture unit 0
-		GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId); // Bind the texture to this unit
-		// Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0
-		GLES20.glUniform1i(TextureUniformHandle, 0); 
-	
-		// Set program handles for cube drawing.
-		mvpMatrixUniform = GLES20.glGetUniformLocation(program[0], MVP_MATRIX_UNIFORM);
-		GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mMVPMatrix, 0);
-		positionAttribute = GLES20.glGetAttribLocation(program[0], POSITION_ATTRIBUTE);
-		texcordAttribute = GLES20.glGetAttribLocation(program[0], TEXCORD_ATTRIBUTE);
-		
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
-
-		GLES20.glVertexAttribPointer(texcordAttribute, 2, GLES20.GL_FLOAT, false,5*4, 0);
-		GLES20.glEnableVertexAttribArray(texcordAttribute);			
-		
-		// Bind Attributes
-		GLES20.glVertexAttribPointer(positionAttribute, 3, GLES20.GL_FLOAT, false,5*4, 2*4);
-		GLES20.glEnableVertexAttribArray(positionAttribute);
-	
-		// Draw
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
-		GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 12, GLES20.GL_UNSIGNED_SHORT, 0);
-
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-		
-		GLES20.glUseProgram(0);
-	}
-}*/
 
 public void InitGLDataForBorder()
 {
@@ -319,85 +272,10 @@ public void InitGLDataForBorder()
 	Matrix.translateM(modleMatrix1, 0, m_OffSetX -m_BorderWidth-m_Width/2.0f, m_OffSetY-m_BorderWidth -m_Height/2.0f, 0);	
 	for(int i =0;i<16;i++)
 		mMVPMatrixForBorder[i] = modleMatrix1[i];	
-	/*final FloatBuffer VertexDataBuffer = ByteBuffer
-				.allocateDirect(vertexBuffer.length * 4).order(ByteOrder.nativeOrder())
-				.asFloatBuffer();
-	VertexDataBuffer.put(vertexBuffer).position(0);
-		
-	final ShortBuffer IndexDataBuffer = ByteBuffer
-				.allocateDirect(indexBuffer.length * 2).order(ByteOrder.nativeOrder())
-				.asShortBuffer();
-	IndexDataBuffer.put(indexBuffer).position(0);
 
-
-
-	if (vbo[0] > 0 && ibo[0] > 0) {
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
-			GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, VertexDataBuffer.capacity() * 4,
-					VertexDataBuffer, GLES20.GL_STATIC_DRAW);
-
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
-			GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, IndexDataBuffer.capacity()
-					* 2, IndexDataBuffer, GLES20.GL_STATIC_DRAW);
-
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-	} */
 }
 
-/***********************************************************************************
-子函数描述：DrawControlArea(bool AnimationEnabled), 绘制示波器控制区域
-************************************************************************************/
-/*void DrawControlArea(float[] modelMatrix){
-	
-         
-	//GLES20.glEnable(GLES20.GL_BLEND);  
-	//GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);	
-		
-		//float[] color = {0.0f,0.3f, 0.3f, 0.3f};		
-	//GLES20.glEnable(GLES20.GL_BLEND);
-	//GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-	//GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-	
-		//Matrix.setIdentityM(mMVPMatrix, 0);
-		//Matrix.translateM(mMVPMatrix, 0, m_OffSetX -mWindowWidth/2.0f, m_OffSetY -mWindowHeight/2.0f, 0);	
-		//Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);
-		
-		Matrix.setIdentityM(mMVPMatrix, 0);
-		Matrix.translateM(mMVPMatrix, 0, -(m_Width)/2.0f- m_BorderWidth +m_OffSetX, -m_Height/2.0f-m_BorderWidth +m_OffSetY, 0);	
-		Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);		
-		
-		if (vbo[3] > 0 && ibo[3] > 0) {		
-			
-			GLES20.glUseProgram(program[2]);
-			//ColorHandle          = GLES20.glGetUniformLocation(program[1], COLOR_UNIFORM);	        
-			//GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
-			//GLES20.glEnableVertexAttribArray(ColorHandle);
-			 
-			// Set program handles for cube drawing.
-			mvpMatrixUniform = GLES20.glGetUniformLocation(program[2], MVP_MATRIX_UNIFORM);
-			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mMVPMatrix, 0);
-			
-			positionAttribute = GLES20.glGetAttribLocation(program[2], POSITION_ATTRIBUTE);
-			colorAttribute = GLES20.glGetAttribLocation(program[2], COLOR_ATTRIBUTE);
-			
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[3]);
-			// Bind Attributes
-			GLES20.glVertexAttribPointer(positionAttribute, 3, GLES20.GL_FLOAT, false,7*4, 0);
-			GLES20.glEnableVertexAttribArray(positionAttribute);
-			
-			GLES20.glVertexAttribPointer(colorAttribute, 4, GLES20.GL_FLOAT, false,7*4, 3*4);
-			GLES20.glEnableVertexAttribArray(colorAttribute);			
-			// Draw
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[3]);
-			GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, 8, GLES20.GL_UNSIGNED_SHORT, 0);
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);			
-			GLES20.glUseProgram(0);
-		}
-		//GLES20.glDisable(GLES20.GL_BLEND);
-  
-}*/
+
 
 public void InitGLDataForArea()
 {
@@ -487,31 +365,7 @@ public void InitGLDataForArea()
 	for(int i =0;i<16;i++)
 		mMVPMatrixForArea[i] = modleMatrix1[i];
     
-  /*  
-	final FloatBuffer VertexDataBuffer = ByteBuffer
-				.allocateDirect(vertexBuffer.length * 4).order(ByteOrder.nativeOrder())
-				.asFloatBuffer();
-	VertexDataBuffer.put(vertexBuffer).position(0);
-		
-	final ShortBuffer IndexDataBuffer = ByteBuffer
-				.allocateDirect(indexBuffer.length * 2).order(ByteOrder.nativeOrder())
-				.asShortBuffer();
-	IndexDataBuffer.put(indexBuffer).position(0);
 
-
-
-	if (vbo[3] > 0 && ibo[3] > 0) {
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[3]);
-			GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, VertexDataBuffer.capacity() * 4,
-					VertexDataBuffer, GLES20.GL_STATIC_DRAW);
-
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[3]);
-			GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, IndexDataBuffer.capacity()
-					* 2, IndexDataBuffer, GLES20.GL_STATIC_DRAW);
-
-			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-	} */
 }
 
 /***********************************************************************************
@@ -823,236 +677,94 @@ public void InitGLDataForArea()
 /***********************************************************************************
 子函数描述：DrawData(), 绘制示波器背景（说明文字、单位以及绘制网格刻度）
 ************************************************************************************/
-void DrawData(float[] modelMatrix){
 
-	 int i,j,k;
-     float tempX,tempY;
-     float x,y,z;
+ void DrawData(float[] modelMatrix){
 
- 	float vertexBuffer[] = new float[(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*m_CurveNum*6];
- 	short indexBuffer[] = new short[(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*m_CurveNum*6];
-     
-if(m_RefreshMode ==0){
-	 for(i=0;i<m_CurveNum;i++){
+  int i,j;
+   float[] DataBoundary ={(2*m_OffSetX+3*m_GraphWidth-mWindowWidth)/mWindowWidth, (2*m_OffSetX+m_GraphWidth-mWindowWidth)/mWindowWidth ,(2*m_OffSetY+3*m_GraphHeight-mWindowHeight)/mWindowHeight, (2*m_OffSetY+m_GraphHeight-mWindowHeight)/mWindowHeight };
+ //Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);
+   
+ if (vbo_data_realtime[0] > 0 && ibo_data_realtime[0] > 0) {		
+ 	//GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+ 	GLES20.glUseProgram(program[0]);
+ 	ColorHandle          = GLES20.glGetUniformLocation(program[0], COLOR_UNIFORM);
+ 	
+ 	BoundaryHandle          = GLES20.glGetUniformLocation(program[0], "u_Boundary");		
+ 	GLES20.glUniform4fv(BoundaryHandle, 1, DataBoundary , 0); 
+ 	GLES20.glEnableVertexAttribArray(BoundaryHandle);		
+ 	
+ 	// Set program handles for cube drawing.
 
-		 m_EffectDataStartIndex[i] =0;
-		  for(j=m_DisplayDataStartTimeIndex;j<=m_DisplayDataEndTimeIndex;j++){	   
 
-			   tempX=m_GraphOffsetX+(m_RecievedTime[j]-m_OriginValueX)*m_TimeDrawCof;
-			   tempY=m_GraphOffsetY+(m_RecievedData[i][j]-m_OriginValueY[i])*m_DataDrawCof[i];
-			   if(m_RecievedData[i][j]>m_OriginValueY[i]+(m_DivNumY)*m_DivValueY[i])
-				   tempY=m_GraphOffsetY+ m_GraphHeight;
-			   if(m_RecievedData[i][j]<m_OriginValueY[i])
-				   tempY=m_GraphOffsetY;//+m_GraphHeight;
-			   if(m_RecievedTime[j]<(m_OriginValueX-m_DivValueX) && tempX < m_GraphOffsetX){
-				   
-				   tempX =m_GraphOffsetX+(m_RecievedTime[j+1]-m_OriginValueX)*m_TimeDrawCof; 
-				   if(tempX < m_GraphOffsetX) {
-					   tempX=m_GraphOffsetX;
-					   tempY=m_GraphOffsetY;
-					   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6]= tempX;
-					   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1]= tempY;
-					   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2]= 0;
-					   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6 );
-					   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1);
-					   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2);
-					   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3]= tempX;
-					   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4]= tempY;
-					   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5]= 0;
-					   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3 );
-					   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4);
-					   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6+(j-m_DisplayDataStartTimeIndex)*6+5);
-					   m_EffectDataStartIndex[i] +=2;	      
-					   continue;
-				   }
-				   else{
-					   tempX = m_GraphOffsetX;   
-					   
-				   }
-			   }
-			   else if(tempX < m_GraphOffsetX && j<m_DisplayDataEndTimeIndex){
+ 	m_DataColor[0] = new float[]{1.0f, 0.0f, 0.0f,1.0f};
+ 	m_DataColor[1] = new float[]{0.0f, 1.0f, 0.0f,1.0f};
+ 	m_DataColor[2] = new float[]{1.0f, 0.0f, 1.0f,1.0f};
+     m_DataColor[3] = new float[]{1.0f, 1.0f, 0.0f,1.0f};
 
-					   tempX =m_GraphOffsetX+(m_RecievedTime[j+1]-m_OriginValueX)*m_TimeDrawCof; 
-					   if(tempX < m_GraphOffsetX) {
-					       tempX=m_GraphOffsetX;
-					       tempY=m_GraphOffsetY;
-						   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6]= tempX;
-						   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1]= tempY;
-						   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2]= 0;
-						   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6 );
-						   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1);
-						   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2);
-						   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3]= tempX;
-						   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4]= tempY;
-						   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5]= 0;
-						   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3 );
-						   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4);
-						   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6+(j-m_DisplayDataStartTimeIndex)*6+5);
-						   m_EffectDataStartIndex[i] += 2;	  
-						   continue;
-					   }
-					   else{
-					      tempX = m_GraphOffsetX;
-					   }
+ 	for(i =0; i<m_CurveNum;i++){
+ 		ColorHandle          = GLES20.glGetUniformLocation(program[0], COLOR_UNIFORM);
+ 		GLES20.glUniform4fv(ColorHandle, 1, m_DataColor[i] , 0); 
+ 		GLES20.glEnableVertexAttribArray(ColorHandle);		
+ 		//if(m_RefreshMode == 0)
+ 		//	GLES20.glDrawElements(GLES20.GL_LINE_STRIP, ((m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*2 -(int)m_EffectDataStartIndex[i]), GLES20.GL_UNSIGNED_SHORT,(int)m_EffectDataStartIndex[i]*2 + (m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*4*i);
+ 		//else
+ 		//	GLES20.glDrawElements(GLES20.GL_LINE_STRIP, ((m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)), GLES20.GL_UNSIGNED_SHORT, (m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*2*i);		
+ 			//GLES20.glDrawElements(GLES20.GL_LINE_STRIP, ((m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*2), GLES20.GL_UNSIGNED_SHORT,(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*2);
+		
+ 		 Matrix.setIdentityM(mMVPMatrix, 0);
 
-			   }
+ 		 Matrix.translateM(mMVPMatrix, 0, m_GraphOffsetX-m_OriginValueX*m_TimeDrawCof, m_GraphOffsetY-m_DataDrawCof[i]*m_OriginValueY[i], 0);	
+ 		 Matrix.translateM(mMVPMatrix, 0, m_OffSetX, m_OffSetY, 0);	
+  		Matrix.scaleM(mMVPMatrix, 0, m_TimeDrawCof, m_DataDrawCof[i], 0);
+ 		 Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);
+ 		 
+ 	 	mvpMatrixUniform = GLES20.glGetUniformLocation(program[0], MVP_MATRIX_UNIFORM);
+ 	 	GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mMVPMatrix, 0);
+ 		
+ 		positionAttribute = GLES20.glGetAttribLocation(program[0], POSITION_ATTRIBUTE);	
+ 		for(j=0;j<=m_RealtimeSectionIndex;j++)
+ 		{
 
-			   if(m_RecievedTime[j]> m_OriginValueX+(m_DivNumX)*m_DivValueX)
-				   tempX=m_GraphOffsetX+m_GraphWidth;
+ 		 	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_data[j]); 		 	
+ 		 	// Bind Attributes
+ 		 	GLES20.glVertexAttribPointer(positionAttribute, 2, GLES20.GL_FLOAT, false,
+ 		 			2*4, 0);
+ 		 	GLES20.glEnableVertexAttribArray(positionAttribute);
 
-			   x = tempX;
-			   y = tempY;
-			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6]= x;
-			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1]= y;
-			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2]= 0;
-			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6 );
-			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+1);
-			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+2);
-			   
-			   if(j<m_DisplayDataEndTimeIndex){
+ 		 	GLES20.glLineWidth(1.0f);
+ 		 	// Draw
+ 		 	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_data[j]);
+ 		 	if(m_SectionNum -1 == m_RealtimeSectionIndex){
+ 		 		if(m_DynamicSectionIndex == m_SectionNum -1 && j==0)
+ 		 			GLES20.glDrawElements(GLES20.GL_LINE_STRIP, 2*m_PerSectionDataLength-m_RealTimeDataLength, GLES20.GL_UNSIGNED_SHORT,(i)*4*m_PerSectionDataLength+2*m_RealTimeDataLength);
+ 		 		else if(m_DynamicSectionIndex != m_SectionNum -1 && j==m_DynamicSectionIndex+1)
+ 		 			GLES20.glDrawElements(GLES20.GL_LINE_STRIP,  2*m_PerSectionDataLength-m_RealTimeDataLength, GLES20.GL_UNSIGNED_SHORT,(i)*4*m_PerSectionDataLength+2*m_RealTimeDataLength);
+ 		 		else
+ 		 			GLES20.glDrawElements(GLES20.GL_LINE_STRIP, 2*m_PerSectionDataLength, GLES20.GL_UNSIGNED_SHORT,i*4*m_PerSectionDataLength );
+ 		 	} 		 	
+ 		 	else
+ 		 		GLES20.glDrawElements(GLES20.GL_LINE_STRIP, 2*m_PerSectionDataLength, GLES20.GL_UNSIGNED_SHORT,i*4*m_PerSectionDataLength );
+ 		}
 
-				   if ((m_RecievedTime[j]-m_OriginValueX)*m_TimeDrawCof >= 0)
-				   {
-					   x =  tempX + (m_RecievedTime[j+1] -m_RecievedTime[j])*m_TimeDrawCof;
-					   y = tempY;
-				   }
-			       else
-			       {
-					   x = tempX + (m_RecievedTime[j+1] -m_OriginValueX)*m_TimeDrawCof;
-					   y = tempY;
-			       }
-			   }
-			   
-			   if(x>=m_GraphOffsetX+m_GraphWidth)
-				   x=m_GraphOffsetX+m_GraphWidth;
-			   
-			   z = 0;
-			   
-			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3]= x;
-			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4]= y;
-			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5]= z;
-			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+3 );
-			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+4);
-			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6 +(j-m_DisplayDataStartTimeIndex)*6+5] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*6+(j-m_DisplayDataStartTimeIndex)*6+5);
-		  }           
 
-	  } 
-  }
-  else{
+ 		 	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_data_realtime[0]); 		 	
+ 		 	// Bind Attributes
+ 		 	GLES20.glVertexAttribPointer(positionAttribute, 2, GLES20.GL_FLOAT, false,
+ 		 			2*4, 0);
+ 		 	GLES20.glEnableVertexAttribArray(positionAttribute);
 
-	 for(i=0;i<m_CurveNum;i++){
-	 
-		  for(j=m_DisplayDataStartTimeIndex;j<=m_DisplayDataEndTimeIndex;j++){	   
-
-			   tempX=m_GraphOffsetX+(m_RecievedTime[j]-m_OriginValueX)*m_TimeDrawCof;
-			   tempY=m_GraphOffsetY+(m_RecievedData[i][j]-m_OriginValueY[i])*m_DataDrawCof[i];
-			   if(m_RecievedData[i][j]>m_OriginValueY[i]+(m_DivNumY)*m_DivValueY[i])
-				   tempY=m_GraphOffsetY+m_GraphHeight;
-			   if(m_RecievedData[i][j]<m_OriginValueY[i])
-				   tempY=m_GraphOffsetY;
-			   if(m_RecievedTime[j]<(m_OriginValueX))//-m_DivValueX))//+(m_DivNumY)*m_DivValueY[i])
-			   {
-				   tempX=m_GraphOffsetX;               
-			   }
-
-			   if(m_RecievedTime[j]> m_OriginValueX+(m_DivNumX)*m_DivValueX)
-				   tempX=m_GraphOffsetX+m_GraphWidth;
-	  
-			   x = tempX;
-			   y = tempY;
-			   z = 0;
-				  
-			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3]= x;
-			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3+1]= y;
-			   vertexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3+2]= z;
-			   
-			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3 );
-			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3+1] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3+1);
-			   indexBuffer[i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3+2] =(short)(i*(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*3 +(j-m_DisplayDataStartTimeIndex)*3+2);			   
-		  }           
-	  } 
+ 		 	GLES20.glLineWidth(1.0f);
+ 		 	// Draw
+ 		 	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_data_realtime[0]);
+ 		 	GLES20.glDrawElements(GLES20.GL_LINE_STRIP, m_RealTimeDataLength, GLES20.GL_UNSIGNED_SHORT,i*4*m_PerSectionDataLength );
+ 	}	
+ 	
+ 	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+ 	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);	
+ 	GLES20.glUseProgram(0);
+ }
 
  }
- 
-	
-final FloatBuffer VertexDataBuffer = ByteBuffer
-			.allocateDirect(vertexBuffer.length * 4).order(ByteOrder.nativeOrder())
-			.asFloatBuffer();
-VertexDataBuffer.put(vertexBuffer).position(0);
-	
-final ShortBuffer IndexDataBuffer = ByteBuffer
-			.allocateDirect(indexBuffer.length * 2).order(ByteOrder.nativeOrder())
-			.asShortBuffer();
-IndexDataBuffer.put(indexBuffer).position(0);
-
-
-
-if (vbo[1] > 0 && ibo[1] > 0) {
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[1]);
-		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, VertexDataBuffer.capacity() * 4,
-				VertexDataBuffer, GLES20.GL_DYNAMIC_DRAW);
-
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[1]);
-		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, IndexDataBuffer.capacity()
-				* 2, IndexDataBuffer, GLES20.GL_DYNAMIC_DRAW);
-
-		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-} 
-
-Matrix.setIdentityM(mMVPMatrix, 0);
-Matrix.translateM(mMVPMatrix, 0, m_OffSetX, m_OffSetY, 0);	
-Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);
-//Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);
-  
-if (vbo[1] > 0 && ibo[1] > 0) {		
-	//GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-	GLES20.glUseProgram(program[0]);
-	ColorHandle          = GLES20.glGetUniformLocation(program[0], COLOR_UNIFORM);
-	
-	BoundaryHandle          = GLES20.glGetUniformLocation(program[0], "u_Boundary");		
-	GLES20.glUniform4fv(BoundaryHandle, 1, mBoundary , 0); 
-	GLES20.glEnableVertexAttribArray(BoundaryHandle);		
-	
-	// Set program handles for cube drawing.
-	mvpMatrixUniform = GLES20.glGetUniformLocation(program[0], MVP_MATRIX_UNIFORM);
-	GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mMVPMatrix, 0);
-	positionAttribute = GLES20.glGetAttribLocation(program[0], POSITION_ATTRIBUTE);	
-	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[1]);
-
-	
-	// Bind Attributes
-	GLES20.glVertexAttribPointer(positionAttribute, 3, GLES20.GL_FLOAT, false,
-			3*4, 0);
-	GLES20.glEnableVertexAttribArray(positionAttribute);
-
-	GLES20.glLineWidth(1.0f);
-	// Draw
-	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[1]);
-	m_DataColor[0] = new float[]{1.0f, 0.0f, 0.0f,1.0f};
-	m_DataColor[1] = new float[]{0.0f, 1.0f, 0.0f,1.0f};
-	m_DataColor[2] = new float[]{1.0f, 0.0f, 1.0f,1.0f};
-    m_DataColor[3] = new float[]{1.0f, 1.0f, 0.0f,1.0f};
-
-	for(i =0; i<m_CurveNum;i++){
-		ColorHandle          = GLES20.glGetUniformLocation(program[0], COLOR_UNIFORM);
-		GLES20.glUniform4fv(ColorHandle, 1, m_DataColor[i] , 0); 
-		GLES20.glEnableVertexAttribArray(ColorHandle);		
-		if(m_RefreshMode == 0)
-			GLES20.glDrawElements(GLES20.GL_LINE_STRIP, ((m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*2 -(int)m_EffectDataStartIndex[i]), GLES20.GL_UNSIGNED_SHORT,(int)m_EffectDataStartIndex[i]*2 + (m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*4*i);
-		else
-			GLES20.glDrawElements(GLES20.GL_LINE_STRIP, ((m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)), GLES20.GL_UNSIGNED_SHORT, (m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*2*i);		
-			//GLES20.glDrawElements(GLES20.GL_LINE_STRIP, ((m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*2), GLES20.GL_UNSIGNED_SHORT,(m_DisplayDataEndTimeIndex - m_DisplayDataStartTimeIndex +1)*2);
-	
-	}	
-	
-	GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-	GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);	
-	GLES20.glUseProgram(0);
-}
-
-}
-
 /***********************************************************************************
 子函数描述：RefreshDisplay(), 刷新示波器显示（X,Y轴坐标以及绘制的曲线动态刷新）
 ************************************************************************************/
@@ -1177,6 +889,7 @@ public void RefreshDisplay(){
 /***********************************************************************************
 子函数描述：ReciedveData(), 接受数据（X,Y轴坐标值）
 ************************************************************************************/
+
 public void ReciedveData(float Time, float[] Data){
 
     int i,j;
@@ -1189,30 +902,108 @@ public void ReciedveData(float Time, float[] Data){
 	if(m_StartRecieve==false){
 		m_LatestTimeIndex=0;
 		m_MinRecievedTime=m_MaxRecievedTime=m_RecievedTime[m_LatestTimeIndex]=m_RecievedTimeToRealTimeScale*Time;
-		for(i=0;i<m_CurveNum;i++){ 	
-	        m_RecievedData[i][m_LatestTimeIndex]=m_RecievedDataToRealDataScale*Data[i];	
-			m_MaxRecievedData[i]=m_RecievedData[i][m_LatestTimeIndex];// Data[i];
-			m_MinRecievedData[i]= m_RecievedData[i][m_LatestTimeIndex];//Data[i];
+		for(i=0;i<m_CurveNum;i++){ 				
+
+			m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex]= m_RecievedTime[m_LatestTimeIndex];
+			m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex+1]= m_RecievedDataToRealDataScale*Data[i];
+			m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex+2]= m_RecievedTime[m_LatestTimeIndex];
+			m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex+3]= m_RecievedDataToRealDataScale*Data[i];
+			
+			m_MaxRecievedData[i]=m_RecievedDataToRealDataScale*Data[i];// Data[i];
+			m_MinRecievedData[i]=m_RecievedDataToRealDataScale*Data[i];//Data[i];
 		}
 		m_StartRecieve=true;
 	}
 	else{
 
-		if(m_LatestTimeIndex<m_DisplayDataMaxTimeIndex){
-		    m_LatestTimeIndex++;	
+		if(m_LatestTimeIndex<m_PerSectionDataLength-1){
+			
+		    m_LatestTimeIndex++;
+		    
+		    m_RealTimeDataLength =2*m_LatestTimeIndex;
+		    final FloatBuffer VertexDataBuffer = ByteBuffer
+		    			.allocateDirect(m_RecievedSectionData.length * 4).order(ByteOrder.nativeOrder())
+		    			.asFloatBuffer();
+		    VertexDataBuffer.put(m_RecievedSectionData).position(0);
+		    	
+		    final ShortBuffer IndexDataBuffer = ByteBuffer
+		    			.allocateDirect(m_RecievedSectionDataIndex.length * 2).order(ByteOrder.nativeOrder())
+		    			.asShortBuffer();
+		    IndexDataBuffer.put(m_RecievedSectionDataIndex).position(0);
+
+
+		    if (vbo_data_realtime[0] > 0 && ibo_data_realtime[0] > 0) {
+		    		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_data_realtime[0]);
+		    		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, VertexDataBuffer.capacity() * 4,
+		    				VertexDataBuffer, GLES20.GL_DYNAMIC_DRAW);
+
+		    		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_data_realtime[0]);
+		    		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, IndexDataBuffer.capacity()
+		    				* 2, IndexDataBuffer, GLES20.GL_DYNAMIC_DRAW);
+
+		    		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+		    		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);	    
+		    
+		    }   
+		    
+		    
 		}
 		else{
-		    m_LatestTimeIndex=m_DisplayDataMaxTimeIndex;
-		    for(i=0;i<m_DisplayDataMaxTimeIndex;i++){ 
-			    for(j=0;j<m_CurveNum;j++)
-                     m_RecievedData[j][i]= m_RecievedData[j][i+1];
-				m_RecievedTime[i]= m_RecievedTime[i+1];
+		    m_LatestTimeIndex=0;//m_DisplayDataMaxTimeIndex;
+		    //for(i=0;i<m_DisplayDataMaxTimeIndex;i++){ 
+			//    for(j=0;j<m_CurveNum;j++)
+            //         m_RecievedData[j][i]= m_RecievedData[j][i+1];
+			//	m_RecievedTime[i]= m_RecievedTime[i+1];
 				
-			}
+			//}
 		    // m_RecievedTime[m_LatestTimeIndex]=m_RecievedTimeToRealTimeScale*Time;
 			// m_RecievedData[j][m_LatestTimeIndex]=m_RecievedDataToRealDataScale*Data[i];		
+		    
+			  //m_PerSectionDataLength;
+			  //m_DynamicSectionIndex ; 
+			  //
+		    
+
+		    final FloatBuffer VertexDataBuffer = ByteBuffer
+		    			.allocateDirect(m_RecievedSectionData.length * 4).order(ByteOrder.nativeOrder())
+		    			.asFloatBuffer();
+		    VertexDataBuffer.put(m_RecievedSectionData).position(0);
+		    	
+		    final ShortBuffer IndexDataBuffer = ByteBuffer
+		    			.allocateDirect(m_RecievedSectionDataIndex.length * 2).order(ByteOrder.nativeOrder())
+		    			.asShortBuffer();
+		    IndexDataBuffer.put(m_RecievedSectionDataIndex).position(0);
+
+		    if(m_DynamicSectionIndex<m_SectionNum -1)
+		    {
+		    	m_DynamicSectionIndex++;
+			    if(m_RealtimeSectionIndex< m_SectionNum-1)
+			    	m_RealtimeSectionIndex ++;
+		    }
+		    else
+		    {
+		    	m_DynamicSectionIndex =0;
+		    }
+    
+
+		    
+		    
+		    if (vbo_data[m_DynamicSectionIndex] > 0 && ibo_data[m_DynamicSectionIndex] > 0) {
+		    		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo_data[m_DynamicSectionIndex]);
+		    		GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, VertexDataBuffer.capacity() * 4,
+		    				VertexDataBuffer, GLES20.GL_DYNAMIC_DRAW);
+
+		    		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo_data[m_DynamicSectionIndex]);
+		    		GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, IndexDataBuffer.capacity()
+		    				* 2, IndexDataBuffer, GLES20.GL_DYNAMIC_DRAW);
+
+		    		GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+		    		GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);	    
+		    
+		    }
 		
-		}
+		  }
+		
         m_RecievedTime[m_LatestTimeIndex]=m_RecievedTimeToRealTimeScale*Time;
 	    if(m_MaxRecievedTime<m_RecievedTime[m_LatestTimeIndex])
 			 m_MaxRecievedTime=m_RecievedTime[m_LatestTimeIndex];
@@ -1221,17 +1012,36 @@ public void ReciedveData(float Time, float[] Data){
 			 m_MinRecievedTime=m_RecievedTime[m_LatestTimeIndex];
 
 		for(i=0;i<m_CurveNum;i++){ 	
-	         m_RecievedData[i][m_LatestTimeIndex]=m_RecievedDataToRealDataScale*Data[i];	
-	         if(m_MaxRecievedData[i]<m_RecievedData[i][m_LatestTimeIndex])
-				m_MaxRecievedData[i]=m_RecievedData[i][m_LatestTimeIndex];
+	        //m_RecievedData[i][m_LatestTimeIndex]=m_RecievedDataToRealDataScale*Data[i];
+	         
+	       
+			//m_RecievedSectionData[i*m_PerSectionDataLength*4 +4*m_LatestTimeIndex]= m_RecievedTime[m_LatestTimeIndex];
+			if(m_LatestTimeIndex>=1){
+				m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex+1]= m_RecievedSectionData[i*m_PerSectionDataLength*4+4*(m_LatestTimeIndex-1)+3];
+				m_RecievedSectionData[i*m_PerSectionDataLength*4 +4*m_LatestTimeIndex]= m_RecievedTime[m_LatestTimeIndex];
+			}
+			else{
+				m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex+1]= m_RecievedSectionData[(i+1)*m_PerSectionDataLength*4-1];//m_RecievedDataToRealDataScale*Data[i];
+				m_RecievedSectionData[i*m_PerSectionDataLength*4 +4*m_LatestTimeIndex]= m_RecievedTime[m_PerSectionDataLength-1];
+			}
+			m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex+2]= m_RecievedTime[m_LatestTimeIndex];
+			m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex+3]= m_RecievedDataToRealDataScale*Data[i];
+	     
+	         
+	         
+	         if(m_MaxRecievedData[i]<m_RecievedDataToRealDataScale*Data[i])
+				m_MaxRecievedData[i]=m_RecievedDataToRealDataScale*Data[i];
 
-             if(m_MinRecievedData[i]>m_RecievedData[i][m_LatestTimeIndex])
-				m_MinRecievedData[i]=m_RecievedData[i][m_LatestTimeIndex];	
-	    }
+             if(m_MinRecievedData[i]>m_RecievedDataToRealDataScale*Data[i])
+				m_MinRecievedData[i]=m_RecievedDataToRealDataScale*Data[i];	
+	    }	
+
 
 	}
 
 }
+
+
 /***********************************************************************************
 子函数描述：UIControlUnit(), 初始化
 ************************************************************************************/
@@ -1337,6 +1147,12 @@ void ShaderRelatedInit(Context context){
 	GLES20.glGenBuffers(2, vbo, 0);
 	GLES20.glGenBuffers(2, ibo, 0);	
 	
+	GLES20.glGenBuffers(5, vbo_data, 0);
+	GLES20.glGenBuffers(5, ibo_data, 0);
+	
+	GLES20.glGenBuffers(1, vbo_data_realtime,0);
+	GLES20.glGenBuffers(1, ibo_data_realtime,0);
+
 }
 /***********************************************************************************
 子函数描述：~OscilloScope(), 注销
@@ -1475,6 +1291,19 @@ public void SetScopeParameters(float GraphHeight, float GraphWidth, int CurveNum
 	  
 	  m_CmdRunState =true;
 	  m_IsOnDrag    =false;
+	  
+	  m_SectionNum =5;
+	  m_PerSectionDataLength =7000/m_SectionNum;
+	  m_DynamicSectionIndex =0;  
+	  m_RealtimeSectionIndex =0;
+	  m_RealTimeDataLength = 0;
+	  m_RecievedSectionData=new float[m_PerSectionDataLength*4*m_CurveNum];//[DataSize];//[DataSize];
+	  m_RecievedSectionDataIndex =new short[m_PerSectionDataLength*2*m_CurveNum];
+	  for(i=0;i<m_PerSectionDataLength*2*m_CurveNum;i++)
+	  {
+			m_RecievedSectionDataIndex[i] =(short)i;
+	  }
+	  
 	  InitGLDataForBorder();
 	  InitGLDataForArea();
 	 InitGLDataForBackPanel();
