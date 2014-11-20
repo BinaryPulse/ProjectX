@@ -143,8 +143,8 @@ public class OscilloScope extends UIControlUnit {
 	
 	public float[] mBoundary ={1.0f,-1.0f,1.0f,-1.0f};
 	
-	protected int[] vbo = new int[2];
-	protected int[] ibo = new int[2];
+	protected int[] vbo = new int[3];
+	protected int[] ibo = new int[3];
 
 	protected int[] vbo_data = new int[5];
 	protected int[] ibo_data = new int[5];
@@ -373,9 +373,9 @@ public void InitGLDataForArea()
 ************************************************************************************/
  void DrawBackPanel(float[] modelMatrix){//boolean AnimationEnabled ){
 		
-		float[] color = {0.0f,0.3f, 0.3f, 0.3f};		
-		float[] color1 = {1.0f,0.0f, 1.0f, 1.0f};		
-		float[] color2 = {0.3f,0.3f, 0.3f, 1.0f};
+		//float[] color = {0.0f,0.3f, 0.3f, 0.3f};		
+		float[] color = {0.5f,0.5f, 0.5f, 0.3f};		
+
 		
 		Matrix.setIdentityM(mMVPMatrix, 0);
 		Matrix.translateM(mMVPMatrix, 0, m_OffSetX, m_OffSetY, 0);	
@@ -416,7 +416,7 @@ public void InitGLDataForArea()
 			GLES20.glDrawElements(GLES20.GL_LINES,  (m_DivNumX)*2, GLES20.GL_UNSIGNED_SHORT, 5*2 + (m_DivNumY)*4);
 			
 			ColorHandle          = GLES20.glGetUniformLocation(program[0], COLOR_UNIFORM);
-			GLES20.glUniform4fv(ColorHandle, 1, color2 , 0); 
+			GLES20.glUniform4fv(ColorHandle, 1, color , 0); 
 			GLES20.glLineWidth(1.0f);
 			GLES20.glDrawElements(GLES20.GL_LINES,  (m_DivNumY)*2, GLES20.GL_UNSIGNED_SHORT, 5*2 + (m_DivNumY+m_DivNumX)*4);
 			GLES20.glDrawElements(GLES20.GL_LINES,  (m_DivNumX)*2, GLES20.GL_UNSIGNED_SHORT, 5*2 + (2*m_DivNumY+m_DivNumX)*4);
@@ -438,15 +438,16 @@ public void InitGLDataForArea()
  /***********************************************************************************
  子函数描述：DrawBackPanel(), 绘制示波器背景（说明文字、单位以及绘制网格刻度）
  ************************************************************************************/
-  void DrawBandArea(float[] modelMatrix){//boolean AnimationEnabled ){
+  void DrawDataBackground(float[] modelMatrix){//boolean AnimationEnabled ){
  		
- 		float[] color = {0.0f,0.3f, 0.3f, 0.3f};		
+ 		float[] color = {0.0f,0.0f, 0.0f, 0.3f};		
  		
  		Matrix.setIdentityM(mMVPMatrix, 0);
  		Matrix.translateM(mMVPMatrix, 0, m_OffSetX, m_OffSetY, 0);	
  		Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);
  		
-
+		GLES20.glEnable(GLES20.GL_BLEND);
+		GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);	 
  		  
  		if (vbo[0] > 0 && ibo[0] > 0) {		
  			//GLES20.glDisable(GLES20.GL_DEPTH_TEST);
@@ -464,23 +465,66 @@ public void InitGLDataForArea()
  			GLES20.glUniformMatrix4fv(mvpMatrixUniform, 1, false, mMVPMatrix, 0);
  			positionAttribute = GLES20.glGetAttribLocation(program[0], POSITION_ATTRIBUTE);
  			
- 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[0]);
+ 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[2]);
  			// Bind Attributes
  			GLES20.glVertexAttribPointer(positionAttribute, 3, GLES20.GL_FLOAT, false,3*4, 0);
  			GLES20.glEnableVertexAttribArray(positionAttribute);
  		
- 			GLES20.glLineWidth(3.0f);
+ 			//GLES20.glLineWidth(3.0f);
  			// Draw
- 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
- 			GLES20.glDrawElements(GLES20.GL_LINE_LOOP, (5), GLES20.GL_UNSIGNED_SHORT, 0);
+ 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[2]);
+ 			GLES20.glDrawElements(GLES20.GL_TRIANGLE_STRIP, (4), GLES20.GL_UNSIGNED_SHORT, 0);
 
  			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
  			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);			
  			GLES20.glUseProgram(0);
+ 			GLES20.glDisable(GLES20.GL_BLEND);
  		}
 
  }
- 
+  public void InitGLDataForDataBackground()
+  {
+
+ 	float 	vertexBuffer[] = {
+	
+ 		 	m_GraphOffsetX,m_GraphOffsetY,0.0f,
+ 		 	m_GraphOffsetX,m_GraphOffsetY+m_GraphHeight,0.0f,
+ 		 	m_GraphOffsetX+m_GraphWidth,m_GraphOffsetY,0.0f,
+ 		 	m_GraphOffsetX+m_GraphWidth,m_GraphOffsetY+m_GraphHeight,0.0f,
+ 	};
+
+     short indexBuffer[] = new short[6];
+     for(int i =0;i<4;i++)
+     {
+     	indexBuffer[i] =(short)i;
+     }
+ 		
+  	final FloatBuffer VertexDataBuffer = ByteBuffer
+  				.allocateDirect(vertexBuffer.length * 4).order(ByteOrder.nativeOrder())
+  				.asFloatBuffer();
+  	VertexDataBuffer.put(vertexBuffer).position(0);
+  		
+  	final ShortBuffer IndexDataBuffer = ByteBuffer
+  				.allocateDirect(indexBuffer.length * 2).order(ByteOrder.nativeOrder())
+  				.asShortBuffer();
+  	IndexDataBuffer.put(indexBuffer).position(0);
+
+
+
+  	if (vbo[2] > 0 && ibo[2] > 0) {
+  			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vbo[2]);
+  			GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, VertexDataBuffer.capacity() * 4,
+  					VertexDataBuffer, GLES20.GL_STATIC_DRAW);
+
+  			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, ibo[2]);
+  			GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, IndexDataBuffer.capacity()
+  					* 2, IndexDataBuffer, GLES20.GL_STATIC_DRAW);
+
+  			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+  			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+  	} 
+  } 
+  
  public void InitGLDataForBackPanel()
  {
  	  
@@ -681,7 +725,7 @@ public void InitGLDataForArea()
  void DrawData(float[] modelMatrix){
 
   int i,j;
-   float[] DataBoundary ={(2*m_OffSetX+3*m_GraphWidth-mWindowWidth)/mWindowWidth, (2*m_OffSetX+m_GraphWidth-mWindowWidth)/mWindowWidth ,(2*m_OffSetY+3*m_GraphHeight-mWindowHeight)/mWindowHeight, (2*m_OffSetY+m_GraphHeight-mWindowHeight)/mWindowHeight };
+   float[] DataBoundary ={(2*m_OffSetX+2*m_GraphWidth+2*m_GraphOffsetX)/mWindowWidth, (2*m_OffSetX+2*m_GraphOffsetX)/mWindowWidth ,(2*m_OffSetY+2*m_GraphOffsetY+2*m_GraphHeight)/mWindowHeight, (2*m_OffSetY+2*m_GraphOffsetY)/mWindowHeight };
  //Matrix.multiplyMM(mMVPMatrix, 0,modelMatrix, 0, mMVPMatrix, 0);
    
  if (vbo_data_realtime[0] > 0 && ibo_data_realtime[0] > 0) {		
@@ -1144,8 +1188,8 @@ void ShaderRelatedInit(Context context){
 	
 	//GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);		
 	GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);	*/		
-	GLES20.glGenBuffers(2, vbo, 0);
-	GLES20.glGenBuffers(2, ibo, 0);	
+	GLES20.glGenBuffers(3, vbo, 0);
+	GLES20.glGenBuffers(3, ibo, 0);	
 	
 	GLES20.glGenBuffers(5, vbo_data, 0);
 	GLES20.glGenBuffers(5, ibo_data, 0);
@@ -1192,7 +1236,7 @@ float GetEndIndex(){
  子函数描述：SetScopeParameters(), 变量初始化
  ************************************************************************************/
 //void SetScopeParameters(float OffsetX, float OffsetY,float Height, float Width, int CurveNum, String[] CurveLabelString, int[] Color,float DataSampleTimeInterval,int DataSize,int DivNumX, int DivNumY, boolean GridOn){
-public void SetScopeParameters(float GraphHeight, float GraphWidth, int CurveNum){//, String[] CurveLabelString, int[] Color,float DataSampleTimeInterval,int DataSize,int DivNumX, int DivNumY, boolean GridOn){
+public void SetScopeParameters( float GraphWidth, float GraphHeight, int CurveNum){//, String[] CurveLabelString, int[] Color,float DataSampleTimeInterval,int DataSize,int DivNumX, int DivNumY, boolean GridOn){
 		        
 	  int i;
 	  
@@ -1214,7 +1258,7 @@ public void SetScopeParameters(float GraphHeight, float GraphWidth, int CurveNum
 	  m_LabelStringX= "";//CurveLabelString[CurveNum];//"t(ms)";
 
 	  m_DataSampleTimeInterval=1;//DataSampleTimeInterval;
-      m_DivNumX=4;//DivNumX; 
+      m_DivNumX=8;//DivNumX; 
       m_DivNumY=8;//DivNumY; 
 
 	  m_GridOn=true;//GridOn;
@@ -1307,6 +1351,7 @@ public void SetScopeParameters(float GraphHeight, float GraphWidth, int CurveNum
 	  InitGLDataForBorder();
 	  InitGLDataForArea();
 	 InitGLDataForBackPanel();
+	 InitGLDataForDataBackground();
 	 
 }
 
@@ -1435,8 +1480,9 @@ public void  Render(float[] modelMatrix,float[] Boundary){
 	DrawLables(modelMatrix);
 	DrawBackPanel(modelMatrix);
 	 RefreshDisplay();
+	 DrawDataBackground(modelMatrix);
 	 DrawData(modelMatrix);	
-	 DrawBandArea(modelMatrix);
+
 	//DrawControlBorder(modelMatrix);
 	//DrawControlArea(modelMatrix);
 	

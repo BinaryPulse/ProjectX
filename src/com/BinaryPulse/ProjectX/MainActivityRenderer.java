@@ -362,9 +362,9 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 	{	
 		UIinitiated =true;	
 		
-		OscilloScope_1=new OscilloScope(MainActivity,0,10+350.0f*UniformScaleX,120.0f*UniformScaleY,1.0f,(float)windowWidth*0.7f,(float)windowHeight*0.8f,5.0f,1.0f*UniformScaleX);
+		OscilloScope_1=new OscilloScope(MainActivity,0,10+25.0f*UniformScaleX,120.0f*UniformScaleY,1.0f,(float)windowWidth*0.95f,(float)windowHeight*0.8f,5.0f,1.0f*UniformScaleX);
 	    OscilloScope_1.SetDispWiodowSize(windowWidth,windowHeight);	
-	    OscilloScope_1.SetScopeParameters(windowHeight*0.50f,windowWidth*0.50f, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
+	    OscilloScope_1.SetScopeParameters(windowWidth*0.75f,windowHeight*0.65f, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
 	    OscilloScope_1.AddCaption("OscilloScope of ProjectX");
 	    
 	    
@@ -437,11 +437,11 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 	   UIDialogue1.AddCtrlUnit(Button5);	
 	   UIDialogue1.AddCtrlUnit(OscilloScope_1);
 
-	   UIDialogue1.AddCtrlUnit(SlideBar1);
+	   /*UIDialogue1.AddCtrlUnit(SlideBar1);
 	   UIDialogue1.AddCtrlUnit(DropDownList1);
 	   UIDialogue1.AddCtrlUnit(DropDownList2);
 	   UIDialogue1.AddCtrlUnit(DropDownList3);
-	   UIDialogue1.AddCtrlUnit(DropDownList4);
+	   UIDialogue1.AddCtrlUnit(DropDownList4);*/
 	   UIDialogue1.EndConstruction();
 	   //UIDialogue1.AddCtrlUnit(OscilloScope_1);
 	   
@@ -638,8 +638,8 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		digits[0] = 1;//(int)(m_timer/1000)-((int)m_timer/10000)*10;
 		else
 			digits[0] = 0;	*/
-		LedList1.draw( digits,-100,0,-580,0,0.0f,0); 
-		LedList1.RenderLedList();			
+		//LedList1.draw( digits,-100,0,-580,0,0.0f,0); 
+		//LedList1.RenderLedList();			
 		
 		UIDialogue1.UserMessageProcess(m_Motion);
 
