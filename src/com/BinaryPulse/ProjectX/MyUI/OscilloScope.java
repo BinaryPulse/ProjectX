@@ -56,8 +56,10 @@ public class OscilloScope extends UIControlUnit {
 
 	protected static int m_DisplayDataStartTimeIndex;
 	protected static int m_DisplayDataEndTimeIndex;
+	protected static int m_DispStartTimeOffsetIndex;
 	protected static int m_DisplayDataMaxTimeIndex;
 	protected static int m_LatestTimeIndex;
+	protected static int m_TotoalRecieveTimeIndex;
 	protected static float m_DisplayDataTimeLength;
 	protected static float[] m_RecievedTime;//[];
 	protected static float[][] m_RecievedData;//[];//[];
@@ -67,7 +69,13 @@ public class OscilloScope extends UIControlUnit {
 	protected static float[] m_DisplayDataRange;//[];
 	protected static float[] m_MaxRecievedData;//[];
 	protected static float[] m_MinRecievedData;//[];;
-
+	protected static float[] m_MaxDispData;//[];
+	protected static float[] m_MinDispData;//[];;	
+	
+	protected static float[][]   m_MaxSectionData ;
+	protected static float[][]   m_MinSectionData;
+	protected static float[]   m_SectionDataStartTime; 
+	  
 	protected static int m_ActiveMouseX;
 	protected static int m_ActiveMouseY;
 
@@ -91,6 +99,13 @@ public class OscilloScope extends UIControlUnit {
 	protected static float[] m_UserSelectedStartY1;//[];
 	protected static float[] m_UserSelectedEndY1;//[];
 	
+	protected static float m_TotalMoveX;
+	protected static float m_TotalMoveY;
+	protected static float m_TotalScaleX;
+	protected static float m_TotalScaleY;	
+	
+	protected static float m_PreScaleX;
+	protected static float m_PreScaleY;	
 	
 	protected static float m_DataSampleTimeInterval;
 
@@ -107,6 +122,7 @@ public class OscilloScope extends UIControlUnit {
 
 	protected static float m_MaxRecievedTime;
 	protected static float m_MinRecievedTime;
+	
 	protected static int m_RefreshMode;
 
 
@@ -946,6 +962,9 @@ public void ReciedveData(float Time, float[] Data){
 	if(m_StartRecieve==false){
 		m_LatestTimeIndex=0;
 		m_MinRecievedTime=m_MaxRecievedTime=m_RecievedTime[m_LatestTimeIndex]=m_RecievedTimeToRealTimeScale*Time;
+		
+		m_DispStartTimeOffsetIndex = (int)Time;
+		
 		for(i=0;i<m_CurveNum;i++){ 				
 
 			m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex]= m_RecievedTime[m_LatestTimeIndex];
@@ -955,6 +974,15 @@ public void ReciedveData(float Time, float[] Data){
 			
 			m_MaxRecievedData[i]=m_RecievedDataToRealDataScale*Data[i];// Data[i];
 			m_MinRecievedData[i]=m_RecievedDataToRealDataScale*Data[i];//Data[i];
+			
+			
+			m_RecievedData[i][0] =m_RecievedDataToRealDataScale*Data[i];
+			/*
+			for(j=0;j<m_SectionNum;j++){
+			  m_MaxSectionData[j][i]  = m_MaxRecievedData[i];
+			  m_MinSectionData[j][i]  = m_MaxRecievedData[i];
+			  m_SectionDataStartTime[j]  =m_MinRecievedTime;
+			}*/
 		}
 		m_StartRecieve=true;
 	}
@@ -1049,17 +1077,39 @@ public void ReciedveData(float Time, float[] Data){
 		  }
 		
         m_RecievedTime[m_LatestTimeIndex]=m_RecievedTimeToRealTimeScale*Time;
+       /* if(m_LatestTimeIndex ==0)
+        {
+        	m_SectionDataStartTime[m_DynamicSectionIndex]  = m_RecievedTime[m_LatestTimeIndex];
+        	for(i=0;i<m_CurveNum;i++){
+			  m_MaxSectionData[m_DynamicSectionIndex][i]  =  m_RecievedDataToRealDataScale*Data[i];
+			  m_MinSectionData[m_DynamicSectionIndex][i]  =  m_RecievedDataToRealDataScale*Data[i];
+        	}
+        }*/
+        
+
+        
 	    if(m_MaxRecievedTime<m_RecievedTime[m_LatestTimeIndex])
 			 m_MaxRecievedTime=m_RecievedTime[m_LatestTimeIndex];
 
 		if(m_MinRecievedTime>m_RecievedTime[m_LatestTimeIndex])
 			 m_MinRecievedTime=m_RecievedTime[m_LatestTimeIndex];
 
+		
 		for(i=0;i<m_CurveNum;i++){ 	
 	        //m_RecievedData[i][m_LatestTimeIndex]=m_RecievedDataToRealDataScale*Data[i];
-	         
-	       
-			//m_RecievedSectionData[i*m_PerSectionDataLength*4 +4*m_LatestTimeIndex]= m_RecievedTime[m_LatestTimeIndex];
+	        //m_RecievedSectionData[i*m_PerSectionDataLength*4 +4*m_LatestTimeIndex]= m_RecievedTime[m_LatestTimeIndex];
+			if(m_TotoalRecieveTimeIndex<=m_DisplayDataMaxTimeIndex)
+				m_RecievedData[i][m_TotoalRecieveTimeIndex] =m_RecievedDataToRealDataScale*Data[i];
+			else
+			{
+				
+				for(j=0;j<m_DisplayDataMaxTimeIndex;j++)
+					m_RecievedData[i][j]=m_RecievedData[i][j+1];
+				
+				m_RecievedData[i][m_DisplayDataMaxTimeIndex] =m_RecievedDataToRealDataScale*Data[i];
+				
+			}
+			
 			if(m_LatestTimeIndex>=1){
 				m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex+1]= m_RecievedSectionData[i*m_PerSectionDataLength*4+4*(m_LatestTimeIndex-1)+3];
 				m_RecievedSectionData[i*m_PerSectionDataLength*4 +4*m_LatestTimeIndex]= m_RecievedTime[m_LatestTimeIndex];
@@ -1078,8 +1128,17 @@ public void ReciedveData(float Time, float[] Data){
 
              if(m_MinRecievedData[i]>m_RecievedDataToRealDataScale*Data[i])
 				m_MinRecievedData[i]=m_RecievedDataToRealDataScale*Data[i];	
-	    }	
+            /* 
+	         if(m_MaxSectionData[m_DynamicSectionIndex][i]<m_RecievedDataToRealDataScale*Data[i])
+	        	 m_MaxSectionData[m_DynamicSectionIndex][i]=m_RecievedDataToRealDataScale*Data[i];
 
+             if( m_MinSectionData[m_DynamicSectionIndex][i]>m_RecievedDataToRealDataScale*Data[i])
+            	 m_MinSectionData[m_DynamicSectionIndex][i]=m_RecievedDataToRealDataScale*Data[i];	            
+			*/
+             
+	    }	
+		if(m_TotoalRecieveTimeIndex<=100*m_DisplayDataMaxTimeIndex)
+			m_TotoalRecieveTimeIndex++;
 
 	}
 
@@ -1282,6 +1341,7 @@ public void SetScopeParameters( float GraphWidth, float GraphHeight, int CurveNu
 	  m_DisplayDataEndTimeIndex=0;
 	  m_DisplayDataMaxTimeIndex=5000-1;
 	  m_LatestTimeIndex=0;
+	  m_TotoalRecieveTimeIndex=0;
 	  m_DisplayDataTimeLength=1500;//ms
       m_MaxRecievedTime=1500;
 	  m_MinRecievedTime=0;
@@ -1295,6 +1355,9 @@ public void SetScopeParameters( float GraphWidth, float GraphHeight, int CurveNu
 	  m_DisplayDataRange =new float[CurveNum];
 	  m_MaxRecievedData  = new float[CurveNum];
 	  m_MinRecievedData  = new float[CurveNum];
+	  
+	  m_MaxDispData  = new float[CurveNum];
+	  m_MinDispData  = new float[CurveNum];
 	  //m_UserSelectedStartX;
 	  //m_UserSelectedEndX;
 	  m_UserSelectedStartY = new float[CurveNum];
@@ -1337,7 +1400,7 @@ public void SetScopeParameters( float GraphWidth, float GraphHeight, int CurveNu
 	  m_IsOnDrag    =false;
 	  
 	  m_SectionNum =5;
-	  m_PerSectionDataLength =7000/m_SectionNum;
+	  m_PerSectionDataLength =5000/m_SectionNum;
 	  m_DynamicSectionIndex =0;  
 	  m_RealtimeSectionIndex =0;
 	  m_RealTimeDataLength = 0;
@@ -1348,6 +1411,21 @@ public void SetScopeParameters( float GraphWidth, float GraphHeight, int CurveNu
 			m_RecievedSectionDataIndex[i] =(short)i;
 	  }
 	  
+	  
+	  m_MaxSectionData  = new float[m_SectionNum][CurveNum];
+	  m_MinSectionData  = new float[m_SectionNum][CurveNum];
+	  //m_MinSectionDataIndex  = new float[m_SectionNum];
+	  //m_MaxSectionDataIndex  = new float[m_SectionNum];
+	  //m_SectionDataStartTime  = new float[m_SectionNum];
+	  
+	  m_DispStartTimeOffsetIndex =0; 
+	  
+	  m_TotalMoveX =0.0f;
+	  m_TotalScaleX=m_DisplayDataTimeLength;
+	  m_TotalMoveY =0.0f;
+	  m_TotalScaleY=1.0f;  
+	  m_PreScaleY=1.0f;  
+	  m_PreScaleX=1.0f;  
 	  InitGLDataForBorder();
 	  InitGLDataForArea();
 	 InitGLDataForBackPanel();
@@ -1547,6 +1625,8 @@ void UserMouseMove(int pointerId,float wParam, float lParam){
    /* m_ReleaseMouseX = ( short )( lParam );
     m_ReleaseMouseY = ( short )( lParam );
 	*/
+	float tempOriginal,tempLength,tempScale,tempOriginalY,tempMax,tempMin,tempOriginalMax,tempOriginalMin;
+	int tempMaxIndex,tempMinIndex,tempDispStartTimeIndex,tempDispEndTimeIndex;
     float OffSetX = m_OffSetX +(mWindowWidth-m_Width)*0.5f + 0.5f*(m_Width-m_GraphWidth);
     float OffSetY = m_OffSetY +(mWindowHeight-m_Height)*0.5f +0.5f*(m_Height-m_GraphHeight);
     
@@ -1563,14 +1643,114 @@ void UserMouseMove(int pointerId,float wParam, float lParam){
 		    m_ReleaseMouseX = ( short )( wParam );
 			m_ReleaseMouseY = ( short )( lParam );		
 			
-			m_OriginValueX = m_OriginValueX-(((float)m_ReleaseMouseX - (float)m_ActiveMouseX))/m_TimeDrawCof;;
-		    m_MinRecievedTime=m_OriginValueX;
-			m_MaxRecievedTime=m_MinRecievedTime+m_DisplayDataTimeLength;		
-			 
-			for(int i=0;i<m_CurveNum;i++){ 
-	
-				m_OriginValueY[i] = m_OriginValueY[i] - (((float)m_ReleaseMouseY - (float)m_ActiveMouseY))/m_DataDrawCof[i];
+			//if(((float)m_ReleaseMouseX - (float)m_ActiveMouseX) > 2*mWindowWidth)
+			//	m_ReleaseMouseX = m_ActiveMouseX + 2*mWindowHeight;
+			tempOriginal = m_OriginValueX-(((float)m_ReleaseMouseX - (float)m_ActiveMouseX))/m_TimeDrawCof;
+			if(tempOriginal>m_MaxRecievedTime-m_DivValueX)
+				m_OriginValueX =m_MaxRecievedTime-m_DivValueX;
+			
+			else if(tempOriginal+m_DivValueX*(m_DivNumX-1) <m_MinRecievedTime)
+				m_OriginValueX =m_MinRecievedTime-m_DivValueX*(m_DivNumX-1);
+			else
+				m_OriginValueX = tempOriginal;		
+			
+			
+			
+			
+			/*
+			tempMax=m_MaxRecievedData[0];
+			tempMin=m_MinRecievedData[0];
+			tempMaxIndex=tempMinIndex =0;
+			for(int i=0;i<m_CurveNum;i++){
+				if((tempMin-m_OriginValueY[tempMinIndex])*m_DataDrawCof[tempMinIndex]>=(m_MinRecievedData[i]-m_OriginValueY[i])*m_DataDrawCof[i]){
+					tempMin=m_MinRecievedData[i];
+					tempMinIndex =i;
+				}
 				
+				if((tempMax-m_OriginValueY[tempMaxIndex])*m_DataDrawCof[tempMaxIndex]<=(m_MaxRecievedData[i]-m_OriginValueY[i])*m_DataDrawCof[i]){
+					tempMax=m_MaxRecievedData[i];
+					tempMaxIndex =i;
+				}
+			}
+			*/
+
+			tempDispStartTimeIndex = (int)((m_OriginValueX)/m_RecievedTimeToRealTimeScale) -m_DispStartTimeOffsetIndex;
+			if(tempDispStartTimeIndex<=0)
+				tempDispStartTimeIndex =0;
+			if(tempDispStartTimeIndex>=m_TotoalRecieveTimeIndex)
+				tempDispStartTimeIndex =m_TotoalRecieveTimeIndex;			
+			
+			tempDispEndTimeIndex = (int)((m_OriginValueX +m_DivValueX*m_DivNumX)/m_RecievedTimeToRealTimeScale)-m_DispStartTimeOffsetIndex;		
+			if(tempDispEndTimeIndex<=0)
+				tempDispEndTimeIndex =0;
+			if(tempDispEndTimeIndex>=m_TotoalRecieveTimeIndex)
+				tempDispEndTimeIndex =m_TotoalRecieveTimeIndex;	
+			
+	         if(m_TotoalRecieveTimeIndex > m_DisplayDataMaxTimeIndex)
+	         {
+	        	 tempDispEndTimeIndex = m_DisplayDataMaxTimeIndex;
+	        	 tempDispStartTimeIndex = m_DisplayDataMaxTimeIndex -(int)((m_DivValueX*m_DivNumX)/m_RecievedTimeToRealTimeScale);
+	 			if(tempDispStartTimeIndex<=0)
+					tempDispStartTimeIndex =0;
+	         }
+
+			for(int i=0;i<m_CurveNum;i++){
+				m_MaxDispData[i] =m_RecievedData[i][tempDispStartTimeIndex];
+				m_MinDispData[i] =m_RecievedData[i][tempDispStartTimeIndex];
+			}
+			
+			for(int j = tempDispStartTimeIndex;j<=tempDispEndTimeIndex; j++)
+			for(int i=0;i<m_CurveNum;i++){
+				if(m_MaxDispData[i]<m_RecievedData[i][j])
+					m_MaxDispData[i]=m_RecievedData[i][j];
+
+				if(m_MinDispData[i]>m_RecievedData[i][j])
+					m_MinDispData[i]=m_RecievedData[i][j];	
+			}
+			
+			
+			tempMax=m_MaxDispData[0];//[tempDispStartTimeIndex];
+			tempMin=m_MinDispData[0];//[tempDispStartTimeIndex];
+			tempMaxIndex=tempMinIndex =0;
+			for(int i=0;i<m_CurveNum;i++){
+				if((tempMin-m_OriginValueY[tempMinIndex])*m_DataDrawCof[tempMinIndex]>=(m_MinDispData[i]-m_OriginValueY[i])*m_DataDrawCof[i]){
+					tempMin=m_MinDispData[i];
+					tempMinIndex =i;
+				}
+						
+				if((tempMax-m_OriginValueY[tempMaxIndex])*m_DataDrawCof[tempMaxIndex]<=(m_MaxDispData[i]-m_OriginValueY[i])*m_DataDrawCof[i]){
+					tempMax=m_MaxDispData[i];
+					tempMaxIndex =i;
+				}
+			}
+			
+			tempOriginalMax = m_OriginValueY[tempMaxIndex] - (((float)m_ReleaseMouseY - (float)m_ActiveMouseY))/m_DataDrawCof[tempMaxIndex];
+			tempOriginalMin = m_OriginValueY[tempMinIndex] - (((float)m_ReleaseMouseY - (float)m_ActiveMouseY))/m_DataDrawCof[tempMinIndex];
+		
+			if(tempOriginalMax>=tempMax-m_DivValueY[tempMaxIndex]){
+				
+				tempOriginalY     =(m_OriginValueY[tempMaxIndex]-(tempMax-m_DivValueY[tempMaxIndex]))*m_DataDrawCof[tempMaxIndex]+m_ActiveMouseY;
+				//m_OriginValueY[tempMaxIndex] =tempMax-m_DivValueY[tempMaxIndex];
+				
+			}				
+			else if(tempOriginalMin+m_DivValueY[tempMinIndex]*(m_DivNumY-1) <tempMin){
+				tempOriginalY     =(m_OriginValueY[tempMinIndex]-(tempMin-m_DivValueY[tempMinIndex]*(m_DivNumY-1)))*m_DataDrawCof[tempMinIndex]+m_ActiveMouseY;
+				//m_OriginValueY[tempMinIndex] =tempMin-m_DivValueY[tempMinIndex]*(m_DivNumY-1);
+			}	
+			else{
+				tempOriginalY  =m_ReleaseMouseY;
+			}	 
+			for(int i=0;i<m_CurveNum;i++){
+				
+				//if(((float)m_ReleaseMouseY - (float)m_ActiveMouseY) > 2*mWindowHeight)				
+				//	m_ReleaseMouseY = m_ActiveMouseY + 2*mWindowHeight;	
+
+				
+				m_OriginValueY[i] = m_OriginValueY[i] - (((float)tempOriginalY - (float)m_ActiveMouseY))/m_DataDrawCof[i];
+				/*if(m_MinRecievedData[i]- 0.9f*(m_DisplayDataRange[i])>=m_OriginValueY[i])
+					m_OriginValueY[i] = m_MinRecievedData[i]- 0.9f*(m_DisplayDataRange[i]);
+				if(m_MaxRecievedData[i]- 0.1f*(m_DisplayDataRange[i])<=m_OriginValueY[i])
+					m_OriginValueY[i] = m_MaxRecievedData[i]- 0.1f*(m_DisplayDataRange[i]);	*/
 			}				
 				
 			 m_ActiveMouseX =m_ReleaseMouseX;
@@ -1585,6 +1765,7 @@ void UserMouseMove(int pointerId,float wParam, float lParam){
 			m_ReleaseMouseY1 = ( short )( lParam );		
 		}
 		else{
+
 		     m_ReleaseMouseX1=m_ActiveMouseX1 = ( short )( wParam );
 			 m_ReleaseMouseY1=m_ActiveMouseY1 = ( short )( lParam );		
 		}			
@@ -1592,26 +1773,78 @@ void UserMouseMove(int pointerId,float wParam, float lParam){
 	
 	 
 		if(m_IsOnDrag){ 
-		 
-			float scaleX =  0.0001f+Math.abs( ( (float)m_ReleaseMouseX1 - (float)m_ReleaseMouseX )/( (float)m_ActiveMouseX1-  (float)m_ActiveMouseX+0.00001f)  );
 			
-			m_OriginValueX = (float)m_UserSelectedStartX1 - (float)m_UserSelectedEndX1/scaleX;
-			m_DisplayDataTimeLength =  (float)m_UserSelectedEndX/scaleX;
-		     m_MinRecievedTime=m_OriginValueX;
-			 m_MaxRecievedTime=m_MinRecievedTime+m_DisplayDataTimeLength;		
+			//if((float)m_ReleaseMouseX1 - (float)m_ReleaseMouseX <=10)
+			//	m_ReleaseMouseX1 = m_ReleaseMouseX +10;
+			
+			if((float)m_ActiveMouseX1<=(float)m_ActiveMouseX && (float)m_ReleaseMouseX1 >= (float)m_ReleaseMouseX)
+			{
+				tempScale =m_PreScaleX;//tempScale =1.0f;
+			}
+			else if((float)m_ActiveMouseX1>=(float)m_ActiveMouseX && (float)m_ReleaseMouseX1 <= (float)m_ReleaseMouseX)
+			{
+				tempScale =m_PreScaleX;//tempScale =1.0f;						
+			}	
+			else
+				tempScale = ( (float)m_ReleaseMouseX1 - (float)m_ReleaseMouseX )/( (float)m_ActiveMouseX1-  (float)m_ActiveMouseX+0.00001f) ;
+			
+			float scaleX =  0.0001f+Math.abs(tempScale);
+				
+			if((float)m_UserSelectedEndX/scaleX>50000.0f)
+				scaleX =m_UserSelectedEndX/50000.0f;
+			
+			if((float)m_UserSelectedEndX/scaleX<2f)
+				scaleX =m_UserSelectedEndX/2;
+			
+			
+
+				
+			tempOriginal = (float)m_UserSelectedStartX1 - (float)m_UserSelectedEndX1/scaleX;
+			tempLength	= (float)m_UserSelectedEndX/scaleX;
+
+			m_OriginValueX = tempOriginal;			
+			m_DisplayDataTimeLength = tempLength;	
+			m_PreScaleX = scaleX;
+ 
 			 
-			 
-				for(int i=0;i<m_CurveNum;i++){ 
+			for(int i=0;i<m_CurveNum;i++){ 
+
+					if((float)m_ActiveMouseY1<=(float)m_ActiveMouseY && (float)m_ReleaseMouseY1 >= (float)m_ReleaseMouseY)
+					{
+						tempScale =m_PreScaleY;//tempScale =1.0f;
+					}
+					else if((float)m_ActiveMouseY1>=(float)m_ActiveMouseY && (float)m_ReleaseMouseY1 <= (float)m_ReleaseMouseY)
+					{
+						tempScale =m_PreScaleY;;//tempScale =1.0f;						
+					}	
+					else
+						
+						tempScale = ( (float)m_ReleaseMouseY1 - (float)m_ReleaseMouseY )/( (float)m_ActiveMouseY1-  (float)m_ActiveMouseY+0.00001f) ;
 					
-					float scaleY =  0.0001f+Math.abs( ( (float)m_ReleaseMouseY1 - (float)m_ReleaseMouseY )/( (float)m_ActiveMouseY1-  (float)m_ActiveMouseY+0.00001f)  );
+					float scaleY =  0.0001f+Math.abs(tempScale );
 					
-					m_OriginValueY[i] = m_UserSelectedStartY1[i] - m_UserSelectedEndY1[i]/scaleY;
-					m_DisplayDataRange[i] =  m_UserSelectedEndY[i]/scaleY;
-					m_MinRecievedData[i]=m_OriginValueY[i];
-					m_MaxRecievedData[i]=m_MinRecievedData[i]+m_DisplayDataRange[i];					
+					if((float)m_UserSelectedEndY[0]/scaleY>50000.0f)
+						scaleY =m_UserSelectedEndY[0]/50000.0f;
+					
+					if((float)m_UserSelectedEndY[0]/scaleY<0.5f)
+						scaleY =m_UserSelectedEndY[0]/0.5f;
+					
+					tempOriginal = m_UserSelectedStartY1[i] - m_UserSelectedEndY1[i]/scaleY;
+					tempLength	=  m_UserSelectedEndY[i]/scaleY;	
+			
+					{
+						
+						m_OriginValueY[i]   =tempOriginal;
+						m_DisplayDataRange[i]= tempLength;
+						m_PreScaleY = scaleY;
+
+					}
+
+					//m_MinRecievedData[i]=m_OriginValueY[i];
+					//m_MaxRecievedData[i]=m_MinRecievedData[i]+m_DisplayDataRange[i];					
 				}
 			 
-				RefreshDisplay();
+				//RefreshDisplay();
 			 
 		}
 	 
@@ -1719,6 +1952,7 @@ void  UserMouseUp(int pointerId,float wParam, float lParam){
 	 }
 	 else
 	 {
+		 //m_TotalScaleX =m_TotalScaleX*m_PreScaleX;
 		 m_IsOnDrag=false;
 	 }
 
@@ -1794,6 +2028,8 @@ void  UserMouseUp(int pointerId,float wParam, float lParam){
 
 }
 
-
+public float getTotalX(){
+	return m_TotoalRecieveTimeIndex;
+}
 
 };

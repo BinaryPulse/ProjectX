@@ -308,28 +308,28 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		
 		//program = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, new String[] {
 		//		POSITION_ATTRIBUTE, NORMAL_ATTRIBUTE, COLOR_ATTRIBUTE });
-		/*program = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, new String[] {
+	/*	program = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, new String[] {
 				POSITION_ATTRIBUTE, NORMAL_ATTRIBUTE,TEXCORD_ATTRIBUTE});
-		heightMap.MeshDataReader(lessonEightActivity,
+		heightMap.MeshDataReader(MainActivity,
 				R.raw.blade);
-		tower.MeshDataReader(lessonEightActivity,
+		tower.MeshDataReader(MainActivity,
 				R.raw.tower);	
-		nacelle.MeshDataReader(lessonEightActivity,
+		nacelle.MeshDataReader(MainActivity,
 				R.raw.nacelle);	
 
-		head.PorcheDataReader(lessonEightActivity,
+		head.PorcheDataReader(MainActivity,
 				R.raw.head_withhair);	
-		topbody.PorcheDataReader(lessonEightActivity,
+		topbody.PorcheDataReader(MainActivity,
 				R.raw.top_body);	
-		bottombody.PorcheDataReader(lessonEightActivity,
+		bottombody.PorcheDataReader(MainActivity,
 				R.raw.bottom_body);	
-		wings.PorcheDataReader(lessonEightActivity,
+		wings.PorcheDataReader(MainActivity,
 				R.raw.blades);	
 		
 		
-		eyeofqueen.PorcheDataReader(lessonEightActivity,
-				R.raw.eyeofqueen1);	*/
-		
+		eyeofqueen.PorcheDataReader(MainActivity,
+				R.raw.eyeofqueen1);	
+		*/
 		
 		dm = new DisplayMetrics();
 		MainActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -452,6 +452,8 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 	    LedList1.SetDigitalLedPara(5,30,8,4);
 	    
 	    m_TestData    =new float[4];
+	    
+	    //m_timer =0;
 		//porche.PorcheDataReader(lessonEightActivity,
 		//		R.raw.porsche);	
 		// Initialize the accumulated rotation matrix
@@ -629,6 +631,8 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		}
 		else 
 			m_timer1 =0;
+		
+		m_timer1 = OscilloScope_1.getTotalX();
 		digits[3] = (int)m_timer1-((int)m_timer1/10)*10;
 		digits[2] = (int)(m_timer1/10)-((int)m_timer1/100)*10;
 		digits[1] = (int)(m_timer1/100)-((int)m_timer1/1000)*10;
@@ -638,8 +642,8 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		digits[0] = 1;//(int)(m_timer/1000)-((int)m_timer/10000)*10;
 		else
 			digits[0] = 0;	*/
-		//LedList1.draw( digits,-100,0,-580,0,0.0f,0); 
-		//LedList1.RenderLedList();			
+		LedList1.draw( digits,-100,0,-580,0,0.0f,0); 
+		LedList1.RenderLedList();			
 		
 		UIDialogue1.UserMessageProcess(m_Motion);
 
