@@ -110,7 +110,7 @@ public class UIDialogue extends UIControlUnit {
     protected int mWindowWidth;
     protected int mWindowHeight;
     
-    protected static float m_timer;
+    protected  float m_timer =0;
     
 	public float[] mBoundary ={1.0f,-1.0f,1.0f,-1.0f};
     
@@ -122,6 +122,9 @@ public class UIDialogue extends UIControlUnit {
     
     protected boolean m_IsChildUnitOnFocus;
     
+    private  FlashLight FlashLight1; 
+    protected boolean m_IsShown;
+    protected boolean m_IsActive;
 
 /*##############################################################################
            
@@ -665,6 +668,8 @@ GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 					  
 		  //InitGLDataForBorder();
 		  //InitGLDataForArea();
+			   FlashLight1 = new FlashLight(context,0,0,0,1.0f,(float)300.0f,(float)60.0f,0.5f);	
+
 	}    
 /***********************************************************************************
  子函数描述：Render(),绘制整个示波器模块
@@ -684,6 +689,11 @@ public void UserMessageProcess(MotionEvent event){
 
 	int i,X,pointerId,pointerIndex,pointCount;
 	float wParam,lParam,wParam1,lParam1;
+	
+	
+	if(!m_IsActive)
+		return;
+	
 if(event != null){
 	//wParam = event.getX();
 	//lParam = mWindowHeight - event.getY();
@@ -980,11 +990,128 @@ void UserMouseMove(int pointerId,float wParam, float lParam){
 void  UserMouseUp(int pointerId,float wParam, float lParam){
 
  }
+
 public void SetDispWiodowSize(int width, int height)
 {
 	 mWindowWidth  = width;
 	 mWindowHeight = height;
+
+	   FlashLight1.SetDispWiodowSize(mWindowWidth,mWindowHeight);	
 	  InitGLDataForBorder();
 	  InitGLDataForArea();
+	  m_IsShown =false;
+	  m_IsActive =false;
 }
+
+public void Active(){
+	m_IsActive =true;
+}
+
+public boolean  IsActive(){
+	return m_IsActive;
+}
+
+public void Show(float[] ViewMatrix,boolean AnimationEnable){	
+	
+	float[] Boundary ={1.0f,-1.0f,1.0f,-1.0f};
+	float[] viewMatrixFontX = new float[16];
+	
+	if(!AnimationEnable)
+	{
+		m_IsShown =true;
+		m_IsActive =true;
+	}
+		
+	
+	if(m_IsShown){
+		
+		Render(ViewMatrix,Boundary);
+		m_timer =250;
+	}		
+	else
+	{
+		if(m_timer<250)
+
+		{
+			m_timer = m_timer + 20f;
+		
+		}	
+		else{
+			
+			m_timer =250;
+			m_IsShown =true;
+			m_IsActive =true;
+		}
+		
+		Matrix.orthoM(viewMatrixFontX, 0,
+				-mWindowWidth/2,
+				mWindowWidth/2,
+				-mWindowHeight/(2*m_timer/250.0f+0.0001f),
+				mWindowHeight/(2*m_timer/250.0f+0.0001f), 0f, 1f);	
+		
+		Render(viewMatrixFontX,Boundary);
+	}	
+	
+	
+}
+
+
+public void Hide(float[] ViewMatrix,boolean AnimationEnable){	
+	
+
+	float[] Boundary ={1.0f,-1.0f,1.0f,-1.0f};
+	float[] UIBoundary ={1.0f,-1.0f,1.0f,-1.0f};
+	float[] viewMatrixFontX = new float[16];
+	
+	if(!AnimationEnable)
+	{
+		Render(ViewMatrix,Boundary);
+		m_IsShown =false;
+		m_IsActive =false;
+		return;
+	}
+
+	
+	if(m_IsShown)
+	{
+		if(m_timer>0)
+
+		{
+			m_timer = m_timer - 20f;
+		
+		}	
+		else{
+			m_timer =0;			
+		}
+		
+		UIBoundary[0]=1.0f;
+		UIBoundary[1]=-1.0f;
+		UIBoundary[2]=m_timer/250.0f;
+		UIBoundary[3]=-m_timer/250.0f;
+		
+		if(m_timer/250.0f>=0.01f)
+			FlashLight1.SetDynamicShowTrue();
+		else{
+			m_timer = 0;
+			m_IsShown =false;
+		
+		}
+		
+		Matrix.orthoM(viewMatrixFontX, 0,
+				-mWindowWidth/2,
+				mWindowWidth/2,
+				-mWindowHeight/(2*m_timer/250.0f+0.0001f),
+				mWindowHeight/(2*m_timer/250.0f+0.0001f), 0f, 1f);	
+		
+		Render(viewMatrixFontX,Boundary);
+
+	}	
+	else{
+		FlashLight1.Render(ViewMatrix, UIBoundary);
+		if(!FlashLight1.IsDynamicShowActive())
+			m_IsActive =false;
+	}
+	
+}
+
 };

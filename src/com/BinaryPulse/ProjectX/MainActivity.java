@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ListActivity;
@@ -12,9 +13,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ConfigurationInfo;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -27,6 +31,9 @@ import android.widget.SimpleAdapter;
 import com.BinaryPulse.ProjectX.MainActivity;
 import com.BinaryPulse.ProjectX.MainActivityGLSurfaceView;
 import com.BinaryPulse.ProjectX.MainActivityRenderer;
+import com.BinaryPulse.ProjectX.util.SystemUiHider;
+
+
 public class MainActivity extends Activity 
 {
 	
@@ -36,6 +43,31 @@ public class MainActivity extends Activity
 	//private SystemUiHider mSystemUiHider;
 	//private View decorView;
 
+	private static final boolean AUTO_HIDE = true;
+
+	/**
+	 * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
+	 * user interaction before hiding the system UI.
+	 */
+	private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+
+	/**
+	 * If set, will toggle the system UI visibility upon interaction. Otherwise,
+	 * will show the system UI visibility upon interaction.
+	 */
+	private static final boolean TOGGLE_ON_CLICK = true;
+
+	/**
+	 * The flags to pass to {@link SystemUiHider#getInstance}.
+	 */
+	private static final int HIDER_FLAGS = SystemUiHider.FLAG_HIDE_NAVIGATION;
+
+	/**
+	 * The instance of the {@link SystemUiHider} for this activity.
+	 */
+	private SystemUiHider mSystemUiHider;
+	
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		
@@ -61,15 +93,116 @@ public class MainActivity extends Activity
 			getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 			renderer = new MainActivityRenderer(this, glSurfaceView);
 			glSurfaceView.setRenderer(renderer, displayMetrics.density);
+			/*glSurfaceView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
 				
+				@Override
+				public void onSystemUiVisibilityChange( int visibility) {
+					// TODO Auto-generated method stub
+					if((visibility & View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) ==0){
+						
+					}
+					else{
+						
+					}
+					
+				}
+
+				
+			});*/
+			// hideSystemUI();
+				
+			
+			
+			
 		} else {
 			// This is where you could create an OpenGL ES 1.x compatible
 			// renderer if you wanted to support both ES 1 and ES 2.
 			return;
 		}	
 		
+
+		mSystemUiHider = SystemUiHider.getInstance(this, glSurfaceView,
+				HIDER_FLAGS);
+		mSystemUiHider.setup();
+		mSystemUiHider
+				.setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
+					// Cached values.
+
+					@Override
+					@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+					public void onVisibilityChange(boolean visible) {
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+	
+						} else {
+							// If the ViewPropertyAnimator APIs aren't
+							// available, simply show or hide the in-layout UI
+							// controls.
+
+						}
+
+						if (visible && AUTO_HIDE) {
+							// Schedule a hide().
+							delayedHide(200);
+						}
+					}
+				});	
 		
+		// Set up the user interaction to manually show or hide the system UI.
+		glSurfaceView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				if (TOGGLE_ON_CLICK) {
+					mSystemUiHider.toggle();
+				} else {
+					mSystemUiHider.show();
+				}
+			}
+		});
+
+		// Upon interacting with UI controls, delay any scheduled hide()
+		// operations to prevent the jarring behavior of controls going away
+		// while interacting with the UI.
+		//findViewById(R.id.dummy_button).setOnTouchListener(
+		//		mDelayHideTouchListener);
 	}
+
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+
+		// Trigger the initial hide() shortly after the activity has been
+		// created, to briefly hint to the user that UI controls
+		// are available.
+		delayedHide(100);
+	}
+
+
+	View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
+		@Override
+		public boolean onTouch(View view, MotionEvent motionEvent) {
+			if (AUTO_HIDE) {
+				delayedHide(AUTO_HIDE_DELAY_MILLIS);
+			}
+			return false;
+		}
+	};
+
+	Handler mHideHandler = new Handler();
+	Runnable mHideRunnable = new Runnable() {
+		@Override
+		public void run() {
+			mSystemUiHider.hide();
+		}
+	};
+
+
+	private void delayedHide(int delayMillis) {
+		mHideHandler.removeCallbacks(mHideRunnable);
+		mHideHandler.postDelayed(mHideRunnable, delayMillis);
+	}
+
+	
+	
 
 	@Override
 	protected void onResume() {
@@ -78,7 +211,7 @@ public class MainActivity extends Activity
 		super.onResume();
 		//glSurfaceView.onResume();
 		if(getRequestedOrientation()!=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);   }  
-  
+		// hideSystemUI();
 	}
 
 	@Override
@@ -89,15 +222,16 @@ public class MainActivity extends Activity
 		//glSurfaceView.onPause();	  
 	}
 
-	/*	@Override
+		@Override
 	public void onWindowFocusChanged(boolean hasFocus){
 			
 		glSurfaceView.setFocusable(true);
 		glSurfaceView.requestFocus();
 		super.onWindowFocusChanged(hasFocus);
+		// hideSystemUI();
 		
 	}
-*/	
+	
 	public void hideSystemUI()
 	{
 		    

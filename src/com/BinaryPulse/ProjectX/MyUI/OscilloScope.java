@@ -1688,9 +1688,15 @@ void UserMouseMove(int pointerId,float wParam, float lParam){
 			
 	         if(m_TotoalRecieveTimeIndex > m_DisplayDataMaxTimeIndex)
 	         {
-	        	 tempDispEndTimeIndex = m_DisplayDataMaxTimeIndex;
-	        	 tempDispStartTimeIndex = m_DisplayDataMaxTimeIndex -(int)((m_DivValueX*m_DivNumX)/m_RecievedTimeToRealTimeScale);
-	 			if(tempDispStartTimeIndex<=0)
+	        	 
+	        	 if(tempDispEndTimeIndex+m_DispStartTimeOffsetIndex <m_TotoalRecieveTimeIndex)
+	        		 tempDispEndTimeIndex = m_DisplayDataMaxTimeIndex -(m_TotoalRecieveTimeIndex-tempDispEndTimeIndex-m_DispStartTimeOffsetIndex);
+	        	 else
+	        		 tempDispEndTimeIndex = m_DisplayDataMaxTimeIndex;
+	        	 
+	        	 tempDispStartTimeIndex = tempDispEndTimeIndex -(int)((m_DivValueX*m_DivNumX)/m_RecievedTimeToRealTimeScale);
+	 			
+	        	 if(tempDispStartTimeIndex<=0)
 					tempDispStartTimeIndex =0;
 	         }
 

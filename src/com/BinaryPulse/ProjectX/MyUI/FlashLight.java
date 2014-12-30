@@ -270,6 +270,7 @@ public void InitGLDataForArea()
 	
 	if(m_timerX>=0.5f || m_timerX<0 ){
 		m_timerX=0.5f;
+		m_DynamicShow =false;
 	}
 	else
 	{
@@ -430,6 +431,10 @@ public boolean IsOnFocus(){
     return m_IsOnfocus;
 }
 
+public boolean IsDynamicShowActive(){
+    return m_DynamicShow;
+}
+
 public void SetDynamicShowTrue(){
     m_timer       = 0;
     m_timerX      =0;
@@ -476,6 +481,7 @@ public void SetDisplayArea(float x1, float x2, float y1, float y2) {
 public void  Render(float[] modelMatrix,float[] Boundary){  
 
 	InitGLDataForBackPanel(); // this must be done after WindowWidth  WindowHeight been Set
+	if(m_DynamicShow)
 	DrawBackPanel(modelMatrix,Boundary);
 
  }

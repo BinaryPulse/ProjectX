@@ -168,6 +168,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
     
     private static Button Button4;   
     private static Button Button5;    
+    private static Button Button6; 
     
     private static DropDownList DropDownList1; 
     private static DropDownList DropDownList2; 
@@ -177,6 +178,8 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
     private static FlashLight FlashLight1; 
     
     private static UIDialogue UIDialogue1;
+    private static UIDialogue UIDialogue2;
+    private static UIDialogue UIDialogue3;
     
     public static  SychronousMotor   gSychronousMotor;
     private static  float m_timer;
@@ -308,7 +311,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		
 		//program = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, new String[] {
 		//		POSITION_ATTRIBUTE, NORMAL_ATTRIBUTE, COLOR_ATTRIBUTE });
-	/*	program = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, new String[] {
+		/*program = ShaderHelper.createAndLinkProgram(vertexShaderHandle, fragmentShaderHandle, new String[] {
 				POSITION_ATTRIBUTE, NORMAL_ATTRIBUTE,TEXCORD_ATTRIBUTE});
 		heightMap.MeshDataReader(MainActivity,
 				R.raw.blade);
@@ -328,21 +331,21 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		
 		
 		eyeofqueen.PorcheDataReader(MainActivity,
-				R.raw.eyeofqueen1);	
-		*/
+				R.raw.eyeofqueen1);	*/
+		
 		
 		dm = new DisplayMetrics();
 		MainActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-		windowWidth = dm.widthPixels;
-		windowHeight = dm.heightPixels;		
+		windowWidth = 1200;//dm.widthPixels;
+		windowHeight = 720;//dm.heightPixels;		
 		
 		 if(windowWidth>windowHeight){
-			 UniformScaleX = (float)windowWidth/1240.0f;
+			 UniformScaleX =(float)windowWidth/1220.0f;//(float)windowWidth/1240.0f;
 			 UniformScaleY = (float)windowHeight/720.0f;	
 		 }
 		 else{
 			 UniformScaleX = (float)windowWidth/720.0f;
-			 UniformScaleY = (float)windowHeight/1240.0f;				 
+			 UniformScaleY = (float)windowWidth/1220.0f;//(float)windowHeight/1240.0f;				 
 		 }	
 		// Create the GLText
 		
@@ -378,16 +381,21 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 	   
 	    Button3=new Button(MainActivity,0,10+480.0f*UniformScaleX,40.0f*UniformScaleY,1.0f,(float)200.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
 	   Button3.SetDispWiodowSize(windowWidth,windowHeight);	
-	   Button3.AddCaption("SETING");
+	   Button3.AddCaption("SET");
 	   
 
 	    Button4=new Button(MainActivity,0,10+720.0f*UniformScaleX,40.0f*UniformScaleY,1.0f,(float)200.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
 	   Button4.SetDispWiodowSize(windowWidth,windowHeight);	
-	   Button4.AddCaption("XXXX");
+	   Button4.AddCaption("CLOSE");
 	   
 	    Button5=new Button(MainActivity,0,10+960.0f*UniformScaleX,40.0f*UniformScaleY,1.0f,(float)200.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
 	   Button5.SetDispWiodowSize(windowWidth,windowHeight);	
-	   Button5.AddCaption("TTTT");
+	   Button5.AddCaption("GRAPH");
+	   
+	   
+	    Button6=new Button(MainActivity,0,10+720.0f*UniformScaleX,40.0f*UniformScaleY,1.0f,(float)200.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
+	   Button6.SetDispWiodowSize(windowWidth,windowHeight);	
+	   Button6.AddCaption("CLOSE");
 	
 	   String DropDownStrings[] = {"Speed_[1]","Voltage_[2]","Current_[3]","Flux_[4]","Torque_[5]","Time_[6]","7","8","9","10"};
 	   DropDownList1 = new DropDownList(MainActivity,0,10+15.0f*UniformScaleX,580.0f*UniformScaleY,1.0f,(float)300.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
@@ -405,27 +413,17 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 
 	   DropDownList4 = new DropDownList(MainActivity,0,10+15.0f*UniformScaleX,280.0f*UniformScaleY,1.0f,(float)300.0f*UniformScaleX,(float)60.0f*UniformScaleY,3.0f,UniformScaleX);
 	   DropDownList4.SetDisplayList(5, DropDownStrings);
-	   DropDownList4.SetDispWiodowSize(windowWidth,windowHeight);	
-
-
-	   
+	   DropDownList4.SetDispWiodowSize(windowWidth,windowHeight);	   
 	   
 	   
 	   SlideBar1 = new SlideBar(MainActivity,0,10+15.0f*UniformScaleX,180.0f*UniformScaleY,1.0f,(float)300.0f*UniformScaleX,(float)60.0f*UniformScaleY,1.0f);
-
 	   SlideBar1.SetDispWiodowSize(windowWidth,windowHeight);	
-
-
 	   SlideBar1.AddCaption("123");
-	   
+	
 	   
 	   FlashLight1 = new FlashLight(MainActivity,0,0,0,1.0f,(float)300.0f*UniformScaleX,(float)60.0f*UniformScaleY,0.5f);
-
 	   FlashLight1.SetDispWiodowSize(windowWidth,windowHeight);	
-
-
-	   FlashLight1.AddCaption("123");
-	   
+	   FlashLight1.AddCaption("123");	   
 	   
 	   
 	   UIDialogue1 =new UIDialogue(MainActivity,0,0.0f,0.0f,1.0f,(float)windowWidth*0.98f,(float)windowHeight*0.98f,3.0f,1.0f*UniformScaleX);
@@ -434,16 +432,27 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 	   UIDialogue1.AddCtrlUnit(Button2);
 	   UIDialogue1.AddCtrlUnit(Button3);
 	   UIDialogue1.AddCtrlUnit(Button4);
-	   UIDialogue1.AddCtrlUnit(Button5);	
+	   //UIDialogue1.AddCtrlUnit(Button5);	
 	   UIDialogue1.AddCtrlUnit(OscilloScope_1);
-
-	   /*UIDialogue1.AddCtrlUnit(SlideBar1);
-	   UIDialogue1.AddCtrlUnit(DropDownList1);
-	   UIDialogue1.AddCtrlUnit(DropDownList2);
-	   UIDialogue1.AddCtrlUnit(DropDownList3);
-	   UIDialogue1.AddCtrlUnit(DropDownList4);*/
 	   UIDialogue1.EndConstruction();
-	   //UIDialogue1.AddCtrlUnit(OscilloScope_1);
+	   UIDialogue1.Active();
+	   
+	   UIDialogue2 =new UIDialogue(MainActivity,0,0.0f,0.0f,1.0f,(float)windowWidth*0,(float)windowHeight*0,0.0f,1.0f*UniformScaleX);   
+	   UIDialogue2.SetDispWiodowSize(windowWidth,windowHeight);	   
+	   UIDialogue2.AddCtrlUnit(Button5);
+	   UIDialogue2.EndConstruction();  
+	   //UIDialogue2.Active();
+	 
+	  
+	   UIDialogue3 =new UIDialogue(MainActivity,0,0.0f,0.0f,1.0f,(float)windowWidth*0.98f,(float)windowHeight*0.98f,3.0f,1.0f*UniformScaleX);
+	   UIDialogue3.SetDispWiodowSize(windowWidth,windowHeight);
+	   UIDialogue3.AddCtrlUnit(Button6);
+	   UIDialogue3.AddCtrlUnit(SlideBar1);
+	   UIDialogue3.AddCtrlUnit(DropDownList1);
+	   UIDialogue3.AddCtrlUnit(DropDownList2);
+	   UIDialogue3.AddCtrlUnit(DropDownList3);
+	   UIDialogue3.AddCtrlUnit(DropDownList4);
+	   UIDialogue3.EndConstruction();  
 	   
 	   
 	    gSychronousMotor = new SychronousMotor();
@@ -476,6 +485,8 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
 		// Set the OpenGL viewport to the same size as the surface.
+		width =1200;
+		height =720;		
 		GLES20.glViewport(0, 0, width, height);
 		// Create a new perspective projection matrix. The height will stay the
 		// same while the width will vary as per aspect ratio.
@@ -504,66 +515,16 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 				-height/2,
 				height/2, 0f, 1f);		
 		
-	/*	 if(width>height){
-			 UniformScaleX = width/1280;
-			 UniformScaleY = height/720;	
-		 }
-		 else{
-			 UniformScaleX = height/720;
-			 UniformScaleY = width/1280;				 
-		 }*/
 	}
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
 		
 		float m_timer1;
-		//float[] m_TestData;
-		int[] digits =new int[]{1,2,3,4}; 
-		float timer1,timer2;
-		float[] Boundary ={1.0f,-1.0f,1.0f,-1.0f};
-		float[] viewMatrixFontX = new float[16];
 
-
-		if(timer>2500)
-		{
-			timer =0;
-		}
-		else
-		{
-			timer = timer + 20f;
-			
-		}		
-
-		timer1 =timer;
-		
-		if(timer >1250.0f && timer<1500.0f)
-		{
-			timer1 =1500.0f -timer;
-		}
-		
-
-		
-		if((timer >=250.0f && timer <=1250.0f) )
-		{
-			timer1 =250;
-		}
-		if( timer>=1500.0f )
-			timer1 =0;
-		
-		UIBoundary[0]=1.0f;
-		UIBoundary[1]=-1.0f;
-		UIBoundary[2]=1.0f-timer1/250.0f;
-		UIBoundary[3]=-1.0f+timer1/250.0f;
-		
-		Matrix.orthoM(viewMatrixFontX, 0,
-				-windowWidth/2,
-				windowWidth/2,
-				-windowHeight/(2*timer1/250.0f+0.0001f),
-				windowHeight/(2*timer1/250.0f+0.0001f), 0f, 1f);			
+		int[] digits =new int[]{1,2,3,4}; 		
 		
 		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
 		
 		GLES20.glDisable(GLES20.GL_BLEND);
 		//GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
@@ -571,7 +532,6 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		GLES20.glEnable(GLES20.GL_CULL_FACE);
 		// Set our per-vertex lighting program.
 		GLES20.glUseProgram(program);
-
 
 		
 		mvpMatrixUniform = GLES20.glGetUniformLocation(program, MVP_MATRIX_UNIFORM);
@@ -590,23 +550,12 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		//DrawWindTurbine(60.0f,0.0f,30.0f,3.2f,3);
 		GLES20.glUseProgram(0);
 		
-
-		
-
-		
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glDisable(GLES20.GL_BLEND);
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 		
-		
-		
-		//GLES20.gl
 		gSychronousMotor.CalculateRealTimeData(1);
-		//m_timer = gSychronousMotor.getTime()*20;
-		/*m_TestData[0] = gSychronousMotor.getTime()*20;
-		m_TestData[1] = 1.0f;
-		m_TestData[2] = 100;
-		m_TestData[3] = 200;*/
+
 		m_timer+= 1.0f;
 		m_TestData = gSychronousMotor.getOutput();
 		// for(int i=0;i<4;i++)
@@ -643,49 +592,99 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		else
 			digits[0] = 0;	*/
 		LedList1.draw( digits,-100,0,-580,0,0.0f,0); 
-		LedList1.RenderLedList();			
+		LedList1.RenderLedList();	
 		
-		UIDialogue1.UserMessageProcess(m_Motion);
-
-		if(Button1.IsClicked())
-		{
-			OscilloScope_1.Start();
-			//UIDialogue1.Render(viewMatrixFont,UIBoundary);
-			Button1.ClearClickedFlag();
-			UIBoundaryShow =true;
+		
+	
+		UIDialogue1.UserMessageProcess(m_Motion);			
+		UIDialogue2.UserMessageProcess(m_Motion);	
+		UIDialogue3.UserMessageProcess(m_Motion);	
+		
+		if(UIDialogue2.IsActive() && Button5.IsClicked()){
+			UIDialogue2.Hide(viewMatrixFont,false);
+	
 		}
-
-			
-		if(Button2.IsClicked())
-		{
-			OscilloScope_1.Stop();
-		
-			Button2.ClearClickedFlag();
-			UIBoundaryShow =false;
+		else if(!Button5.IsClicked() &&  UIDialogue2.IsActive()){
+			UIDialogue2.Show(viewMatrixFont,false);
 		}
 		
-		if(UIBoundaryShow ==true){
 		
-			if(timer1/250.0f>=0.01f){
-			UIDialogue1.Render(viewMatrixFontX,Boundary);
-			FlashLight1.SetDynamicShowTrue();
+		
+		
+		if( (!UIDialogue2.IsActive()) && Button5.IsClicked()  ){
+			UIDialogue1.Show(viewMatrixFont,true);
+			if(UIDialogue1.IsActive())
+			{
+				Button5.ClearClickedFlag();	
 			}
-			else
-				FlashLight1.Render(viewMatrixFont, Boundary);
-			;//FlashLight1.SetDynamicShowTrue();
-			//if(timer1/250.0f==0.1f) 
-			//   FlashLight1.SetDynamicShowTrue();
-			//if(timer1/250.0f<=0.1f && timer1/250.0f>=0.01f ){
-			//FlashLight1.Render(viewMatrixFont, UIBoundary);
+		}		
+		
+		if(UIDialogue1.IsActive()  && Button4.IsClicked() ){
+			UIDialogue1.Hide(viewMatrixFont,true);	
+			if(!UIDialogue1.IsActive())
+			{
+				UIDialogue2.Show(viewMatrixFont,false);
+				Button4.ClearClickedFlag();	
+			}
+		}
+		
+		else if(UIDialogue1.IsActive()  && Button3.IsClicked() ){
+			UIDialogue1.Hide(viewMatrixFont,true);	
+			
+			//if(!UIDialogue1.IsActive())
+			//{
+				//UIDialogue3.Show(viewMatrixFont,false);
+				//Button3.ClearClickedFlag();	
 			//}
 		}
-		else
+		else if(Button3.IsClicked() && (!UIDialogue1.IsActive()))
 		{
-			UIDialogue1.Render(viewMatrixFont,Boundary);
+			UIDialogue3.Show(viewMatrixFont,true);
+			if(UIDialogue3.IsActive())
+			{
+				Button3.ClearClickedFlag();	
+			}
+		}		
+		else if(!Button4.IsClicked() && UIDialogue1.IsActive() ){
+			UIDialogue1.Show(viewMatrixFont,true);
+			
+			if(Button1.IsClicked())
+			{
+				OscilloScope_1.Start();
+				Button1.ClearClickedFlag();
+				UIBoundaryShow =true;
+			}
+				
+			if(Button2.IsClicked())
+			{
+				OscilloScope_1.Stop();		
+				Button2.ClearClickedFlag();
+				UIBoundaryShow =false;
+			}
 		}
 		
 		
-		//UIDialogue1.Render(viewMatrixFont);
+		if(UIDialogue3.IsActive()  && Button6.IsClicked() ){
+			UIDialogue3.Hide(viewMatrixFont,true);	
+			
+			//if(!UIDialogue3.IsActive())
+			//{
+			//	UIDialogue1.Show(viewMatrixFont,false);
+			//	Button6.ClearClickedFlag();	
+			//}
+		}
+		else if(Button6.IsClicked() && (!UIDialogue3.IsActive()))
+		{
+			UIDialogue1.Show(viewMatrixFont,true);
+			if(UIDialogue1.IsActive())
+			{
+				Button6.ClearClickedFlag();	
+			}
+		}
+		else if(!Button6.IsClicked() && UIDialogue3.IsActive() ){
+			UIDialogue3.Show(viewMatrixFont,true);
+		}	
+		
 		
 		
 		
