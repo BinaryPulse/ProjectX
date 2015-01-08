@@ -581,7 +581,7 @@ GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		for(int i=0; i<m_ChildUnitLength; i++){
 			
 			//m_ChildUnitArrayTemp.Render(modelMatrix);
-		    if(m_ChildUnitArrayTemp.IsOnFocus())
+		    if(m_ChildUnitArrayTemp.IsOnFocus() && m_ChildUnitArrayTemp.IsShowFocusState())
 		    {
 		    	IndexLengthOnfuocs = m_ChildUnitArrayTemp.indexBufferForArea.length;
 		    	realtimeIndexOnfuocs    = realtimeIndex;

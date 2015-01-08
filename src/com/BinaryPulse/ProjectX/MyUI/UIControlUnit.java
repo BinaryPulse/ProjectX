@@ -35,6 +35,7 @@ public abstract class  UIControlUnit{
 	  protected  int     	m_BorderStyle;
 	  protected  float   	m_OffSetX,m_OffSetY,m_Scale,m_Width,m_Height,m_PositionCoordinate,m_IntervalCoordinate;
 	  protected	 boolean    m_IsOnfocus;
+	  protected	 boolean    m_ShowFocusState;
 	  protected	 boolean    m_IsActive;
 	  protected	 boolean    m_IsClicked;
 
@@ -97,6 +98,7 @@ public abstract class  UIControlUnit{
 			 m_IsOnfocus=false;
 			 m_IsActive=false;
 			 m_IsClicked =false;
+			 m_ShowFocusState =true;
 			 m_BorderWidth=BorderWidth;
 			 m_CornerProportion =0.1f;
 			 m_PositionCoordinate =0;
@@ -123,6 +125,7 @@ public abstract class  UIControlUnit{
 	     abstract boolean IsOnFocus();//{return false;}
 	     
 	     public boolean IsClicked(){return m_IsClicked;}
+	     public boolean IsShowFocusState(){return m_ShowFocusState;}
 	     
 	     public void ClearClickedFlag(){m_IsClicked =false;}
 	     

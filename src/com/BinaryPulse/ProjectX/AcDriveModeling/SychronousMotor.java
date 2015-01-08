@@ -35,21 +35,37 @@ public class SychronousMotor {
 	
 	protected static int toutIndex;
 	public static float realtime;
-
+    protected boolean m_CmdRunState =false;
 
 /*##############################################################################
            
 		         对象模块功能描述： OscilloScope（示波器）
 
 ###############################################################################*/
+	public void Stop()
+	{
+		 m_CmdRunState  = false;
 
+	}
+
+	public void Start()
+	{
+		 m_CmdRunState  = true;
+
+	}
+	
+	public boolean IsRun()
+	{
+		 return m_CmdRunState;
+
+	}
 /***********************************************************************************
 子函数描述：DrawControlBorder(bool AnimationEnabled), 绘制示波器边框
 ************************************************************************************/
 public SychronousMotor(){//boolean AnimationEnabled ){
 	
 	int i, j, k, m;
-	
+
 	toutIndex =0;
 	/*
 	'电压方程系数
@@ -132,7 +148,8 @@ public void CalculateRealTimeData(int Timeindex){
 	
 int i, j, k, m;
 //float realtime;
-
+if(m_CmdRunState==false)
+	return;
 toutIndex++;
 
 if(toutIndex > Ns)

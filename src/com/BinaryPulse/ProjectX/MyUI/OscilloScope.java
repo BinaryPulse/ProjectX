@@ -1139,6 +1139,10 @@ public void ReciedveData(float Time, float[] Data){
 	    }	
 		if(m_TotoalRecieveTimeIndex<=100*m_DisplayDataMaxTimeIndex)
 			m_TotoalRecieveTimeIndex++;
+		
+		if(m_TotoalRecieveTimeIndex>m_DisplayDataMaxTimeIndex)
+			m_MinRecievedTime = m_MaxRecievedTime - m_DisplayDataMaxTimeIndex*m_RecievedTimeToRealTimeScale;
+			
 
 	}
 
@@ -1174,7 +1178,7 @@ public OscilloScope(Context context,int ControlType,float OffSetX,float OffSetY,
 {
 	super(context,ControlType, OffSetX, OffSetY, Scale, BorderWith);	
 	
-
+	m_ShowFocusState =false;
 	m_Width=Width*m_Scale-2.0f*BorderWith;
 	m_Height=Height*m_Scale-2.0f*BorderWith;
 	m_ControlType =CONTROL_UNIT_OSCILLO;	

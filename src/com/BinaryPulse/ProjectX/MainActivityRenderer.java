@@ -197,6 +197,8 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
     protected static float timer;
 	public float[] UIBoundary ={1.0f,-1.0f,1.0f,-1.0f};
 	public boolean UIBoundaryShow =false;
+
+	
 	/**
 	 * Initialize the model data.
 	 */
@@ -210,7 +212,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		
 	    	
 	}
-	
+
 	@Override
 	public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
 		
@@ -336,16 +338,16 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		
 		dm = new DisplayMetrics();
 		MainActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-		windowWidth = 1200;//dm.widthPixels;
-		windowHeight = 720;//dm.heightPixels;		
+		windowWidth =  dm.widthPixels;
+		windowHeight = dm.heightPixels;		
 		
 		 if(windowWidth>windowHeight){
-			 UniformScaleX =(float)windowWidth/1220.0f;//(float)windowWidth/1240.0f;
+			 UniformScaleX =(float)windowWidth/1240.0f;//(float)windowWidth/1240.0f;
 			 UniformScaleY = (float)windowHeight/720.0f;	
 		 }
 		 else{
 			 UniformScaleX = (float)windowWidth/720.0f;
-			 UniformScaleY = (float)windowWidth/1220.0f;//(float)windowHeight/1240.0f;				 
+			 UniformScaleY = (float)windowWidth/1240.0f;//(float)windowHeight/1240.0f;				 
 		 }	
 		// Create the GLText
 		
@@ -485,8 +487,8 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 	@Override
 	public void onSurfaceChanged(GL10 glUnused, int width, int height) {
 		// Set the OpenGL viewport to the same size as the surface.
-		width =1200;
-		height =720;		
+		//width =1280;
+		//height =720;		
 		GLES20.glViewport(0, 0, width, height);
 		// Create a new perspective projection matrix. The height will stay the
 		// same while the width will vary as per aspect ratio.
@@ -553,18 +555,18 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		GLES20.glDisable(GLES20.GL_CULL_FACE);
 		GLES20.glDisable(GLES20.GL_BLEND);
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-		
+		 if(gSychronousMotor.IsRun()){
 		gSychronousMotor.CalculateRealTimeData(1);
-
+       
 		m_timer+= 1.0f;
 		m_TestData = gSychronousMotor.getOutput();
 		// for(int i=0;i<4;i++)
 			// m_TestData[i] =2000*(i+1)*(float)Math.cos(m_timer/500.0f)*(float)Math.sin((i+1)*m_timer/40.0f+i*5.0f);
 		    			//float yyy=2000*cos(double(iFrames)/500.0)*sin(double(iFrames)/4.0);    
 		//if(m_timer<500.0f)
-		OscilloScope_1.ReciedveData(m_timer,m_TestData);
+		OscilloScope_1.ReciedveData(m_timer,m_TestData);}
 		//OscilloScope_1.Render(viewMatrixFont);
-		
+		 
 		//Button1.Render(viewMatrixFont);
 		//Button2.Render(viewMatrixFont);	
 		//Button3.Render(viewMatrixFont);	
@@ -591,8 +593,11 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		digits[0] = 1;//(int)(m_timer/1000)-((int)m_timer/10000)*10;
 		else
 			digits[0] = 0;	*/
-		LedList1.draw( digits,-100,0,-580,0,0.0f,0); 
-		LedList1.RenderLedList();	
+		
+		if(UIDialogue2.IsActive() ){
+			LedList1.draw( digits,-100,0,-580,0,0.0f,0); 
+		   LedList1.RenderLedList();	
+		}
 		
 		
 	
@@ -651,13 +656,15 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 			if(Button1.IsClicked())
 			{
 				OscilloScope_1.Start();
+				gSychronousMotor.Start();
 				Button1.ClearClickedFlag();
 				UIBoundaryShow =true;
 			}
 				
 			if(Button2.IsClicked())
 			{
-				OscilloScope_1.Stop();		
+				OscilloScope_1.Stop();	
+				gSychronousMotor.Stop();
 				Button2.ClearClickedFlag();
 				UIBoundaryShow =false;
 			}

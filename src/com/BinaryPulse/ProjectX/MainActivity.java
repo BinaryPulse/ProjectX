@@ -60,7 +60,7 @@ public class MainActivity extends Activity
 	/**
 	 * The flags to pass to {@link SystemUiHider#getInstance}.
 	 */
-	private static final int HIDER_FLAGS = SystemUiHider.FLAG_HIDE_NAVIGATION;
+	private static final int HIDER_FLAGS = SystemUiHider.FLAG_FULLSCREEN;//FLAG_HIDE_NAVIGATION;
 
 	/**
 	 * The instance of the {@link SystemUiHider} for this activity.
@@ -76,9 +76,12 @@ public class MainActivity extends Activity
 		
 	    requestWindowFeature(Window.FEATURE_NO_TITLE);
 	    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+	    //getWindow().setFlags(WindowManager.LayoutParams.FLA, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 	   
 	    
 		glSurfaceView = new MainActivityGLSurfaceView(this);	
+		
+		
 		setContentView(glSurfaceView);		
 
 		// Check if the system supports OpenGL ES 2.0.
@@ -124,8 +127,10 @@ public class MainActivity extends Activity
 		mSystemUiHider = SystemUiHider.getInstance(this, glSurfaceView,
 				HIDER_FLAGS);
 		mSystemUiHider.setup();
-		mSystemUiHider
-				.setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
+		//mSystemUiHider.hide();
+
+		//delayedHide(200);
+		mSystemUiHider.setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
 					// Cached values.
 
 					@Override
@@ -140,24 +145,25 @@ public class MainActivity extends Activity
 
 						}
 
-						if (visible && AUTO_HIDE) {
+						//if (visible && AUTO_HIDE) {
 							// Schedule a hide().
-							delayedHide(200);
-						}
+							delayedHide(1000);
+						//}
 					}
 				});	
 		
 		// Set up the user interaction to manually show or hide the system UI.
-		glSurfaceView.setOnClickListener(new View.OnClickListener() {
+		/*glSurfaceView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				if (TOGGLE_ON_CLICK) {
-					mSystemUiHider.toggle();
-				} else {
-					mSystemUiHider.show();
-				}
+				//if (TOGGLE_ON_CLICK) {
+				//	mSystemUiHider.hide();
+				//} else {
+				//	mSystemUiHider.show();
+				//}
+				//mSystemUiHider.hide();
 			}
-		});
+		});*/
 
 		// Upon interacting with UI controls, delay any scheduled hide()
 		// operations to prevent the jarring behavior of controls going away
@@ -173,7 +179,7 @@ public class MainActivity extends Activity
 		// Trigger the initial hide() shortly after the activity has been
 		// created, to briefly hint to the user that UI controls
 		// are available.
-		delayedHide(100);
+		delayedHide(2000);
 	}
 
 
@@ -192,6 +198,7 @@ public class MainActivity extends Activity
 		@Override
 		public void run() {
 			mSystemUiHider.hide();
+			//hideSystemUI();
 		}
 	};
 
@@ -212,6 +219,10 @@ public class MainActivity extends Activity
 		//glSurfaceView.onResume();
 		if(getRequestedOrientation()!=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);   }  
 		// hideSystemUI();
+		
+		//View decorView =getWindow().getDecorView();
+		//decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+		//		| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |View.SYSTEM_UI_FLAG_LAYOUT_STABLE|View.SYSTEM_UI_FLAG_FULLSCREEN |View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 	}
 
 	@Override

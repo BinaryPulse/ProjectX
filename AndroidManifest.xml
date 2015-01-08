@@ -11,7 +11,8 @@
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:theme="@style/AppTheme" >
+
+       android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
         <activity
             android:name="com.BinaryPulse.ProjectX.MainActivity"
             android:label="@string/app_name" >
