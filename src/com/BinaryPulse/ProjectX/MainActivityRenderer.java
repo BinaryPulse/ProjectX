@@ -39,7 +39,7 @@ import com.BinaryPulse.ProjectX.MyUI.SlideBar;
 import com.BinaryPulse.ProjectX.MyUI.FlashLight;
 import android.util.DisplayMetrics;
 import com.BinaryPulse.ProjectX.AcDriveModeling.SychronousMotor;
-
+import com.BinaryPulse.ProjectX.AcDriveModeling.AsychronousMotor;
 import android.view.MotionEvent;
 /**
  * This class implements our custom renderer. Note that the GL10 parameter
@@ -181,7 +181,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
     private static UIDialogue UIDialogue2;
     private static UIDialogue UIDialogue3;
     
-    public static  SychronousMotor   gSychronousMotor;
+    public static  AsychronousMotor   gSychronousMotor;
     private static  float m_timer;
     private static   float[] m_TestData;
     
@@ -457,7 +457,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 	   UIDialogue3.EndConstruction();  
 	   
 	   
-	    gSychronousMotor = new SychronousMotor();
+	    gSychronousMotor = new AsychronousMotor();
 	    
 	    LedList1 =new LedList(MainActivity,(MainActivity.getAssets()));
 	    LedList1.SetDigitalLedPara(5,30,8,4);

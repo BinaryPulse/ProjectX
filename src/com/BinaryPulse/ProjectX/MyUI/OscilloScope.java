@@ -162,8 +162,8 @@ public class OscilloScope extends UIControlUnit {
 	protected int[] vbo = new int[3];
 	protected int[] ibo = new int[3];
 
-	protected int[] vbo_data = new int[5];
-	protected int[] ibo_data = new int[5];
+	protected int[] vbo_data ;//= new int[5];
+	protected int[] ibo_data ;//= new int[5];
 	protected int[] vbo_data_realtime = new int[1];
 	protected int[] ibo_data_realtime= new int[1] ;	
 	
@@ -1254,8 +1254,8 @@ void ShaderRelatedInit(Context context){
 	GLES20.glGenBuffers(3, vbo, 0);
 	GLES20.glGenBuffers(3, ibo, 0);	
 	
-	GLES20.glGenBuffers(5, vbo_data, 0);
-	GLES20.glGenBuffers(5, ibo_data, 0);
+	//GLES20.glGenBuffers(5, vbo_data, 0);
+	//GLES20.glGenBuffers(5, ibo_data, 0);
 	
 	GLES20.glGenBuffers(1, vbo_data_realtime,0);
 	GLES20.glGenBuffers(1, ibo_data_realtime,0);
@@ -1343,7 +1343,7 @@ public void SetScopeParameters( float GraphWidth, float GraphHeight, int CurveNu
 
 	  m_DisplayDataStartTimeIndex=0;
 	  m_DisplayDataEndTimeIndex=0;
-	  m_DisplayDataMaxTimeIndex=5000-1;
+	  m_DisplayDataMaxTimeIndex=50000-1;
 	  m_LatestTimeIndex=0;
 	  m_TotoalRecieveTimeIndex=0;
 	  m_DisplayDataTimeLength=1500;//ms
@@ -1379,7 +1379,7 @@ public void SetScopeParameters( float GraphWidth, float GraphHeight, int CurveNu
 			m_MinRecievedData[i]=0;
 			m_UserSelectedStartY[i]=0;
 			m_UserSelectedStartY1[i]=0;
-			m_RecievedData[i]=new float[5000];//new float[DataSize];
+			m_RecievedData[i]=new float[50000];//new float[DataSize];
 			m_UserSelectedEndY[i]=0; 
 			m_UserSelectedEndY1[i]=0; 
 			m_DivValueY[i]=0;
@@ -1403,8 +1403,13 @@ public void SetScopeParameters( float GraphWidth, float GraphHeight, int CurveNu
 	  m_CmdRunState =true;
 	  m_IsOnDrag    =false;
 	  
-	  m_SectionNum =5;
-	  m_PerSectionDataLength =5000/m_SectionNum;
+	  m_SectionNum =10;
+	  
+	  vbo_data = new int[m_SectionNum];
+	  ibo_data = new int[m_SectionNum];
+	  GLES20.glGenBuffers(m_SectionNum, vbo_data, 0);
+	  GLES20.glGenBuffers(m_SectionNum, ibo_data, 0);
+	  m_PerSectionDataLength =50000/m_SectionNum;
 	  m_DynamicSectionIndex =0;  
 	  m_RealtimeSectionIndex =0;
 	  m_RealTimeDataLength = 0;
