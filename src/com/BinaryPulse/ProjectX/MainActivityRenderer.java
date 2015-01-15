@@ -40,6 +40,7 @@ import com.BinaryPulse.ProjectX.MyUI.FlashLight;
 import android.util.DisplayMetrics;
 import com.BinaryPulse.ProjectX.AcDriveModeling.SychronousMotor;
 import com.BinaryPulse.ProjectX.AcDriveModeling.AsychronousMotor;
+import com.BinaryPulse.ProjectX.AcDriveModeling.SV_PWM;
 import android.view.MotionEvent;
 /**
  * This class implements our custom renderer. Note that the GL10 parameter
@@ -182,6 +183,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
     private static UIDialogue UIDialogue3;
     
     public static  AsychronousMotor   gSychronousMotor;
+    public static  SV_PWM   gSV_PWM;
     private static  float m_timer;
     private static   float[] m_TestData;
     
@@ -458,6 +460,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 	   
 	   
 	    gSychronousMotor = new AsychronousMotor();
+	    gSV_PWM =new SV_PWM();
 	    
 	    LedList1 =new LedList(MainActivity,(MainActivity.getAssets()));
 	    LedList1.SetDigitalLedPara(5,30,8,4);
@@ -556,10 +559,12 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		GLES20.glDisable(GLES20.GL_BLEND);
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 		 if(gSychronousMotor.IsRun()){
-		gSychronousMotor.CalculateRealTimeData(1);
+		//gSychronousMotor.CalculateRealTimeData(1);
+		gSV_PWM.CalculateRealTimeData(1);
        
 		m_timer+= 1.0f;
-		m_TestData = gSychronousMotor.getOutput();
+		//m_TestData = gSychronousMotor.getOutput();
+		m_TestData = gSV_PWM.getOutput();
 		// for(int i=0;i<4;i++)
 			// m_TestData[i] =2000*(i+1)*(float)Math.cos(m_timer/500.0f)*(float)Math.sin((i+1)*m_timer/40.0f+i*5.0f);
 		    			//float yyy=2000*cos(double(iFrames)/500.0)*sin(double(iFrames)/4.0);    
@@ -657,6 +662,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 			{
 				OscilloScope_1.Start();
 				gSychronousMotor.Start();
+				gSV_PWM.Start();
 				Button1.ClearClickedFlag();
 				UIBoundaryShow =true;
 			}
@@ -665,6 +671,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 			{
 				OscilloScope_1.Stop();	
 				gSychronousMotor.Stop();
+				gSV_PWM.Stop();
 				Button2.ClearClickedFlag();
 				UIBoundaryShow =false;
 			}

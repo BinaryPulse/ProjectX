@@ -150,9 +150,9 @@ realtime = h * (toutIndex - 1);
 
 //Input[0] = inputVar[0]; 
 //Input[1] = inputVar[1]; 
-freq =  realtime*40.0f/2.0f;
-if(freq >40.0f)
-	freq =40.0f;
+freq =  realtime*48.0f/2.0f;
+if(freq >48.0f)
+	freq =48.0f;
 Amp = 380.0f*freq/50.0f;
 
 Theta = Theta + h*2*3.14f*freq;
