@@ -1111,7 +1111,10 @@ public void ReciedveData(float Time, float[] Data){
 			}
 			
 			if(m_LatestTimeIndex>=1){
-				m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex+1]= m_RecievedSectionData[i*m_PerSectionDataLength*4+4*(m_LatestTimeIndex-1)+3];
+				if(i==0)
+					m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex+1]= m_RecievedDataToRealDataScale*Data[i];
+				else
+					m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex+1]= m_RecievedSectionData[i*m_PerSectionDataLength*4+4*(m_LatestTimeIndex-1)+3];
 				m_RecievedSectionData[i*m_PerSectionDataLength*4 +4*m_LatestTimeIndex]= m_RecievedTime[m_LatestTimeIndex];
 			}
 			else{

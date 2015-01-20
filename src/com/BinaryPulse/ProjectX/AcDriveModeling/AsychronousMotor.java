@@ -41,8 +41,9 @@ public class AsychronousMotor {
 	
 	public  float[] yout = new float[OUTPUT_VAR_NUM];
 	
-	protected static int toutIndex;
+	protected static int toutIndex,InnerNum;
 	public static float realtime;
+	public static float PreRealtime;
     protected boolean m_CmdRunState =false;
 
 /*##############################################################################
@@ -95,7 +96,7 @@ public AsychronousMotor(){//boolean AnimationEnabled ){
 	
 	Wr =0;//rotor speed;
 	P=2;// pole pairs
-	TL =5.0f;
+	TL =0.0f;
 	J= 0.032f;
 			
 	Theta =0;
@@ -103,9 +104,11 @@ public AsychronousMotor(){//boolean AnimationEnabled ){
 	h =0.001f;
 	T =10; 
 	ts =20;
-			
+	PreRealtime =0;		
 	N = (int)(T / h);
 	Ns =(int)(ts / h);
+	
+	InnerNum =0;
 	
 	for(j =0; j< 5;j++)
 	   StateEqVar[j] = 0;
@@ -132,13 +135,14 @@ public AsychronousMotor(){//boolean AnimationEnabled ){
 	Cof[2][4] = Cof[2][5] = Cof[3][4] = Cof[3][5] = 0;  
 	Cof[0][4] = Cof[1][5]  = 1.0f/deltLs;
 	
-	const_ke  =1.5f*P*Lr*Lr/Lm/J;  kL =TL/J;
+	const_ke  =P*Lr*Lr/Lm/J;//1.5f*P*Lr*Lr/Lm/J; 
+	kL =TL/J;
 }
 
 
-public void CalculateRealTimeData(int TimeIndex){//float[] inputVar){
+public void CalculateRealTimeData(float[] inputVar){//int TimeIndex){//
 	
-int i, j, k, m;
+int i, j, k, m,IteNum;
 float freq,Amp;
 //float realtime;
 if(m_CmdRunState==false)
@@ -148,9 +152,19 @@ toutIndex++;
 realtime = h * (toutIndex - 1);
  
 
-//Input[0] = inputVar[0]; 
-//Input[1] = inputVar[1]; 
-freq =  realtime*48.0f/2.0f;
+Input[0] = inputVar[0]; 
+Input[1] = inputVar[1]; 
+
+IteNum = (int)inputVar[2];
+
+//h  = inputVar[4];
+for(int z =0;z<=IteNum;z++){
+     if(z<IteNum)
+       h  =0.0005f;
+     else
+       h=inputVar[3];
+     
+/*freq =  realtime*48.0f/2.0f;
 if(freq >48.0f)
 	freq =48.0f;
 Amp = 380.0f*freq/50.0f;
@@ -158,7 +172,7 @@ Amp = 380.0f*freq/50.0f;
 Theta = Theta + h*2*3.14f*freq;
 Input[0] = Amp*(float)java.lang.Math.cos(Theta); 
 Input[1] = Amp*(float)java.lang.Math.sin(Theta); 
-
+*/
 Wr = StateEqVar[4];
 
 Cof[2][3] = -P*Wr;
@@ -202,9 +216,22 @@ for(j =0; j<=4;j++){
 
 yout[0] = StateEqVar[0];
 yout[1] = const_ke * (StateEqVarTemp[1]*StateEqVarTemp[2] -StateEqVarTemp[0]*StateEqVarTemp[3])*J;//StateEqVar[2];
-yout[2] = freq;//StateEqVar[2];
+yout[2] = StateEqVar[2];
 yout[4] = StateEqVar[3];
 yout[3] = P*StateEqVar[4]/2.0f/3.1415f;
+}
+
+InnerNum ++;
+if(InnerNum>=4)
+{
+	InnerNum =0;
+	/*yout[0] = StateEqVar[0];
+	yout[1] = const_ke * (StateEqVarTemp[1]*StateEqVarTemp[2] -StateEqVarTemp[0]*StateEqVarTemp[3])*J;//StateEqVar[2];
+	yout[2] = StateEqVar[2];
+	yout[4] = StateEqVar[3];
+	yout[3] = P*StateEqVar[4]/2.0f/3.1415f;*/
+
+}
 
 
 }

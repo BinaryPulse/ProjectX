@@ -186,7 +186,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
     public static  SV_PWM   gSV_PWM;
     private static  float m_timer;
     private static   float[] m_TestData;
-    
+    private static   float[] m_InternData;
     private DisplayMetrics dm;
     private int windowWidth;
     private int windowHeight;
@@ -466,6 +466,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 	    LedList1.SetDigitalLedPara(5,30,8,4);
 	    
 	    m_TestData    =new float[4];
+	    m_InternData  =new float[5];
 	    
 	    //m_timer =0;
 		//porche.PorcheDataReader(lessonEightActivity,
@@ -562,14 +563,20 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		//gSychronousMotor.CalculateRealTimeData(1);
 		gSV_PWM.CalculateRealTimeData(1);
        
-		m_timer+= 1.0f;
+		//m_timer+= 1.0f;
 		//m_TestData = gSychronousMotor.getOutput();
-		m_TestData = gSV_PWM.getOutput();
+		m_timer = gSV_PWM.getTime();
+		m_InternData = gSV_PWM.getOutput();
+		m_InternData[4] = m_timer;
+		gSychronousMotor.CalculateRealTimeData(m_InternData);
+		m_TestData = gSychronousMotor.getOutput();
 		// for(int i=0;i<4;i++)
 			// m_TestData[i] =2000*(i+1)*(float)Math.cos(m_timer/500.0f)*(float)Math.sin((i+1)*m_timer/40.0f+i*5.0f);
 		    			//float yyy=2000*cos(double(iFrames)/500.0)*sin(double(iFrames)/4.0);    
 		//if(m_timer<500.0f)
-		OscilloScope_1.ReciedveData(m_timer,m_TestData);}
+		//m_TestData[2]= gSV_PWM.getPeroidZeroTrigger();
+		m_TestData[2] = gSV_PWM.getUu();
+		OscilloScope_1.ReciedveData(m_timer*1000.0f,m_TestData);}
 		//OscilloScope_1.Render(viewMatrixFont);
 		 
 		//Button1.Render(viewMatrixFont);
