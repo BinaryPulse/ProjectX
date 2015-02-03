@@ -611,7 +611,6 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		   LedList1.RenderLedList();	
 		}
 		
-		
 	
 		UIDialogue1.UserMessageProcess(m_Motion);			
 		UIDialogue2.UserMessageProcess(m_Motion);	

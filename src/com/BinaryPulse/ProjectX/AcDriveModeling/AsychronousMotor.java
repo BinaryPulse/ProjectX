@@ -160,7 +160,7 @@ IteNum = (int)inputVar[2];
 //h  = inputVar[4];
 for(int z =0;z<=IteNum;z++){
      if(z<IteNum)
-       h  =0.0005f;
+       h  =0.0001f;
      else
        h=inputVar[3];
      
@@ -215,7 +215,7 @@ for(j =0; j<=4;j++){
 }
 
 yout[0] = StateEqVar[0];
-yout[1] = const_ke * (StateEqVarTemp[1]*StateEqVarTemp[2] -StateEqVarTemp[0]*StateEqVarTemp[3])*J;//StateEqVar[2];
+//yout[1] = const_ke * (StateEqVarTemp[1]*StateEqVarTemp[2] -StateEqVarTemp[0]*StateEqVarTemp[3])*J;//StateEqVar[2];
 yout[2] = StateEqVar[2];
 yout[4] = StateEqVar[3];
 yout[3] = P*StateEqVar[4]/2.0f/3.1415f;
@@ -225,6 +225,7 @@ InnerNum ++;
 if(InnerNum>=4)
 {
 	InnerNum =0;
+	yout[1] =StateEqVar[0];
 	/*yout[0] = StateEqVar[0];
 	yout[1] = const_ke * (StateEqVarTemp[1]*StateEqVarTemp[2] -StateEqVarTemp[0]*StateEqVarTemp[3])*J;//StateEqVar[2];
 	yout[2] = StateEqVar[2];

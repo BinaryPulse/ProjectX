@@ -1015,7 +1015,7 @@ public void Show(float[] ViewMatrix,boolean AnimationEnable){
 	
 	float[] Boundary ={1.0f,-1.0f,1.0f,-1.0f};
 	float[] viewMatrixFontX = new float[16];
-	
+	float[] UIBoundary ={1.0f,-1.0f,1.0f,-1.0f};
 	if(!AnimationEnable)
 	{
 		m_IsShown =true;
@@ -1049,7 +1049,12 @@ public void Show(float[] ViewMatrix,boolean AnimationEnable){
 				-mWindowHeight/(2*m_timer/250.0f+0.0001f),
 				mWindowHeight/(2*m_timer/250.0f+0.0001f), 0f, 1f);	
 		
-		Render(viewMatrixFontX,Boundary);
+		UIBoundary[0]=1.0f;
+		UIBoundary[1]=-1.0f;
+		UIBoundary[2]=m_timer/250.0f;
+		UIBoundary[3]=-m_timer/250.0f;
+		
+		Render(viewMatrixFontX,UIBoundary);
 	}	
 	
 	
@@ -1103,7 +1108,7 @@ public void Hide(float[] ViewMatrix,boolean AnimationEnable){
 				-mWindowHeight/(2*m_timer/250.0f+0.0001f),
 				mWindowHeight/(2*m_timer/250.0f+0.0001f), 0f, 1f);	
 		
-		Render(viewMatrixFontX,Boundary);
+		Render(viewMatrixFontX,UIBoundary);
 
 	}	
 	else{
