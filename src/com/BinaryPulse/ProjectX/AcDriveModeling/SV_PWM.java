@@ -70,6 +70,7 @@ public class SV_PWM {
 	public  float[] yout = new float[4+INDEXT_OFFSET];
 	public  float[] youtAlph = new float[4];
 	public  float[] youtBeta = new float[4];
+	public  float[] Tfac = new float[2];
 	
 	protected static int SimuStepIndex;
 	protected static int InnerStepIndex;
@@ -108,7 +109,7 @@ public SV_PWM(){//boolean AnimationEnabled ){
 	UsAmp = ThetaUs =0;
 	Udc =540;
 	Tc =0.001f;
-	Tsimu =0.0005f;
+	Tsimu =0.5f*Tc;
 	InnerStepIndex =0;
 	tout =0;
 	for(int i =0;i<6;i++){
@@ -121,7 +122,7 @@ public SV_PWM(){//boolean AnimationEnabled ){
 }
 
 
-public void CalculateRealTimeData(int Timeindex){
+public void CalculateRealTimeData(float[] UsInfo){//int Timeindex){
 	float freq,Amp,tempresult;
 	float ThetaToVec1,ThetaToVec2;
 	float AmpVec1,AmpVec2,FracVec1,FracVec2;
@@ -133,7 +134,7 @@ public void CalculateRealTimeData(int Timeindex){
 		return;
 if(InnerStepIndex ==0){
 
-
+    /*
 	realtime = 0.5f* Tc * (SimuStepIndex - 1);
 	freq =  realtime*48.0f/2.0f;
 	if(freq >48.0f)
@@ -141,34 +142,64 @@ if(InnerStepIndex ==0){
 	UsAmp = 380.0f*freq/50.0f;
 	//ThetaUs = ThetaUs + 0.5f* Tc *2*PI*freq;
 	ThetaUs = ThetaUs + 0.5f* Tc *360.0f*freq;
+	*/
 	
+	UsAmp = UsInfo[0];
+	ThetaUs= UsInfo[1];
 	
 	tempresult = Udc*SQRT1DIV2;
 	if(UsAmp >=tempresult)
 		UsAmp =tempresult;
 	
-	ThetaUsMod = (int)(ThetaUs%360.0f);//(int)(ThetaUs - (float)((int)(ThetaUs/360.0f))*360.0f);	
-	SectionIndex = (int)(ThetaUsMod/60.0f);
+	ThetaUsMod =(ThetaUs%360.0f);// (ThetaUs - (float)((int)(ThetaUs)/360)*360);	//
+	if(ThetaUsMod<0){
+		ThetaUsMod += 360.0f;
+	}
+	SectionIndex = (int)(ThetaUsMod)/60;
 	
-	if(SectionIndex>=6)
+	if(SectionIndex>6 && ThetaUsMod>360.0f){
+		
 		SectionIndex =0;
-	
+		ThetaUsMod =ThetaUsMod-360.0f;
+		
+	}
+
 	ThetaToVec1 = ThetaUsMod - (float)(SectionIndex*60);
 	ThetaToVec2 = 60.0f -ThetaToVec1;
+	
+	if(SectionIndex==6)
+	{
+		SectionIndex =0;
+	}
+	
+	Tfac[1] = ThetaToVec2;	
 	
 	AmpVec1 = UsAmp*(float)java.lang.Math.sin(ThetaToVec2*PI/180.0f)/(float)java.lang.Math.sin(PI/3);	
 	AmpVec2 = UsAmp*(float)java.lang.Math.sin(ThetaToVec1*PI/180.0f)/(float)java.lang.Math.sin(PI/3);
 	
 	t1 = AmpVec1/Udc*SQRT3DIV2*Tc*0.5f;
 	t2 = AmpVec2/Udc*SQRT3DIV2*Tc*0.5f;
+	
 	t0 = t7 =Tc*0.25f-0.5f*(t1+t2);
+	if(t0<0)
+	{
+
+		AmpVec1 = tempresult*(float)java.lang.Math.sin(ThetaToVec2*PI/180.0f)/(float)java.lang.Math.sin(PI/3);	
+		AmpVec2 = tempresult*(float)java.lang.Math.sin(ThetaToVec1*PI/180.0f)/(float)java.lang.Math.sin(PI/3);
+		
+		t1 = AmpVec1/Udc*SQRT3DIV2*Tc*0.5f;
+		t2 =1.0f-t1;// AmpVec2/Udc*SQRT3DIV2*Tc*0.5f;	
+		t0 = t7 =0;
+		
+	}
+		
 	
 	tCmpA = t1*SectionToCmpAValidVect1[SectionIndex] + t2*SectionToCmpAValidVect2[SectionIndex]+t0;
 	tCmpB = t1*SectionToCmpBValidVect1[SectionIndex] + t2*SectionToCmpBValidVect2[SectionIndex]+t0;
 	tCmpC = t1*SectionToCmpCValidVect1[SectionIndex] + t2*SectionToCmpCValidVect2[SectionIndex]+t0;
 	
 	NumofSimStep[0] = NumofSimStep[3]= 0;// (int)(t0/Tsimu);
-	tFrac[0] = tFrac[3] =t0%Tsimu;// t0 -(float)NumofSimStep[0]*Tsimu;
+	tFrac[0] = tFrac[3] =t0;//%Tsimu;// t0 -(float)NumofSimStep[0]*Tsimu;
 	
 	if(SectionSwip[SectionIndex] == 0){
 		vector1 = SectionToVector1[SectionIndex]-1;
@@ -176,8 +207,8 @@ if(InnerStepIndex ==0){
 		
 		NumofSimStepVect1= (int)(t1/Tsimu);
 		NumofSimStepVect2 = (int)(t2/Tsimu);		
-		FracVec1 = t1%Tsimu;//t1 -(float)NumofSimStepVect1*Tsimu;
-		FracVec2 = t2%Tsimu;//t2 -(float)NumofSimStepVect2*Tsimu;
+		FracVec1 = t1;//%Tsimu;//t1 -(float)NumofSimStepVect1*Tsimu;
+		FracVec2 = t2;//%Tsimu;//t2 -(float)NumofSimStepVect2*Tsimu;
 		
 		
 	}
@@ -187,8 +218,8 @@ if(InnerStepIndex ==0){
 		vector1 = SectionToVector2[SectionIndex]-1;		
 		NumofSimStepVect1= (int)(t2/Tsimu);
 		NumofSimStepVect2 = (int)(t1/Tsimu);		
-		FracVec1 = t2%Tsimu;//t2 -(float)NumofSimStepVect1*Tsimu;
-		FracVec2 = t1%Tsimu;//t1 -(float)NumofSimStepVect2*Tsimu;	
+		FracVec1 = t2;//%Tsimu;//t2 -(float)NumofSimStepVect1*Tsimu;
+		FracVec2 = t1;//%Tsimu;//t1 -(float)NumofSimStepVect2*Tsimu;	
 		
 	}
 	youtAlph[0] = youtAlph[3] =0;	
@@ -200,8 +231,8 @@ if(InnerStepIndex ==0){
 		youtAlph[2] = VetorToUalphCof[vector1]*Udc;
 		youtBeta[1] = VetorToUbetaCof[vector2]*Udc;
 		youtBeta[2] = VetorToUbetaCof[vector1]*Udc;	
-		Uu[1] = VectorToUuCof[vector2]*Udc;
-		Uu[2] = VectorToUuCof[vector1]*Udc;
+		Uu[1] = VectorToUwCof[vector2]*Udc;
+		Uu[2] = VectorToUwCof[vector1]*Udc;
 		/*
 		youtAlph[1] = VectorToUuCof[vector2]*Udc;
 		youtAlph[2] = VectorToUuCof[vector1]*Udc;
@@ -219,8 +250,8 @@ if(InnerStepIndex ==0){
 		youtAlph[2] = VetorToUalphCof[vector2]*Udc;
 		youtBeta[1] = VetorToUbetaCof[vector1]*Udc;
 		youtBeta[2] = VetorToUbetaCof[vector2]*Udc;	
-		Uu[1] = VectorToUuCof[vector1]*Udc;
-		Uu[2] = VectorToUuCof[vector2]*Udc;
+		Uu[1] = VectorToUwCof[vector1]*Udc;
+		Uu[2] = VectorToUwCof[vector2]*Udc;
 		/*
 		youtAlph[1] = VectorToUuCof[vector1]*Udc;
 		youtAlph[2] = VectorToUuCof[vector2]*Udc;
@@ -234,8 +265,9 @@ if(InnerStepIndex ==0){
 		tFrac[2]        = FracVec2;		
 	}
 	
+	Tfac[0] = t1;
+	//Tfac[1] = t2;	
 	
-		
 	SimuStepIndex++;
 	ttemp =0;
 }	
@@ -274,6 +306,18 @@ if(InnerStepIndex==4)
 public float[] getOutput(){
 	
 	return yout;
+	
+}
+
+public float getTfac1(){
+	
+	return  tFrac[InnerStepIndex]*1000.0f;//Tfac[1];
+	
+}
+
+public float getTfac2(){
+	
+	return youtAlph[InnerStepIndex];//UsAmp;//Tfac[1];
 	
 }
 

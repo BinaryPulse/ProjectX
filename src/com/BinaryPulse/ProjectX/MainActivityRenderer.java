@@ -40,6 +40,7 @@ import com.BinaryPulse.ProjectX.MyUI.FlashLight;
 import android.util.DisplayMetrics;
 import com.BinaryPulse.ProjectX.AcDriveModeling.SychronousMotor;
 import com.BinaryPulse.ProjectX.AcDriveModeling.AsychronousMotor;
+import com.BinaryPulse.ProjectX.AcDriveModeling.TorqCtrlLoop;
 import com.BinaryPulse.ProjectX.AcDriveModeling.SV_PWM;
 import android.view.MotionEvent;
 /**
@@ -184,8 +185,13 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
     
     public static  AsychronousMotor   gSychronousMotor;
     public static  SV_PWM   gSV_PWM;
+    public static  TorqCtrlLoop   gTorqCtrlLoop;
     private static  float m_timer;
     private static   float[] m_TestData;
+    private static   float[] m_IABFeedBk;
+    private static   float[] m_UsInfo;
+    private static   float m_RotorTheta;
+    private static   float m_RotorSpeed;
     private static   float[] m_InternData;
     private DisplayMetrics dm;
     private int windowWidth;
@@ -371,7 +377,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		
 		OscilloScope_1=new OscilloScope(MainActivity,0,10+25.0f*UniformScaleX,120.0f*UniformScaleY,1.0f,(float)windowWidth*0.95f,(float)windowHeight*0.8f,5.0f,1.0f*UniformScaleX);
 	    OscilloScope_1.SetDispWiodowSize(windowWidth,windowHeight);	
-	    OscilloScope_1.SetScopeParameters(windowWidth*0.75f,windowHeight*0.65f, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
+	    OscilloScope_1.SetScopeParameters(windowWidth*0.90f,windowHeight*0.65f, 4);//, "123",{1.0f,1.0f,1.0f}, 0.001,  20000,10,5);
 	    OscilloScope_1.AddCaption("OscilloScope of ProjectX");
 	    
 	    
@@ -461,7 +467,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 	   
 	    gSychronousMotor = new AsychronousMotor();
 	    gSV_PWM =new SV_PWM();
-	    
+	    gTorqCtrlLoop = new TorqCtrlLoop();
 	    LedList1 =new LedList(MainActivity,(MainActivity.getAssets()));
 	    LedList1.SetDigitalLedPara(5,30,8,4);
 	    
@@ -561,21 +567,36 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 		 if(gSychronousMotor.IsRun()){
 		//gSychronousMotor.CalculateRealTimeData(1);
-		gSV_PWM.CalculateRealTimeData(1);
+			 
+			 
+	    m_IABFeedBk =gSychronousMotor.getIAB();
+		
+	    m_RotorTheta=gSychronousMotor.RotorTheta();		
+	    m_RotorSpeed =gSychronousMotor.RotorSpeed();
+			 
+	     gTorqCtrlLoop.CalculateRealTimeData(m_IABFeedBk, m_RotorTheta,m_RotorSpeed);
+	     
+		 m_UsInfo =gTorqCtrlLoop.getUsInfo();
+	     
+		gSV_PWM.CalculateRealTimeData(m_UsInfo);
        
 		//m_timer+= 1.0f;
 		//m_TestData = gSychronousMotor.getOutput();
 		m_timer = gSV_PWM.getTime();
+		
 		m_InternData = gSV_PWM.getOutput();
 		m_InternData[4] = m_timer;
 		gSychronousMotor.CalculateRealTimeData(m_InternData);
 		m_TestData = gSychronousMotor.getOutput();
+		
+		m_TestData[3]= gTorqCtrlLoop.getFBKIt();//*1000.0f;
+		m_TestData[2]= gTorqCtrlLoop.getFBKIm();//*1000.0f;
 		// for(int i=0;i<4;i++)
 			// m_TestData[i] =2000*(i+1)*(float)Math.cos(m_timer/500.0f)*(float)Math.sin((i+1)*m_timer/40.0f+i*5.0f);
 		    			//float yyy=2000*cos(double(iFrames)/500.0)*sin(double(iFrames)/4.0);    
 		//if(m_timer<500.0f)
 		//m_TestData[2]= gSV_PWM.getPeroidZeroTrigger();
-		m_TestData[2] = gSV_PWM.getUu();
+		//m_TestData[2] = gSV_PWM.getUu();
 		OscilloScope_1.ReciedveData(m_timer*1000.0f,m_TestData);}
 		//OscilloScope_1.Render(viewMatrixFont);
 		 
@@ -669,6 +690,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 				OscilloScope_1.Start();
 				gSychronousMotor.Start();
 				gSV_PWM.Start();
+				gTorqCtrlLoop.Start();
 				Button1.ClearClickedFlag();
 				UIBoundaryShow =true;
 			}
@@ -678,6 +700,7 @@ public class MainActivityRenderer implements GLSurfaceView.Renderer {
 				OscilloScope_1.Stop();	
 				gSychronousMotor.Stop();
 				gSV_PWM.Stop();
+				gTorqCtrlLoop.Stop();
 				Button2.ClearClickedFlag();
 				UIBoundaryShow =false;
 			}

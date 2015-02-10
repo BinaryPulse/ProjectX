@@ -28,7 +28,7 @@ public class AsychronousMotor {
 	protected float ts;// As Single = 20
 	protected int   T ;// As Integer = 600
 	protected  int  N, Ns;//As Long
-	protected float Rs,	Rr, Ls, Lr, Lm, deltLs,Wr,P,J,TL,kL;
+	protected float Rs,	Rr, Ls, Lr, Lm, deltLs,Wr,P,J,TL,kL,Tc;
 	
 	protected float const_a11,const_a21,const_k1,const_ke,const_kl;
 	
@@ -41,11 +41,18 @@ public class AsychronousMotor {
 	
 	public  float[] yout = new float[OUTPUT_VAR_NUM];
 	
+	public  float Iu,Iv,Iw,Te,RotorTheta,Ialph,Ibeta,RotorSpeed;
+	public  float Iu_out,Iv_out,Iw_out,Te_out,RotorTheta_out,RotorSpeed_out;
+	public  float[]  Ialphbeta_out =new float[2];
+	
 	protected static int toutIndex,InnerNum;
 	public static float realtime;
 	public static float PreRealtime;
     protected boolean m_CmdRunState =false;
-
+    protected final float SQRT2 = (float)java.lang.Math.sqrt(2.0);
+    protected final float SQRT3 = (float)java.lang.Math.sqrt(3.0);
+    protected final float SQRT2DIV3 = SQRT2/SQRT3;
+    protected final float PI =(float)java.lang.Math.PI;
 /*##############################################################################
            
 		         对象模块功能描述： OscilloScope（示波器）
@@ -87,21 +94,21 @@ public AsychronousMotor(){//boolean AnimationEnabled ){
 	 '│w'       = (3/2*p*Lr*Lr/Lm*(I0_alph*Is_beta-I0_beta*Is_alph) -TL)/J
 	 '└*/
    	  
-	Rs = 1.4f;//Ohm
-	Rr = 0.8f;//Ohm
-	Ls = 0.134f;//H
-	Lr = 0.134f;//H	
-	Lm = 0.124f;//H			
+	Rs = 0.469f;//1.4f;//Ohm
+	Rr = 0.372f;//0.8f;//Ohm
+	Ls = 0.067f;//0.134f;//H
+	Lr = 0.067f;//134f;//H	
+	Lm = 0.064f;//0.124f;//H			
 	deltLs = Ls -Lm*Lm/Lr;//H
 	
 	Wr =0;//rotor speed;
 	P=2;// pole pairs
 	TL =0.0f;
-	J= 0.032f;
+	J= 0.152f;//0.032f;
 			
 	Theta =0;
 	
-	h =0.001f;
+	Tc = h =0.001f;
 	T =10; 
 	ts =20;
 	PreRealtime =0;		
@@ -137,6 +144,9 @@ public AsychronousMotor(){//boolean AnimationEnabled ){
 	
 	const_ke  =P*Lr*Lr/Lm/J;//1.5f*P*Lr*Lr/Lm/J; 
 	kL =TL/J;
+	
+	Ialphbeta_out[0] = Ialphbeta_out[1] =0;
+	RotorTheta_out=RotorSpeed_out =0;
 }
 
 
@@ -160,19 +170,11 @@ IteNum = (int)inputVar[2];
 //h  = inputVar[4];
 for(int z =0;z<=IteNum;z++){
      if(z<IteNum)
-       h  =0.0001f;
+       h  =0.001f;
      else
-       h=inputVar[3];
-     
-/*freq =  realtime*48.0f/2.0f;
-if(freq >48.0f)
-	freq =48.0f;
-Amp = 380.0f*freq/50.0f;
+       h=inputVar[3]*0.1f;
+	
 
-Theta = Theta + h*2*3.14f*freq;
-Input[0] = Amp*(float)java.lang.Math.cos(Theta); 
-Input[1] = Amp*(float)java.lang.Math.sin(Theta); 
-*/
 Wr = StateEqVar[4];
 
 Cof[2][3] = -P*Wr;
@@ -208,29 +210,57 @@ for(m =0; m<=3;m++)
 			StateEqVarTemp[j] = StateEqVar[j] + h * DerivStateVar[m][ j];
    
 	}
+/*	
+	Cof[2][3] = -P*StateEqVarTemp[4];
+	Cof[3][2] =  -Cof[2][3]; 
+
+	Cof[0][3] = P*StateEqVarTemp[4]*const_k1;
+	Cof[1][2] =  -Cof[0][3];*/
 }
 
 for(j =0; j<=4;j++){
-   StateEqVar[j] = StateEqVar[j] + h / 6 * (DerivStateVar[0][ j] +  2 * DerivStateVar[1][ j]+ 2 * DerivStateVar[2][ j] + DerivStateVar[3][j]);
+   StateEqVar[j] = StateEqVar[j] + h / 6.0f * (DerivStateVar[0][ j] +  2.0f * DerivStateVar[1][ j]+ 2.0f * DerivStateVar[2][ j] + DerivStateVar[3][j]);
 }
 
-yout[0] = StateEqVar[0];
-//yout[1] = const_ke * (StateEqVarTemp[1]*StateEqVarTemp[2] -StateEqVarTemp[0]*StateEqVarTemp[3])*J;//StateEqVar[2];
-yout[2] = StateEqVar[2];
-yout[4] = StateEqVar[3];
-yout[3] = P*StateEqVar[4]/2.0f/3.1415f;
+Iu = SQRT2DIV3*StateEqVar[0];
+Iv = SQRT2DIV3*(-0.5f*StateEqVar[0]+StateEqVar[1]*SQRT3/2);
+Iw = SQRT2DIV3*(-0.5f*StateEqVar[0]-StateEqVar[1]*SQRT3/2);
+
+
+RotorTheta+= (0.5f*P*h*(Wr + StateEqVar[4]));//%(2.0f*PI));
+
+Ialph =  StateEqVar[0];
+Ibeta =  StateEqVar[1];
+Te    =   const_ke * (StateEqVarTemp[1]*StateEqVarTemp[2] -StateEqVarTemp[0]*StateEqVarTemp[3])*J;
+RotorSpeed = P*StateEqVar[4];///2.0f/3.1415f; //r/min
+
+
+yout[0] = Iu;//StateEqVar[0];
+//yout[1] =//StateEqVar[2];
+//yout[2] = Iv;//StateEqVar[2];
+yout[4] = Iv;//StateEqVar[3];
+yout[3] = Iw;//P*StateEqVar[4]/2.0f/3.1415f;
+
+
 }
 
 InnerNum ++;
 if(InnerNum>=4)
 {
 	InnerNum =0;
-	yout[1] =StateEqVar[0];
-	/*yout[0] = StateEqVar[0];
-	yout[1] = const_ke * (StateEqVarTemp[1]*StateEqVarTemp[2] -StateEqVarTemp[0]*StateEqVarTemp[3])*J;//StateEqVar[2];
-	yout[2] = StateEqVar[2];
-	yout[4] = StateEqVar[3];
-	yout[3] = P*StateEqVar[4]/2.0f/3.1415f;*/
+	yout[1] =RotorSpeed;//Iu;//StateEqVar[0];
+
+	Iu_out  =Iu;
+	Iv_out  =Iv;
+	Iw_out  =Iw;
+	//yout[0] = Iu_out;
+
+	yout[2] = Iv_out;
+	RotorTheta_out +=(0.5f*P*Tc*(StateEqVar[4]));
+	Ialphbeta_out[0] =  Ialph;
+	Ialphbeta_out[1] =  Ibeta;
+	Te_out    = Te;
+	RotorSpeed_out = RotorSpeed; //r/min
 
 }
 
@@ -241,6 +271,24 @@ if(InnerNum>=4)
 public float[] getOutput(){
 	
 	return yout;
+	
+}
+
+public float[] getIAB(){
+	
+	return Ialphbeta_out;
+	
+}
+
+public float RotorTheta(){
+	
+	return RotorTheta_out;
+	
+}
+
+public float RotorSpeed(){
+	
+	return RotorSpeed_out;
 	
 }
 

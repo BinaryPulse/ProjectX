@@ -74,13 +74,13 @@ public class MainActivity extends Activity
 				
 		super.onCreate(savedInstanceState);		
 		
-	    requestWindowFeature(Window.FEATURE_NO_TITLE);
+	    //requestWindowFeature(Window.FEATURE_NO_TITLE);
 	    getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 	    //getWindow().setFlags(WindowManager.LayoutParams.FLA, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 	   
 	    
 		glSurfaceView = new MainActivityGLSurfaceView(this);	
-		
+		//hideSystemUI();
 		
 		setContentView(glSurfaceView);		
 
@@ -147,7 +147,7 @@ public class MainActivity extends Activity
 
 						//if (visible && AUTO_HIDE) {
 							// Schedule a hide().
-							delayedHide(1000);
+							delayedHide(500);
 						//}
 					}
 				});	

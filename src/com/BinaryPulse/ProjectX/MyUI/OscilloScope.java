@@ -437,14 +437,14 @@ public void InitGLDataForArea()
 			GLES20.glLineWidth(1.0f);
 			GLES20.glDrawElements(GLES20.GL_LINES,  (m_DivNumY)*2, GLES20.GL_UNSIGNED_SHORT, 5*2 + (m_DivNumY+m_DivNumX)*4);
 			GLES20.glDrawElements(GLES20.GL_LINES,  (m_DivNumX)*2, GLES20.GL_UNSIGNED_SHORT, 5*2 + (2*m_DivNumY+m_DivNumX)*4);
-
+/*
 			for(int i =0;i<m_CurveNum;i++)
 			{	
 				ColorHandle          = GLES20.glGetUniformLocation(program[0], COLOR_UNIFORM);
 				GLES20.glUniform4fv(ColorHandle, 1, m_DataColor[i] , 0); 
 				GLES20.glDrawElements(GLES20.GL_LINES, (4+m_DivNumY*2), GLES20.GL_UNSIGNED_SHORT, ((m_DivNumY+m_DivNumX)*4 +5 +(4*i+m_DivNumY*2*i))*2);
 			}
-
+*/
 			GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 			GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);			
 			GLES20.glUseProgram(0);
@@ -700,27 +700,33 @@ public void InitGLDataForArea()
 		for(i =0;i<m_CurveNum;i++){
 			//GLES20.glUniform4fv(ColorHandle, 1, m_DataColor[i] , 0); 
 			m_FontGraph.SetColor(  m_DataColor[i][0],  m_DataColor[i][1],  m_DataColor[i][2],  m_DataColor[i][3]);  
-			if(i<2){
-			  x = m_GraphOffsetX-(i+0.9f)*m_GraphLabelWidth;
-			  z =0.0f;	 
+			if(i<2)
+			{
+			   x = m_GraphOffsetX+(i)*m_GraphUnitWidth;;//m_GraphOffsetX-(i+0.9f)*m_GraphLabelWidth;
+			   z = 0.0f;	 
 			}
-			else{
-			  x = m_GraphOffsetX+ m_GraphWidth*m_Scale+((i-2)+0.2f)*m_GraphLabelWidth;
-			  z = 0.0f;	
+			else
+			{
+			   x = m_GraphOffsetX+ m_GraphWidth*m_Scale-((i-1))*m_GraphUnitWidth;;//m_GraphOffsetX+ m_GraphWidth*m_Scale+((i-2)+0.2f)*m_GraphLabelWidth;
+			   z = 0.0f;	
 			}
 			
-			for(j =0;j<m_DivNumY+1;j++){		 
-				if(i<2){
+			for(j =0;j<m_DivNumY+1;j++)
+			{		 
+				if(i<2)
+				{
 					 y =m_GraphOffsetY+m_GraphUnitHeight*(j+0.0f);
-
-				 }
-				 else{
-					
+				}
+				else
+				{					
 					 y = m_GraphOffsetY+m_GraphUnitHeight*(j+0.0f);
-	 
-				 }			        
-			     s = format.format((float)(m_OriginValueY[i]+(j)*m_DivValueY[i])); //×ª»»³É×Ö·û´®
-			     m_FontGraph.draw( s , x+m_OffSetX,y+m_OffSetY, z); 
+	 			}	
+
+			    s = format.format((float)(m_OriginValueY[i]+(j)*m_DivValueY[i])); //×ª»»³É×Ö·û´®
+				if(j == m_DivNumY)
+					 m_FontGraph.draw( s , x+m_OffSetX,y+m_OffSetY-16.0f*m_FontSizeScaleFactor, z); 	
+				else  
+					m_FontGraph.draw( s , x+m_OffSetX,y+m_OffSetY, z); 
 			}	
 			m_FontGraph.RenderFont();
 		}
@@ -728,9 +734,14 @@ public void InitGLDataForArea()
 		for(j=0; j<=m_DivNumX; j++){			
 	         //glWindowPos2i(m_OffSetX+m_GraphOffsetX+m_GraphUnitWidth*j-m_GraphLabelWidth, GetSystemMetrics(SM_CYSCREEN)-m_GraphOffsetY-m_GraphHeight-m_GraphLabelHeight-m_OffSetY);
 		      s = format.format((float)(m_OriginValueX+(j)*m_DivValueX)); //×ª»»³É×Ö·û´®
-		      m_FontGraph.draw( s  , m_GraphOffsetX+m_GraphUnitWidth*j-m_GraphLabelWidth*0.5f+m_OffSetX,m_GraphOffsetY-18.0f+m_OffSetY, 0); 
-			  
+		      if(j==0)
+		    	  m_FontGraph.draw( s  , m_GraphOffsetX+m_GraphUnitWidth*j+m_OffSetX-2*12.0f*m_FontSizeScaleFactor,m_GraphOffsetY-20.0f*m_FontSizeScaleFactor+m_OffSetY, 0); 
+		      else if(j==m_DivNumX)
+		    	  m_FontGraph.draw( s  , m_GraphOffsetX+m_GraphUnitWidth*j-(s.length()-2)*12.0f*m_FontSizeScaleFactor+m_OffSetX,m_GraphOffsetY-20.0f*m_FontSizeScaleFactor+m_OffSetY, 0);
+		      else
+		    	  m_FontGraph.draw( s  , m_GraphOffsetX+m_GraphUnitWidth*j-s.length()*0.5f*12.0f*m_FontSizeScaleFactor+m_OffSetX,m_GraphOffsetY-20.0f*m_FontSizeScaleFactor+m_OffSetY, 0);
        }
+		
 		m_FontGraph.RenderFont();
 		GLES20.glDisable(GLES20.GL_BLEND);
 		//GLES20.glDisable(GLES20.GL_DEPTH_TEST);
@@ -1143,7 +1154,7 @@ public void ReciedveData(float Time, float[] Data){
 			}
 			
 			if(m_LatestTimeIndex>=1){
-				if(i==0)
+				if(i==0||i==3|| i==2)
 					m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex+1]= m_RecievedDataToRealDataScale*Data[i];
 				else
 					m_RecievedSectionData[i*m_PerSectionDataLength*4+4*m_LatestTimeIndex+1]= m_RecievedSectionData[i*m_PerSectionDataLength*4+4*(m_LatestTimeIndex-1)+3];
@@ -1633,7 +1644,9 @@ public void  RenderFont(float[] modelMatrix,float[] Boundary){
 	m_Font.SetDisplayArea(Boundary);  
   	m_Font.SetColor( 1.0f, 0.0f, 0.0f, 1.0f );  
   	m_Font.draw( m_TextString ,m_OffSetX -(m_BorderWidth)/2.0f  -m_TextString.length()*0.5f*20*m_FontSizeScaleFactor, m_OffSetY -(-m_Height*m_Scale-m_BorderWidth)/2.0f -50*m_FontSizeScaleFactor, 0); 
-   	
+  	
+ 	m_Font.SetColor( 0.0f,1.0f, 1.0f, 1.0f ); 
+  	m_Font.draw( "t[ms]"  , m_GraphOffsetX+m_GraphUnitWidth*m_DivNumX/2-3*0.5f*30.0f*m_FontSizeScaleFactor+m_OffSetX,m_GraphOffsetY-50.0f*m_FontSizeScaleFactor+m_OffSetY, 0);
 	/*
     DecimalFormat format = new DecimalFormat("#.00");
     String s = format.format((float)(m_ActiveMouseX)); //×ª»»³É×Ö·û´®
