@@ -157,7 +157,7 @@ if(InnerStepIndex ==0){
 	}
 	SectionIndex = (int)(ThetaUsMod)/60;
 	
-	if(SectionIndex>6 && ThetaUsMod>360.0f){
+	if(SectionIndex==6){// && ThetaUsMod>360.0f){
 		
 		SectionIndex =0;
 		ThetaUsMod =ThetaUsMod-360.0f;

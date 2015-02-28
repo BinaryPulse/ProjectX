@@ -36,7 +36,7 @@ public class TorqCtrlLoop {
     protected final float PI1DIV3 =PI/3.0f;
 
     		
-	protected float Rs,	Rr, Ls, Lr, Lm, deltLs,Wsl,ThetaWsl,ThetaFlux,PreThetaFlux,Udc,UsRef,Utheta;
+	protected float Rs,	Rr, Ls, Lr, Lm, deltLs,Wsl,ThetaWsl,ThetaFlux,PreThetaFlux,Udc,UsRef,Utheta,rotorSpeedFilter;
 	protected float[] Kp= new float[2];
 	protected float[] Ki= new float[2];
 	protected float[] CtlLoopIntegral= new float[2];
@@ -51,7 +51,7 @@ public class TorqCtrlLoop {
 	
 	protected static int SimuStepIndex;
 	protected static int InnerStepIndex;
-	public static float realtime,tout, ttemp;
+	public static float realtime,tout, ttemp,rotorxxxx;
     protected boolean m_CmdRunState =false;
 
 /*##############################################################################
@@ -98,17 +98,23 @@ public TorqCtrlLoop(){//boolean AnimationEnabled ){
 	CtlLoopIntegral[0] = CtlLoopIntegral[1] =0;
 	ThetaFlux = ThetaWsl  = PreThetaFlux =0;
 	Udc =540.0f;
+	rotorSpeedFilter =0;
 }
 
 
 public void CalculateRealTimeData(float FeedBkIn[],float RotroThetaIn,float RotroSpeedIn){//int Timeindex){
 
 	float MaxOutput;
+	double acrtanX;
 	MaxOutput = Udc*SQRT1DIV2;
 
 	
 	if(m_CmdRunState==false)
 		return;
+	
+	
+	
+	
 if(InnerStepIndex ==0){
 
     
@@ -145,7 +151,7 @@ if(InnerStepIndex ==0){
 		CtlLoopRefSet[0] =10.0f*SQRT3;
 	}
 
-	
+	/*
 	if(CtlLoopRefSet[0] == 0)
 	{
 		Wsl = 0;
@@ -156,15 +162,29 @@ if(InnerStepIndex ==0){
 	}
 
 	ThetaWsl  += Wsl*0.5f*Tc;
-	ThetaWsl  =  ThetaWsl%(2.0f*PI);
+	ThetaWsl  =  ThetaWsl%(2.0f*PI);*/
 	
 	//ThetaFlux = (PreThetaFlux )%(2.0f*PI);//;
-	ThetaFlux = ThetaWsl+ RotroThetaIn+(RotroSpeedIn+Wsl)*0.75f*Tc;
+	rotorxxxx =RotroThetaIn;
+	ThetaFlux = ThetaWsl+ RotroThetaIn;//(RotroSpeedIn+Wsl)*0.5f*Tc;
 	CtlLoopFeedBk[1] = -(float)java.lang.Math.sin(ThetaFlux)*FeedBkIn[0]+(float)java.lang.Math.cos(ThetaFlux)*FeedBkIn[1];
 	CtlLoopFeedBk[0] = (float)java.lang.Math.cos(ThetaFlux)*FeedBkIn[0]+(float)java.lang.Math.sin(ThetaFlux)*FeedBkIn[1];	
+
+	
+	if(CtlLoopFeedBk[0] == 0)
+	{
+		Wsl = 0;
+	}
+	else
+	{
+		Wsl = CtlLoopFeedBk[1]/CtlLoopFeedBk[0]/Lr*Rr;
+	}
+
+	ThetaWsl  += Wsl*0.5f*Tc;
+	ThetaWsl  =  ThetaWsl%(2.0f*PI);
 	
 	//PreThetaFlux = ThetaFlux;
-	
+	rotorSpeedFilter = rotorSpeedFilter*0.5f+0.5f*(RotroSpeedIn+Wsl);
 	for(int i =0;i<2;i++){
 		
 		CtlLoopDeltIn[i] = CtlLoopRefSet[i] -CtlLoopFeedBk[i];
@@ -176,13 +196,14 @@ if(InnerStepIndex ==0){
 			CtlLoopIntegral[i] += Ki[i]*CtlLoopDeltIn[i];
 		}
 		CtlLoopOut[i] += CtlLoopIntegral[i];
+		
 		if(i ==1)
 		{
-			CtlLoopOut[i] +=(RotroSpeedIn+Wsl)*Lm*CtlLoopRefSet[0];
+			CtlLoopOut[i] +=(rotorSpeedFilter)*Lm*CtlLoopRefSet[0];
 	
 		}
 		else
-			CtlLoopOut[i] -=(RotroSpeedIn+Wsl)*deltLs*CtlLoopRefSet[1];
+			CtlLoopOut[i] -=(rotorSpeedFilter)*deltLs*CtlLoopRefSet[1];
 		
 		if(CtlLoopOut[i] > MaxOutput)
 			CtlLoopOut[i] = MaxOutput;
@@ -196,15 +217,10 @@ if(InnerStepIndex ==0){
 	if(UsRef > MaxOutput)
 		UsRef= MaxOutput;
 	
+	Utheta =(float)java.lang.Math.atan2(CtlLoopOut[1], CtlLoopOut[0]);//(acrtanX);
+    Utheta +=2*PI;
+    Utheta = Utheta%(2*PI);
 
-    if(CtlLoopOut[0]==0)
-    {
-    	Utheta =(float)java.lang.Math.atan(CtlLoopOut[1]/0.00001f);
-    }
-    else
-    {
-    	Utheta =(float)java.lang.Math.atan(CtlLoopOut[1]/CtlLoopOut[0]);
-    }
 
     Utheta =Utheta+	ThetaFlux;
 	SimuStepIndex++;

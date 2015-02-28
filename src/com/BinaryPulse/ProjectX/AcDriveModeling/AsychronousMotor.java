@@ -167,12 +167,11 @@ Input[1] = inputVar[1];
 
 IteNum = (int)inputVar[2];
 
-//h  = inputVar[4];
 for(int z =0;z<=IteNum;z++){
-     if(z<IteNum)
-       h  =0.001f;
-     else
-       h=inputVar[3]*0.1f;
+     //if(z<IteNum)
+     //  h  =0.001f;
+     //else
+       h=0.001f;//;
 	
 
 Wr = StateEqVar[4];
@@ -201,7 +200,7 @@ for(m =0; m<=3;m++)
 		}	
 		DerivStateVar[m][k] = DerivStateVar[m][k] +  Cof[k][4] * Input[0] +  Cof[k][5] * Input[1];
 	}
-	DerivStateVar[m][4] = DerivStateVar[m][4] +const_ke * (StateEqVarTemp[1]*StateEqVarTemp[2] -StateEqVarTemp[0]*StateEqVarTemp[3])-kL;
+	DerivStateVar[m][4] = DerivStateVar[m][4] +const_ke * (StateEqVarTemp[1]*StateEqVarTemp[2] -StateEqVarTemp[0]*StateEqVarTemp[3])-kL;//-0.01f*StateEqVarTemp[4];
 	
 	for(j =0; j<=4;j++){
 		if (m!=2)
@@ -256,7 +255,7 @@ if(InnerNum>=4)
 	//yout[0] = Iu_out;
 
 	yout[2] = Iv_out;
-	RotorTheta_out +=(0.5f*P*Tc*(StateEqVar[4]));
+	RotorTheta_out =RotorTheta;//+=(0.5f*P*Tc*(StateEqVar[4]));
 	Ialphbeta_out[0] =  Ialph;
 	Ialphbeta_out[1] =  Ibeta;
 	Te_out    = Te;
